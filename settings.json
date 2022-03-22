@@ -1,0 +1,22 @@
+{
+    "proxys": ["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"],
+    "nbb": {
+        "delay":1
+    },
+    "aboutyou": {
+        "keywords": [
+            "dunk",
+            "jordan 1",
+            "jordan 3"
+        ],
+        "blacksku":[
+            7827555
+        ],
+        "delay": 0.1
+    },
+    "kith": {
+        "url":"https://eu.kith.com/products.json",
+        "delay":1,
+        "keywords":[]
+    }
+}
