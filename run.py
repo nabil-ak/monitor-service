@@ -12,7 +12,7 @@ proxys = settings["proxys"]
 
 if __name__ == "__main__":
     #Start About You Monitor
-    Thread(target=aboutyou.monitor,args=(cookgroups,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,)).start()
+    Thread(target=aboutyou.monitor,args=(cookgroups,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"],)).start()
 
     #Start NBB Monitor
     Thread(target=nbb.monitor,args=(cookgroups,settings["nbb"]["delay"],proxys,)).start()
@@ -20,5 +20,5 @@ if __name__ == "__main__":
     #Start KITH Monitor
     kith = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
     Thread(target=kith.monitor).start()
-    
+
 
