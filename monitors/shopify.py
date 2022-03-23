@@ -181,9 +181,9 @@ class shopify:
         Update groups and settings
         """
         self.groups = groups
-        self.url = settings["kith"]["url"]
-        self.delay = settings["kith"]["delay"]
-        self.keywords = settings["kith"]["keywords"]
+        self.url = settings[self.site]["url"]
+        self.delay = settings[self.site]["delay"]
+        self.keywords = settings[self.site]["keywords"]
         self.proxys = settings["proxys"]
 
     def monitor(self):
