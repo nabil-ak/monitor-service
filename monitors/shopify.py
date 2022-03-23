@@ -31,7 +31,7 @@ class shopify:
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if group[self.site] == "":
+        if self.site not in group:
             return
 
         fields = []
@@ -176,7 +176,15 @@ class shopify:
             # Remove old version of the product
             self.remove(product_item[2])
 
-
+    def update(self,groups,settings):
+        """
+        Update groups and settings
+        """
+        self.groups = groups
+        self.url = settings["kith"]["url"]
+        self.delay = settings["kith"]["delay"]
+        self.keywords = settings["kith"]["keywords"]
+        self.proxys = settings["proxys"]
 
     def monitor(self):
         urllib3.disable_warnings()
