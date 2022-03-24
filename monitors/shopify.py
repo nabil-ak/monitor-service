@@ -228,7 +228,7 @@ class shopify:
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(90)
+                time.sleep(60)
 
                 # Rotates headers
                 headers = {'User-Agent': self.user_agent_rotator.get_random_user_agent()}
