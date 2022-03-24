@@ -218,6 +218,7 @@ class aboutyou:
     
         while True:
             try:
+                startTime = time.time()
                 for store in STORES:
                     # Makes request to site and stores products 
                     items = self.scrape_site(f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=53709,61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={store[1]}", proxy, headers)
@@ -235,9 +236,12 @@ class aboutyou:
 
                 # Allows changes to be notified
                 start = 0
+                
+                logging.info(msg=f'[ABOUT YOU] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
                 time.sleep(float(self.delay))
+
 
             except Exception as e:
                 print(f"[ABOUT YOU] Exception found: {traceback.format_exc()}")

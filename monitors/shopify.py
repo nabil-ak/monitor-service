@@ -205,6 +205,8 @@ class shopify:
         
         while True:
             try:
+                startTime = time.time()
+
                 # Makes request to site and stores products 
                 items = self.scrape_site(self.url, proxy, headers)
                 for product in items:
@@ -221,6 +223,8 @@ class shopify:
 
                 # Allows changes to be notified
                 start = 0
+
+                logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
                 time.sleep(float(self.delay))

@@ -102,6 +102,8 @@ class nbb:
 
         while True:
                 try:
+                    startTime = time.time()
+
                     # Makes request to site and stores products 
                     response = rq.get("https://api.store.nvidia.com/partner/v1/feinventory?skus=DE~NVGFT070~NVGFT080~NVGFT090~NVLKR30S~NSHRMT01~NVGFT060T~187&locale=DE",headers=headers,proxies=proxy,timeout=20)
                     items = response.json()["listMap"]
@@ -115,7 +117,9 @@ class nbb:
                             print(f"[NBB] {product}")
                         if product["is_active"] == "false" and product["fe_sku"] in self.INSTOCK:
                             self.INSTOCK.remove(product["fe_sku"])
-                   
+
+                    logging.info(msg=f'[NBB] Checked in {time.time()-startTime} seconds')
+
                     # User set delay
                     time.sleep(float(self.delay))
 
