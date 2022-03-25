@@ -17,13 +17,15 @@ hardware_type = [HardwareType.MOBILE__PHONE]
 user_agent_rotator = UserAgent(software_names=software_names, hardware_type=hardware_type)
 
 class aboutyou:
-    def __init__(self,groups,delay=1,keywords=[],proxys=[],blacksku=[]):
+    def __init__(self,groups,store,storeid,delay=1,keywords=[],proxys=[],blacksku=[]):
         self.INSTOCK = []
         self.groups = groups
         self.delay = delay
         self.keywords = keywords
         self.proxys = proxys
         self.blacksku = blacksku
+        self.store = store
+        self.storeid = storeid
 
     def discord_webhook(self,group,sku,store,title, url, thumbnail,prize, sizes, stock):
             """
@@ -75,8 +77,8 @@ class aboutyou:
             except rq.exceptions.HTTPError as err:
                 logging.error(err)
             else:
-                logging.info(msg=f'[ABOUT YOU] Successfully sent Discord notification to {group["aboutyou"]}')
-                print(f'[ABOUT YOU] Successfully sent Discord notification to {group["aboutyou"]}')
+                logging.info(msg=f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
+                print(f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
 
 
     def scrape_site(self,url, headers, proxy):
@@ -102,36 +104,36 @@ class aboutyou:
             items.append(product_item)
         
         
-        logging.info(msg='[ABOUT YOU] Successfully scraped site')
+        logging.info(msg=f'[ABOUT YOU {self.store}] Successfully scraped site')
         s.close()
         return items
 
-    def remove(self,id,store):
+    def remove(self,id):
         """
-        Remove all Products from INSTOCK with the same id and same Store
+        Remove all Products from INSTOCK with the same id
         """
         for elem in self.INSTOCK:
-            if id == elem["Product"][2] and store == elem["Region"]:
+            if id == elem[2]:
                 self.INSTOCK.remove(elem)
 
-    def checkUpdated(self,product, store):
+    def checkUpdated(self,product):
         """
         Check if the Variants got updated
         """
         for elem in self.INSTOCK:
             #Check if Product was not changed
-            if product[2] == elem["Product"][2] and product[3] == elem["Product"][3]:
+            if product[2] == elem[2] and product[3] == elem[3]:
                 return [False,False]
                 
             #Dont ping if no new size was added
-            if product[2] == elem["Product"][2] and len(product[3]) <= len(elem["Product"][3]):
-                if all(size in elem["Product"][3] for size in product[3]) and store == elem["Region"]:
+            if product[2] == elem[2] and len(product[3]) <= len(elem[3]):
+                if all(size in elem[3] for size in product[3]):
                     return [False,True]
 
         return[True,True]
 
 
-    def comparitor(self,product, start, groups, store):
+    def comparitor(self,product, start):
         product_item = [product['title'], product['image'], product['id']]
 
         # Collect all available sizes
@@ -146,19 +148,19 @@ class aboutyou:
         product_item.append(available_sizes) # Appends in field
         
         if available_sizes:
-            ping, updated = self.checkUpdated(product_item, store)
+            ping, updated = self.checkUpdated(product_item)
             if updated or start == 1:
                 # If product is available but not stored or product is stored but available sizes are changed - sends notification and stores
 
                 # Remove old version of the product
-                self.remove(product_item[2],store)
+                self.remove(product_item[2])
                 
-                self.INSTOCK.append({"Region":store,"Product":product_item})
+                self.INSTOCK.append(product_item)
                 if start == 0:
-                    print(f"[ABOUT YOU] {product_item}")
-                    logging.info(msg=f"[ABOUT YOU] {product_item}")
+                    print(f"[ABOUT YOU {self.store}] {product_item}")
+                    logging.info(msg=f"[ABOUT YOU {self.store}] {product_item}")
                 if start == 0 and ping:
-                    for group in groups:
+                    for group in self.groups:
                         #Send Ping to each Group
                         '''discord_webhook(
                             group=group,
@@ -174,9 +176,9 @@ class aboutyou:
                         Thread(target=self.discord_webhook,args=(
                             group,
                             product['id'],
-                            store,
+                            self.store,
                             product['title'],
-                            f"https://www.aboutyou.{store}/p/nabil/nabil-{product['id']}",
+                            f"https://www.aboutyou.{self.store}/p/nabil/nabil-{product['id']}",
                             product['image'],
                             str(product['variants'][0]['price']['withTax']/100),
                             available_sizes,
@@ -184,7 +186,7 @@ class aboutyou:
                             )).start()
         else:
             # Remove old version of the product
-            self.remove(product_item[2],store)
+            self.remove(product_item[2])
 
     def update(self,groups,settings):
         """
@@ -201,14 +203,14 @@ class aboutyou:
         """
         Initiates the monitor
         """
-        print(f'STARTING ABOUT YOU MONITOR')
-        logging.info(msg='[ABOUT YOU] Successfully started monitor')
+        print(f'STARTING ABOUT YOU {self.store} MONITOR')
+        logging.info(msg=f'[ABOUT YOU {self.store}] Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
         start = 1
 
         
-        STORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
+        #STORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
 
         # Initialising proxy and headers
         proxy_no = 0
@@ -219,32 +221,32 @@ class aboutyou:
         while True:
             try:
                 startTime = time.time()
-                for store in STORES:
-                    # Makes request to site and stores products 
-                    items = self.scrape_site(f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=53709,61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={store[1]}", proxy, headers)
-                    for product in items:
-                        if int(product['id']) not in self.blacksku:
-                            if len(self.keywords) == 0:
-                                # If no keywords set, checks whether item status has changed
-                                self.comparitor(product, start, self.groups, store[0])
 
-                            else:
-                                # For each keyword, checks whether particular item status has changed
-                                for key in self.keywords:
-                                    if key.lower() in product['title'].lower():
-                                        self.comparitor(product, start, self.groups, store[0])
+                # Makes request to site and stores products 
+                items = self.scrape_site(f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=53709,61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}", proxy, headers)
+                for product in items:
+                    if int(product['id']) not in self.blacksku:
+                        if len(self.keywords) == 0:
+                            # If no keywords set, checks whether item status has changed
+                            self.comparitor(product, start)
+
+                        else:
+                            # For each keyword, checks whether particular item status has changed
+                            for key in self.keywords:
+                                if key.lower() in product['title'].lower():
+                                    self.comparitor(product, start)
 
                 # Allows changes to be notified
                 start = 0
                 
-                logging.info(msg=f'[ABOUT YOU] Checked in {time.time()-startTime} seconds')
+                logging.info(msg=f'[ABOUT YOU {self.store}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
                 time.sleep(float(self.delay))
 
 
             except Exception as e:
-                print(f"[ABOUT YOU] Exception found: {traceback.format_exc()}")
+                print(f"[ABOUT YOU {self.store}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
 
                 # Rotates headers
@@ -261,6 +263,11 @@ if __name__ == '__main__':
         "Name":"Nabil DEV",
         "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
         "Colour":1382451,
-        "aboutyou":"https://discord.com/api/webhooks/954776382603419738/Myj91IW77mVYxCVuR0UBXygDW49CvPJeNej3FHuWl1fKI_VZ4m_ZzrrJyaNGtPKVL5ti"
+        "aboutyou":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
     }
-    aboutyou(groups=[devgroup],proxys=["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"],keywords=["dunk","jordan 1"],delay=0.1).monitor()
+    STORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
+    logging.basicConfig(filename=f'aboutyou.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+            level=logging.DEBUG)
+    for store in STORES:
+        a = aboutyou(groups=[devgroup],proxys=["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"],keywords=[],delay=0.1,store=store[0],storeid=store[1])
+        Thread(target=a.monitor).start()
