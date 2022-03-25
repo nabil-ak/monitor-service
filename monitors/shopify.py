@@ -71,7 +71,7 @@ class shopify:
             print(f'[{self.site}] Successfully sent Discord notification to {group[self.site]}')
 
 
-    def scrape_site(self,url, headers, proxy):
+    def scrape_site(self,url,page,headers, proxy):
         """
         Scrapes the specified Shopify site and adds items to array
         """
@@ -79,26 +79,22 @@ class shopify:
 
         # Makes request to site
         s = rq.Session()
-        page = 1
-        while True:
-            html = s.get(url + f'?page={page}&limit=250', headers=headers, proxies=proxy, verify=False, timeout=20)
-            output = json.loads(html.text)['products']
-            if output == []:
-                break
-            else:
-                # Stores particular details in array
-                for product in output:
-                    #Just scrape Sneakers
-                    if product["product_type"] == "Sneakers":
-                        product_item = {
-                            'title': product['title'], 
-                            'image': product['images'][0]['src'], 
-                            'handle': product['handle'],
-                            'variants': product['variants']}
-                        items.append(product_item)
-                page += 1
         
-        logging.info(msg=f'[{self.site}] Successfully scraped site')
+        html = s.get(url + f'?page={page}&limit=250', headers=headers, proxies=proxy, verify=False, timeout=20)
+        output = json.loads(html.text)['products']
+        
+        # Stores particular details in array
+        for product in output:
+            #Just scrape Sneakers
+            if product["product_type"] == "Sneakers":
+                product_item = {
+                    'title': product['title'], 
+                    'image': product['images'][0]['src'], 
+                    'handle': product['handle'],
+                    'variants': product['variants']}
+                items.append(product_item)
+        
+        logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
         s.close()
         return items
 
@@ -206,20 +202,23 @@ class shopify:
         while True:
             try:
                 startTime = time.time()
+                items = [1]
+                page = 1
+                while items:
+                    # Makes request to site and stores products 
+                    items = self.scrape_site(self.url,page, headers, proxy)
+                    for product in items:
 
-                # Makes request to site and stores products 
-                items = self.scrape_site(self.url, proxy, headers)
-                for product in items:
+                        if len(self.keywords) == 0:
+                            # If no keywords set, checks whether item status has changed
+                            self.comparitor(product, start)
 
-                    if len(self.keywords) == 0:
-                        # If no keywords set, checks whether item status has changed
-                        self.comparitor(product, start)
-
-                    else:
-                        # For each keyword, checks whether particular item status has changed
-                        for key in self.keywords:
-                            if key.lower() in product['title'].lower():
-                                self.comparitor(product, start)
+                        else:
+                            # For each keyword, checks whether particular item status has changed
+                            for key in self.keywords:
+                                if key.lower() in product['title'].lower():
+                                    self.comparitor(product, start)
+                    page+=1
 
                 # Allows changes to be notified
                 start = 0
@@ -232,7 +231,6 @@ class shopify:
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(60)
 
                 # Rotates headers
                 headers = {'User-Agent': self.user_agent_rotator.get_random_user_agent()}
@@ -248,9 +246,9 @@ if __name__ == '__main__':
         "Name":"Nabil DEV",
         "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
         "Colour":1382451,
-        "kith":"https://discord.com/api/webhooks/953049618848051230/tMu7dKb8cNHEGHsAeBQo8gWmibLYdAm2MaSzUw8hEZV5KhaFCr6LmDg_EkwebqG6xdy1"
+        "kith":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
     }
-    logging.basicConfig(filename=f'kith.log', filemode='a', format='%(asctime)s - %(name)s - %(message)s',
+    logging.basicConfig(filename=f'kith.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
     s = shopify(site="kith",groups=[devgroup],url="https://eu.kith.com/products.json",proxys=["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"])
     s.monitor()

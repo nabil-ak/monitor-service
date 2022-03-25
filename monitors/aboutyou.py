@@ -246,7 +246,6 @@ class aboutyou:
             except Exception as e:
                 print(f"[ABOUT YOU] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(60)
 
                 # Rotates headers
                 headers = {'User-Agent': user_agent_rotator.get_random_user_agent()}
