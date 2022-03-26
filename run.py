@@ -2,7 +2,9 @@ import traceback
 import time
 from monitors import aboutyou,nbb,shopify
 from multiprocessing import Process
-import logging
+from threading import Thread
+from random_user_agent.params import SoftwareName, HardwareType
+from random_user_agent.user_agent import UserAgent
 
 import database
 
@@ -22,38 +24,57 @@ def updateData():
             newSettings = database.getSettings()
         except Exception as e:
             print(f"[DATABASE] Exception found: {traceback.format_exc()}")
-            logging.error(e)
             time.sleep(10)
             database.Connect()
 
         if settings != newSettings or newCookgroups != cookgroups:
             cookgroups = newCookgroups
             settings = newSettings
-            #Update every Monitor
+            print("[UPDATER] Restart Monitors")
+
+            #Restart every Monitor
             for mon in monitorPool:
-                mon.update(cookgroups,settings)
+                #Stop them
+                mon.terminate()
+            monitorPool.clear()
+
+            #Start them with new Settings
+            startMonitors()
+            
         time.sleep(20)
 
-if __name__ == "__main__":
+def startMonitors():
+    """
+    Start every Monitor in a Process
+    """
+    #Get 200 User Agents
+    software_names = [SoftwareName.CHROME.value]
+    hardware_type = [HardwareType.MOBILE__PHONE]
+    user_agents = UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents()[:200]
+    
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
     for store in ABOUTYOUSTORES:
-        a = aboutyou.aboutyou(cookgroups,store[0],store[1],settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"])
-        monitorPool.append(a)
+        a = aboutyou.aboutyou(cookgroups,store[0],store[1],user_agents,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"])
+        monitorPool.append(Process(target=a.monitor))
 
     #Create NBB Monitor
-    nbb = nbb.nbb(cookgroups,settings["nbb"]["delay"],proxys)
-    monitorPool.append(nbb)
+    nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
+    monitorPool.append(Process(target=nbbProcess.monitor))
 
     #Create KITH Monitor
-    kith = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
-    monitorPool.append(kith)
+    kith = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=kith.monitor))
 
     #Start all Monitors
     for mon in monitorPool:
-        Process(target=mon.monitor).start()
+        mon.start()
+
+if __name__ == "__main__":
+    #Start Monitors
+    startMonitors()
 
     #Check if new Group was added or updated and also check if settings was updated
-    #Thread(target=updateData).start()
+    Thread(target=updateData).start()
 
 

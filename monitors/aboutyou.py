@@ -1,7 +1,6 @@
-from random_user_agent.params import SoftwareName, HardwareType
-from random_user_agent.user_agent import UserAgent
 from threading import Thread
 from datetime import datetime
+import random
 
 import requests as rq
 
@@ -12,17 +11,17 @@ import logging
 import traceback
 import urllib3
 
-software_names = [SoftwareName.CHROME.value]
-hardware_type = [HardwareType.MOBILE__PHONE]
-user_agent_rotator = UserAgent(software_names=software_names, hardware_type=hardware_type)
+
 
 class aboutyou:
-    def __init__(self,groups,store,storeid,delay=1,keywords=[],proxys=[],blacksku=[]):
+    def __init__(self,groups,store,storeid,user_agents,delay=1,keywords=[],proxys=[],blacksku=[]):
+        self.user_agents = user_agents
         self.INSTOCK = []
         self.groups = groups
         self.delay = delay
         self.keywords = keywords
         self.proxys = proxys
+        self.proxytime = 0
         self.blacksku = blacksku
         self.store = store
         self.storeid = storeid
@@ -90,7 +89,7 @@ class aboutyou:
         # Makes request to site
         s = rq.Session()
     
-        html = s.get(url, headers=headers, proxies=proxy, verify=False, timeout=20)
+        html = s.get(url, headers=headers, proxies=proxy, verify=False, timeout=10)
         output = json.loads(html.text)['entities']
         
         # Stores particular details in array
@@ -188,16 +187,6 @@ class aboutyou:
             # Remove old version of the product
             self.remove(product_item[2])
 
-    def update(self,groups,settings):
-        """
-        Update groups and settings
-        """
-        self.groups = groups
-        self.delay = settings["aboutyou"]["delay"]
-        self.keywords = settings["aboutyou"]["keywords"]
-        self.blacksku = settings["aboutyou"]["blacksku"]
-        self.proxys = settings["proxys"]
-
     def monitor(self):
         urllib3.disable_warnings()
         """
@@ -217,12 +206,12 @@ class aboutyou:
 
         # Initialising proxy and headers
         proxy_no = 0
-        proxy = {} if len(self.proxys) == 0 else {"http": f"http://{self.proxys[proxy_no]}"}
-        headers = {'User-Agent': user_agent_rotator.get_random_user_agent()}
+        headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
     
         while True:
             try:
+                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                 startTime = time.time()
 
                 # Makes request to site and stores products 
@@ -253,12 +242,16 @@ class aboutyou:
                 logging.error(e)
 
                 # Rotates headers
-                headers = {'User-Agent': user_agent_rotator.get_random_user_agent()}
+                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
+
+                # Safe time to let the Monitor only use the Proxy for 5 min
+                if proxy == {}:
+                    self.proxytime = time.time()+300
                 
                 if len(self.proxys) != 0:
                     # If optional proxy set, rotates if there are multiple proxies
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {"http": f"http://{self.proxys[proxy_no]}"}
+                    proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
 
 if __name__ == '__main__':

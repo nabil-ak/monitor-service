@@ -29,7 +29,6 @@ def Connect():
         client = MongoClient("mongodb+srv://monitor:BfdiEzEhx1ZpXMgp@monitorsolutions.yerbc.mongodb.net/monitorsolutions?retryWrites=true&w=majority")["monitorsolutions"]
     except Exception as e:
         print(f"[DATABASE] Exception found: {traceback.format_exc()}")
-        logging.error(e)
         time.sleep(10)
         Connect()
 
