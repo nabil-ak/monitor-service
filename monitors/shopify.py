@@ -187,6 +187,11 @@ class shopify:
         """
         Initiates the monitor
         """
+
+        #Initiate the Logger
+        logging.basicConfig(filename=f'logs/{self.site}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+            level=logging.DEBUG)
+
         print(f'STARTING {self.site} MONITOR')
         logging.info(msg=f'[{self.site}] Successfully started monitor')
 

@@ -90,6 +90,11 @@ class nbb:
         """
         Initiates the monitor
         """
+
+        #Initiate the Logger
+        logging.basicConfig(filename=f'logs/nbb.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+            level=logging.DEBUG)
+
         urllib3.disable_warnings()
 
         print(f'STARTING NBB MONITOR')

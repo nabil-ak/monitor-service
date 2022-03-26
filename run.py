@@ -1,11 +1,8 @@
 import traceback
 import time
 from monitors import aboutyou,nbb,shopify
-from threading import Thread
+from multiprocessing import Process
 import logging
-
-logging.basicConfig(filename=f'monitor.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
 
 import database
 
@@ -54,9 +51,9 @@ if __name__ == "__main__":
 
     #Start all Monitors
     for mon in monitorPool:
-        Thread(target=mon.monitor).start()
+        Process(target=mon.monitor).start()
 
     #Check if new Group was added or updated and also check if settings was updated
-    Thread(target=updateData).start()
+    #Thread(target=updateData).start()
 
 

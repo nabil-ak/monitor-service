@@ -203,14 +203,17 @@ class aboutyou:
         """
         Initiates the monitor
         """
+
+        #Initiate the Logger
+        logging.basicConfig(filename=f'logs/aboutyou-{self.store}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+            level=logging.DEBUG)
+
+
         print(f'STARTING ABOUT YOU {self.store} MONITOR')
         logging.info(msg=f'[ABOUT YOU {self.store}] Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
         start = 1
-
-        
-        #STORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
 
         # Initialising proxy and headers
         proxy_no = 0
