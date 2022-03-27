@@ -1,10 +1,9 @@
 from threading import Thread
 from datetime import datetime
+from timeout import timeout 
 import random
 import requests as rq
-
 import time
-
 import json
 import logging
 import traceback
@@ -23,6 +22,7 @@ class shopify:
         self.proxytime = 0
 
         self.INSTOCK = []
+        self.timeout = timeout()
         
     def discord_webhook(self,group,site,title, url, thumbnail,prize, sizes):
         """
@@ -144,27 +144,19 @@ class shopify:
                 if start == 0:
                     print(f"[{self.site}] {product_item}")
                     logging.info(msg=f"[{self.site}] {product_item}")
-                if start == 0 and ping:
-                    for group in self.groups:
-                        #Send Ping to each Group
-                        '''self.discord_webhook(
-                            group=group,
-                            title=product['title'],
-                            site=self.site,
-                            url=self.url.replace('.json', '/') + product['handle'],
-                            thumbnail=product['image'],
-                            sizes=available_sizes,
-                            prize=product['variants'][0]['price']+" €"
-                        )'''
-                        Thread(target=self.discord_webhook,args=(
-                            group,
-                            self.site,
-                            product["title"],
-                            self.url.replace('.json', '/') + product['handle'],
-                            product['image'],
-                            product['variants'][0]['price']+" €",
-                            available_sizes,
-                            )).start()
+                    
+                    if ping and self.timeout.ping(product_item):
+                        for group in self.groups:
+                            #Send Ping to each Group
+                            Thread(target=self.discord_webhook,args=(
+                                group,
+                                self.site,
+                                product["title"],
+                                self.url.replace('.json', '/') + product['handle'],
+                                product['image'],
+                                product['variants'][0]['price']+" €",
+                                available_sizes,
+                                )).start()
         else:
             # Remove old version of the product
             self.remove(product_item[2])

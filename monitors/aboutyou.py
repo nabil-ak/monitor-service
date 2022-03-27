@@ -1,15 +1,14 @@
 from threading import Thread
 from datetime import datetime
+from timeout import timeout
 import random
-
 import requests as rq
-
 import time
-
 import json
 import logging
 import traceback
 import urllib3
+
 
 
 
@@ -25,6 +24,7 @@ class aboutyou:
         self.blacksku = blacksku
         self.store = store
         self.storeid = storeid
+        self.timeout = timeout()
 
     def discord_webhook(self,group,sku,store,title, url, thumbnail,prize, sizes, stock):
             """
@@ -158,31 +158,21 @@ class aboutyou:
                 if start == 0:
                     print(f"[ABOUT YOU {self.store}] {product_item}")
                     logging.info(msg=f"[ABOUT YOU {self.store}] {product_item}")
-                if start == 0 and ping:
-                    for group in self.groups:
-                        #Send Ping to each Group
-                        '''discord_webhook(
-                            group=group,
-                            title=product['title'],
-                            sku=product['id'],
-                            store=store,
-                            url=f"https://www.aboutyou.{store}/p/nabil/nabil-{product['id']}",
-                            thumbnail=product['image'],
-                            sizes=available_sizes,
-                            stock=stocks,
-                            prize=str(product['variants'][0]['price']['withTax']/100)
-                        )'''
-                        Thread(target=self.discord_webhook,args=(
-                            group,
-                            product['id'],
-                            self.store,
-                            product['title'],
-                            f"https://www.aboutyou.{self.store}/p/nabil/nabil-{product['id']}",
-                            product['image'],
-                            str(product['variants'][0]['price']['withTax']/100),
-                            available_sizes,
-                            stocks,
-                            )).start()
+                    
+                    if ping and self.timeout.ping(product_item):
+                        for group in self.groups:
+                            #Send Ping to each Group
+                            Thread(target=self.discord_webhook,args=(
+                                group,
+                                product['id'],
+                                self.store,
+                                product['title'],
+                                f"https://www.aboutyou.{self.store}/p/nabil/nabil-{product['id']}",
+                                product['image'],
+                                str(product['variants'][0]['price']['withTax']/100),
+                                available_sizes,
+                                stocks,
+                                )).start()
         else:
             # Remove old version of the product
             self.remove(product_item[2])
