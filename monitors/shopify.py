@@ -24,7 +24,7 @@ class shopify:
         self.INSTOCK = []
         self.timeout = timeout()
         
-    def discord_webhook(self,group,site,title, url, thumbnail,prize, sizes):
+    def discord_webhook(self,group,site,title,sku, url, thumbnail,prize, sizes):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -33,6 +33,7 @@ class shopify:
 
         fields = []
         fields.append({"name": "[ PRIZE ]", "value": prize, "inline": True})
+        fields.append({"name": "[ SKU ]", "value": sku, "inline": True})
         fields.append({"name": "[ STOCK ]", "value": str(len(sizes))+"+", "inline": False})
         for size in sizes:
             fields.append({"name": size['title'], "value": size['url'], "inline": True})
@@ -63,6 +64,7 @@ class shopify:
             result.raise_for_status()
         except rq.exceptions.HTTPError as err:
             logging.error(err)
+            print(f"[{self.site}] Exception found: {err}")
         else:
             logging.info(msg=f'[{self.site}] Successfully sent Discord notification to {group[self.site]}')
             print(f'[{self.site}] Successfully sent Discord notification to {group[self.site]}')
@@ -144,7 +146,7 @@ class shopify:
                 if start == 0:
                     print(f"[{self.site}] {product_item}")
                     logging.info(msg=f"[{self.site}] {product_item}")
-                    
+
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group
@@ -152,6 +154,7 @@ class shopify:
                                 group,
                                 self.site,
                                 product["title"],
+                                product['handle'],
                                 self.url.replace('.json', '/') + product['handle'],
                                 product['image'],
                                 product['variants'][0]['price']+" €",

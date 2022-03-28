@@ -1,6 +1,7 @@
+import random
 import traceback
 import time
-from monitors import aboutyou,nbb,shopify
+from monitors import aboutyou,nbb,shopify,zalando
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -47,10 +48,11 @@ def startMonitors():
     """
     Start every Monitor in a Process
     """
-    #Get 200 User Agents
+    #Get 200 random User Agents
     software_names = [SoftwareName.CHROME.value]
     hardware_type = [HardwareType.MOBILE__PHONE]
-    user_agents = UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents()[:200]
+    user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
+
     
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
@@ -63,8 +65,12 @@ def startMonitors():
     monitorPool.append(Process(target=nbbProcess.monitor))
 
     #Create KITH Monitor
-    kith = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=kith.monitor))
+    kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=kithProcess.monitor))
+
+    #Create Zalando Monitor
+    zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=zalandoProcess.monitor))
 
     #Start all Monitors
     for mon in monitorPool:

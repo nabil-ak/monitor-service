@@ -75,6 +75,7 @@ class aboutyou:
                 result.raise_for_status()
             except rq.exceptions.HTTPError as err:
                 logging.error(err)
+                print(f"[ABOUT YOU {self.store}] Exception found: {err}")
             else:
                 logging.info(msg=f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
                 print(f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
@@ -158,7 +159,7 @@ class aboutyou:
                 if start == 0:
                     print(f"[ABOUT YOU {self.store}] {product_item}")
                     logging.info(msg=f"[ABOUT YOU {self.store}] {product_item}")
-                    
+
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group

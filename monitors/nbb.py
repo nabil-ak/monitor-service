@@ -70,6 +70,7 @@ class nbb:
             result.raise_for_status()
         except rq.exceptions.HTTPError as err:
             logging.error(err)
+            print(f"[NBB] Exception found: {err}")
         else:
             logging.info(msg=f'[NBB] Successfully sent Discord notification to {group["nbb"]}')
             print(f'[NBB] Successfully sent Discord notification to {group["nbb"]}')
