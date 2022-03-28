@@ -5,3 +5,4 @@ env
 logs
 Sneaker-Monitors
 monitor.log
+debug.py

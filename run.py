@@ -69,7 +69,7 @@ def startMonitors():
     monitorPool.append(Process(target=kithProcess.monitor))
 
     #Create Zalando Monitor
-    zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
+    zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=zalandoProcess.monitor))
 
     #Start all Monitors

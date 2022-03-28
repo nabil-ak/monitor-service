@@ -11,10 +11,11 @@ import urllib3
 import numpy
 
 class zalando:
-    def __init__(self,groups,user_agents,delay=1,keywords=[],proxys=[]):
+    def __init__(self,groups,user_agents,blacksku=[],delay=1,keywords=[],proxys=[]):
         self.user_agents = user_agents
 
         self.groups = groups
+        self.blacksku = blacksku
         self.delay = delay
         self.keywords= keywords
         self.proxys = proxys
@@ -253,16 +254,16 @@ class zalando:
                     # Makes request to site and stores products 
                     items = self.scrape_site(headers, proxy, women)
                     for product in items:
+                        if product["sku"] not in self.blacksku:
+                            if len(self.keywords) == 0:
+                                # If no keywords set, checks whether item status has changed
+                                self.comparitor(product, start)
 
-                        if len(self.keywords) == 0:
-                            # If no keywords set, checks whether item status has changed
-                            self.comparitor(product, start)
-
-                        else:
-                            # For each keyword, checks whether particular item status has changed
-                            for key in self.keywords:
-                                if key.lower() in product['title'].lower():
-                                    self.comparitor(product, start)
+                            else:
+                                # For each keyword, checks whether particular item status has changed
+                                for key in self.keywords:
+                                    if key.lower() in product['title'].lower():
+                                        self.comparitor(product, start)
                     women = True
             
 
