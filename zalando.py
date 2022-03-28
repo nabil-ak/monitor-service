@@ -38,7 +38,7 @@ class zalando:
             fields.append({"name": size['size'], "value": f"`{size['sku']}`", "inline": True})
         fields.append({"name": "[ Links ]", 
             "value": f"[CH](https://zalando.ch/home/?q={sku}) - [CZ](https://zalando.cz/home/?q={sku}) - [DE](https://zalando.de/home/?q={sku}) - [FR](https://zalando.fr/home/?q={sku}) - [IT](https://zalando.it/home/?q={sku}) - [PL](https://zalando.pl/home/?q={sku}) - [SK](https://zalando.sk/home/?q={sku}) - [ES](https://zalando.es/home/?q={sku}) - [NL](https://zalando.nl/home/?q={sku}) - [BE](https://zalando.be/home/?q={sku}) - [UK](https://zalando.uk/home/?q={sku})", "inline": False})
-        print(fields[-1])
+        
         data = {
             "username": group["Name"],
             "avatar_url": group["Avatar_Url"],
@@ -90,7 +90,7 @@ class zalando:
                         "discreteFilters": [
                             {
                                 "key": "brands",
-                                "options": ["ADID", "JOC", "NI1"]
+                                "options": ["ADID", "JOC", "NE2", "NI1"]
                             }
                         ],
                         "rangeFilters": [],
@@ -125,7 +125,7 @@ class zalando:
         
         currentpage = 1
         lastpage = 2
-    
+        a = time.time()
         while currentpage != lastpage:
             r = s.post(URL, headers=headers, json=data, proxies=proxy, verify=False, timeout=15)
             ent = r.json()[0]["data"]["collection"]["entities"]
@@ -134,17 +134,17 @@ class zalando:
             data[0]["variables"]["after"] = ent["pageInfo"]["endCursor"]
             currentpage = ent["pageInfo"]["currentPage"]
             lastpage = ent["pageInfo"]["numberOfPages"]
-
+        logging.info(msg=f"first api {time.time()-a}")
         #Split SKUS because second API Call only accepts 110 Skus at once
         skus = numpy.array_split(skus,(len(skus)//100)+1)
 
         output = []
-
+        b = time.time()
         for skupart in skus:
             r = s.post(URL, headers=headers, json=skupart.tolist(), proxies=proxy, verify=False, timeout=15)
             for elem in r.json():
                 output.append(elem['data']['product'])
-
+        logging.info(msg=f"second api {time.time()-b}")
         items = []
         # Stores particular details in array
         for product in output:
@@ -298,5 +298,5 @@ if __name__ == '__main__':
         "Colour":1382451,
         "zalando":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
     }
-    s = zalando(groups=[devgroup],user_agents=["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36"])
+    s = zalando(groups=[devgroup],user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36"}])
     s.monitor()
