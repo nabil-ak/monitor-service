@@ -98,7 +98,7 @@ class swatch:
                         response.raise_for_status()
 
 
-                        if "button" not in response.text:
+                        if "button" in response.text:
                             if watch["sku"] not in self.INSTOCK:
                                 for group in self.groups:
                                     Thread(target=self.discord_webhook,args=(group,watch,)).start()
