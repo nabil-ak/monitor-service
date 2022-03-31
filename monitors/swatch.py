@@ -1,5 +1,4 @@
 import json
-from tkinter import INSERT
 import urllib3
 import requests as rq
 import logging

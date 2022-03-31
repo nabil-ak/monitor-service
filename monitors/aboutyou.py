@@ -11,7 +11,6 @@ import urllib3
 
 
 
-
 class aboutyou:
     def __init__(self,groups,store,storeid,user_agents,delay=1,keywords=[],proxys=[],blacksku=[]):
         self.user_agents = user_agents
