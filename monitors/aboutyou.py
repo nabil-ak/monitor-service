@@ -83,7 +83,7 @@ class aboutyou:
 
     def scrape_site(self,url, headers, proxy):
         """
-        Scrapes the specified Shopify site and adds items to array
+        Scrapes the specified About You site and adds items to array
         """
         items = []
 

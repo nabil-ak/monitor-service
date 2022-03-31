@@ -149,6 +149,8 @@ class zalando:
         items = []
         # Stores particular details in array
         for product in output:
+            if product == None:
+                continue
             product_item = {
                 'title': product['brand']['name'] + " " + product['name'], 
                 'image': product['smallDefaultMedia']['uri'], 
@@ -299,5 +301,5 @@ if __name__ == '__main__':
         "Colour":1382451,
         "zalando":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
     }
-    s = zalando(groups=[devgroup],user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36"}])
+    s = zalando(groups=[devgroup],user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36"}],blacksku=["test"])
     s.monitor()
