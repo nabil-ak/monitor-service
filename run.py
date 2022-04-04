@@ -1,7 +1,7 @@
 import random
 import traceback
 import time
-from monitors import aboutyou,nbb,shopify,zalando,swatch
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -75,6 +75,10 @@ def startMonitors():
     #Create Swatch Monitor
     swatchProcess = swatch.swatch(groups=cookgroups,user_agents=user_agents,proxys=proxys,delay=2)
     monitorPool.append(Process(target=swatchProcess.monitor))
+    
+    #Create Cultura Monitor
+    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36"}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"])
+    monitorPool.append(Process(target=culturaProcess.monitor))
 
     #Start all Monitors
     for mon in monitorPool:
