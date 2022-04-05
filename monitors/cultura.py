@@ -288,7 +288,7 @@ class cultura:
                 logging.error(e)
                 time.sleep(60)
                 # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
+                headers["user-agent"] = random.choice(self.user_agents)["user_agent"]
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
