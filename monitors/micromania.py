@@ -10,13 +10,14 @@ import traceback
 import urllib3
 
 class micromania:
-    def __init__(self,groups,user_agents,delay=2,querys=[],proxys=[]):
+    def __init__(self,groups,user_agents,delay=2,querys=[],blacksku=[],proxys=[]):
         self.user_agents = user_agents
 
         self.groups = groups
         self.delay = delay
         self.querys= querys
         self.proxys = proxys
+        self.blacksku = blacksku
         self.proxytime = 0
 
         self.INSTOCK = []
@@ -148,6 +149,7 @@ class micromania:
                 # Makes request to site and stores products 
                     items = self.scrape_site(query, headers, proxy)
                     for product in items:
+                        if product["sku"] not in self.blacksku:
                             # Check if Item Status has changed
                             self.comparitor(product, start)
                     time.sleep(self.delay)

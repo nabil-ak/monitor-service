@@ -10,13 +10,14 @@ import traceback
 import urllib3
 
 class cultura:
-    def __init__(self,groups,user_agents,delay=45,querys=[],proxys=[]):
+    def __init__(self,groups,user_agents,delay=45,querys=[],blacksku=[],proxys=[]):
         self.user_agents = user_agents
 
         self.groups = groups
         self.delay = delay
         self.querys= querys
         self.proxys = proxys
+        self.blacksku = blacksku
         self.proxytime = 0
 
         self.stores = {'CGN': 'Agen', 'CAM': 'Amiens', 'CAG': 'Anglet', 'CAB': 'Aubagne', 'CAU': 'Aubière', 'CAX': 'Auxerre', 'CBP': 'Bagnolet', 'CBM': 'Balma', 'CBA': 'Barentin', 'CB2': 'Bay 2-Collégien', 'CBY': 'Bayonne', 'CBU': 'Beauvais', 'CBG': 'Bègles', 'CBE': 'Belle Epine', 'CBC': 'Besançon', 'CBZ': 'Béziers', 'CBX': 'Bordeaux Lac', 'CBB': 'Bourg En Bresse', 'CBO': 'Bourgoin Jallieu', 'CBT': 'Brest', 'CBV': 'Brive Centre', 'CBR': 'Brive La Gaillarde', 'CMD': 'Caen Mondeville', 'CCR': 'Carcassonne', 'CCE': 'Carré Senart', 'CCT': 'Chambray Les Tours', 'CDO': "Champagne Au Mont d'Or", 'CC2': 'Champniers', 'CRE': 'Chantepie', 'CCP': 'Chasseneuil Du Poitou', 'CHO': 'Cholet', 'CCS': 'Claye Souilly', 'CRM': 'Cormontreuil', 'CDI': 'Dijon', 'CEY': 'Epagny', 'CEP': 'Epinal', 'CEV': 'Evreux', 'CFE': 'Fenouillet', 'CBN': 'Fouquieres Les Bethune', 'CFR': 'Franconville', 'CGM': 'Geispolsheim', 'CGE': 'Gennevilliers', 'CGI': 'Givors', 'CHB': 'Hénin-Beaumont', 'C4T': 'La Défense', 'CLT': 'La Teste', 'CLV': 'La Valentine', 'CLA': 'Labège', 'CLG': 'Langueux', 'CLM': 'Le Mans', 'CLE': 'Lescar', 'CLI': 'Limoges', 'CMA': 'Mâcon', 'CCA': 'Mandelieu', 'CMS': 'Marsac', 'CME': 'Mérignac', 'CMM': 'Metz', 'CMT': 'Montauban', 'CLH': 'Montivilliers', 'CML': 'Montluçon', 'CMU': 'Mundolsheim', 'CNB': 'Narbonne', 'CRQ': 'Neuville-en-Ferrain', 'CNC': 'Nice', 'CNI': 'Nîmes', 'COR': 'Pince Vent', 'CPL': 'Les Clayes-sous-Bois', 'CPC': 'Plan De Campagne', 'CPO': 'Portet Sur Garonne', 'CPB': 'Publier', 'CPT': 'Puget', 'CP2': 'Puilboreau', 'CRB': 'Rambouillet', 'CRV': 'Rivesaltes', 'CSA': 'Saint Aunès', 'CSB': 'Saint Berthevin', 'CS2': 'Saint Doulchard', 'CGR': 'Saint Grégoire', 'CSM': 'Saint Malo', 'CMR': 'Saint Maur', 'CCL': 'Saint Maximin', 'CSQ': 'Saint Quentin Fayet', 'CGV': 'Geneviève Des Bois', 'CSR': 'Saran', 'CLP': 'Sorgues', 'CTE': 'Terville', 'CTL': 'Toulon', 'CTN': 'Tours', 'CTR': 'Trignac', 'CTO': 'Troyes - St Parres', 'CVA': 'Valence', 'CCO': 'Venette', 'CAN': 'Ville-la-Grand', 'CVF': 'Villefranche', 'CV2': "Villeneuve D'Ascq", 'CVS': 'Villennes Sur Seine', 'CWM': 'Wittenheim'}
@@ -271,6 +272,7 @@ class cultura:
                 # Makes request to site and stores products 
                     items = self.scrape_site(query, headers, proxy)
                     for product in items:
+                        if product["sku"] not in self.blacksku:
                             # Check if Item Status has changed
                             self.comparitor(product, start)
                     time.sleep(self.delay/len(self.querys))
