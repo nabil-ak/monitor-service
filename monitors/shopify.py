@@ -32,9 +32,9 @@ class shopify:
             return
 
         fields = []
-        fields.append({"name": "[ PRIZE ]", "value": prize, "inline": True})
-        fields.append({"name": "[ SKU ]", "value": sku, "inline": True})
-        fields.append({"name": "[ STOCK ]", "value": str(len(sizes))+"+", "inline": False})
+        fields.append({"name": "Prize", "value": f"```{prize}```", "inline": True})
+        fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
+        fields.append({"name": "Stock", "value": f"```{str(len(sizes))}+```", "inline": True})
         for size in sizes:
             fields.append({"name": size['title'], "value": size['url'], "inline": True})
 
@@ -84,14 +84,15 @@ class shopify:
         
         # Stores particular details in array
         for product in output:
-            #Just scrape Sneakers
-            if product["product_type"] == "Sneakers":
-                product_item = {
-                    'title': product['title'], 
-                    'image': product['images'][0]['src'], 
-                    'handle': product['handle'],
-                    'variants': product['variants']}
-                items.append(product_item)
+            #Just scrape Sneakers when the site is Kith
+            if self.site == "kith" and product["product_type"] != "Sneakers":
+                continue
+            product_item = {
+                'title': product['title'], 
+                'image': product['images'][0]['src'], 
+                'handle': product['handle'],
+                'variants': product['variants']}
+            items.append(product_item)
         
         logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
         s.close()

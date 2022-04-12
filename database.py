@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import logging
 import traceback
 import time
 
