@@ -1,7 +1,7 @@
 import random
 import traceback
 import time
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -85,7 +85,7 @@ def startMonitors():
     monitorPool.append(Process(target=micromaniaProcess.monitor))
     
     #Create funkoeurope Monitor
-    funkoeuropeProcess = shopify.shopify(groups=cookgroups,site="funkoeurope",url=settings["funkoeurope"]["url"],user_agents=user_agents,delay=settings["funkoeurope"]["delay"],keywords=settings["funkoeurope"]["keywords"],proxys=proxys)
+    funkoeuropeProcess = funkoeurope.funkoeurope(groups=cookgroups,site="funkoeurope",url=settings["funkoeurope"]["url"],user_agents=user_agents,delay=settings["funkoeurope"]["delay"],tags=settings["funkoeurope"]["tags"],proxys=proxys)
     monitorPool.append(Process(target=funkoeuropeProcess.monitor))
     
     #Start all Monitors
