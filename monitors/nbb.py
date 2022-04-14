@@ -98,10 +98,14 @@ class nbb:
                     proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                     startTime = time.time()
 
+                    items = []
+                    skus = ["NVGFT080","NVGFT090","NVGFT070","NVGFT060T","NVGFT070T","NVGFT080T"]
                     # Makes request to site and stores products 
-                    response = rq.get("https://api.store.nvidia.com/partner/v1/feinventory?skus=DE~NVGFT070~NVGFT080~NVGFT090~NVLKR30S~NSHRMT01~NVGFT060T~187&locale=DE",headers=headers,proxies=proxy,timeout=10)
-                    items = response.json()["listMap"]
+                    for sku in skus:
+                        response = rq.get(f"https://api.store.nvidia.com/partner/v1/feinventory?skus={sku}&locale=DE",headers=headers,proxies=proxy,timeout=10)
+                        items.append(response.json()["listMap"][0])
                     logging.info(msg='[NBB] Successfully scraped site')
+                    print(items)
                     
                     for product in items:
                         if product["is_active"] == "true" and product["fe_sku"] not in self.INSTOCK and "geforce" in product["product_url"]:
@@ -140,6 +144,6 @@ if __name__ == '__main__':
         "Name":"Nabil DEV",
         "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
         "Colour":1382451,
-        "nbb":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
+        "nbb":"https://discord.com/api/webhooks/953640704209485854/qBo9_7bjQNRgfdnsH6PInagJzwuc_EkXAfIKmY7r5jNU234vaI87COUyWlnLyB2W4fur"
     }
-    nbb([devgroup]).monitor()
+    nbb([devgroup], user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"}]).monitor()
