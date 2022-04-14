@@ -68,6 +68,10 @@ def startMonitors():
     kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=kithProcess.monitor))
 
+    #Create Slamjam Monitor
+    slamjamProcess = shopify.shopify(groups=cookgroups,site="slamjam",url=settings["slamjam"]["url"],user_agents=user_agents,delay=settings["slamjam"]["delay"],keywords=settings["slamjam"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=slamjamProcess.monitor))
+
     #Create Zalando Monitor
     zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=zalandoProcess.monitor))

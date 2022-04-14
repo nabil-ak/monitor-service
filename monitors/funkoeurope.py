@@ -223,16 +223,3 @@ class funkoeurope:
                     # If optional proxy set, rotates if there are multiple proxies
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                     proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-
-
-if __name__ == '__main__':
-    devgroup = {
-        "Name":"Nabil DEV",
-        "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
-        "Colour":1382451,
-        "kith":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
-    }
-    logging.basicConfig(filename=f'kith.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-    s = funkoeurope(site="kith",groups=[devgroup],url="https://eu.kith.com/products.json",proxys=["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"])
-    s.monitor()
