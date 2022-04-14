@@ -105,7 +105,7 @@ class nbb:
                         response = rq.get(f"https://api.store.nvidia.com/partner/v1/feinventory?skus={sku}&locale=DE",headers=headers,proxies=proxy,timeout=10)
                         items.append(response.json()["listMap"][0])
                     logging.info(msg='[NBB] Successfully scraped site')
-                    print(items)
+                    
                     
                     for product in items:
                         if product["is_active"] == "true" and product["fe_sku"] not in self.INSTOCK and "geforce" in product["product_url"]:
