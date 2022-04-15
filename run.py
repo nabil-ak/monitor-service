@@ -1,7 +1,7 @@
 import random
 import traceback
 import time
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -88,9 +88,13 @@ def startMonitors():
     micromaniaProcess = micromania.micromania(groups=cookgroups,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=settings["micromania"]["query"],delay=settings["micromania"]["delay"],blacksku=settings["micromania"]["blacksku"])
     monitorPool.append(Process(target=micromaniaProcess.monitor))
     
-    #Create funkoeurope Monitor
+    #Create Funkoeurope Monitor
     funkoeuropeProcess = funkoeurope.funkoeurope(groups=cookgroups,site="funkoeurope",url=settings["funkoeurope"]["url"],user_agents=user_agents,delay=settings["funkoeurope"]["delay"],tags=settings["funkoeurope"]["tags"],proxys=proxys)
     monitorPool.append(Process(target=funkoeuropeProcess.monitor))
+    
+    #Create Popinabox Monitor
+    popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"])
+    monitorPool.append(Process(target=popinaboxProcess.monitor))
     
     #Start all Monitors
     for mon in monitorPool:
