@@ -2,7 +2,6 @@
 __pycache__
 dev
 env
-logs
 Sneaker-Monitors
 monitor.log
 debug.py
