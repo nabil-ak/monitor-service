@@ -1,7 +1,7 @@
 import random
 import traceback
 import time
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -95,6 +95,10 @@ def startMonitors():
     #Create Popinabox Monitor
     popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"])
     monitorPool.append(Process(target=popinaboxProcess.monitor))
+    
+    #Create Popito Monitor
+    popitoProcess = popito.popito(groups=cookgroups,user_agents=user_agents,querys=settings["popito"]["query"],delay=settings["popito"]["delay"],blacksku=settings["popito"]["blacksku"])
+    monitorPool.append(Process(target=popitoProcess.monitor))
     
     #Start all Monitors
     for mon in monitorPool:
