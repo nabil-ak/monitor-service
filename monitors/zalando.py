@@ -211,7 +211,6 @@ class zalando:
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group
-                            print("send webhook")
                             Thread(target=self.discord_webhook,args=(
                                 group,
                                 product['sku'],

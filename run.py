@@ -1,11 +1,12 @@
 import random
 import traceback
 import time
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
 from random_user_agent.user_agent import UserAgent
+from user_agent import getcurrentChromeUseragent
 
 import database
 
@@ -52,7 +53,7 @@ def startMonitors():
     software_names = [SoftwareName.CHROME.value]
     hardware_type = [HardwareType.MOBILE__PHONE]
     user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
-
+    
     
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
@@ -81,7 +82,7 @@ def startMonitors():
     monitorPool.append(Process(target=swatchProcess.monitor))
     
     #Create Cultura Monitor
-    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36"}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
+    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":getcurrentChromeUseragent()}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
     monitorPool.append(Process(target=culturaProcess.monitor))
     
     #Create Micromania Monitor
@@ -99,6 +100,10 @@ def startMonitors():
     #Create Popito Monitor
     popitoProcess = popito.popito(groups=cookgroups,user_agents=user_agents,querys=settings["popito"]["query"],delay=settings["popito"]["delay"],blacksku=settings["popito"]["blacksku"])
     monitorPool.append(Process(target=popitoProcess.monitor))
+    
+    #Create Wethenew Monitor
+    wethenewProcess = wethenew.wethenew(groups=cookgroups,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=wethenewProcess.monitor))
     
     #Start all Monitors
     for mon in monitorPool:
