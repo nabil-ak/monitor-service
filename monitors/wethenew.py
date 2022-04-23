@@ -1,3 +1,4 @@
+from shutil import ExecError
 from user_agent import getcurrentChromeUseragent
 import cloudscraper
 from threading import Thread
@@ -216,9 +217,13 @@ class wethenew:
             except Exception as e:
                 print(f"[wethenew] Exception found: {traceback.format_exc()}")
                 logging.error(e)
+                time.sleep(10)
 
-                # Update User_Agent
-                self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
+                try:
+                    # Update User_Agent
+                    self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
+                except:
+                    raise e
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
