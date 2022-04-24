@@ -224,6 +224,7 @@ class wethenew:
                     # Update User_Agent
                     self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
                 except:
+                    logging.info(msg=f'[wethenew] Cant fetch current Chrome Useragent')
                     raise e
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
