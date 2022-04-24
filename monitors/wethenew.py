@@ -132,6 +132,18 @@ class wethenew:
 
         return[True,True]
 
+    def removeduplicate(self,items):
+        """
+        Remove duplicates
+        """
+        newItems = []
+        skus = []
+        for item in items:
+            if item["sku"] not in skus:
+                newItems.append(item)
+                skus.append(item["sku"])
+        
+        return newItems
 
     def comparitor(self,product, start):
         product_item = [product['title'], product['image'], product['sku']]
@@ -193,6 +205,10 @@ class wethenew:
                 
                 # Makes request to site and stores products 
                 items = self.scrape_site(proxy)
+
+                #Remove duplicates
+                items = self.removeduplicate(items)
+                
                 for product in items:
                     if product["sku"] not in self.blacksku:
                         if len(self.keywords) == 0:
@@ -223,9 +239,9 @@ class wethenew:
                 try:
                     # Update User_Agent
                     self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
-                except:
-                    logging.info(msg=f'[wethenew] Cant fetch current Chrome Useragent')
-                    raise e
+                except Exception as ex:
+                    print(f"[wethenew] Exception found: {traceback.format_exc()}")
+                    logging.error(ex)
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
