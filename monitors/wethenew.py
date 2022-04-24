@@ -86,7 +86,6 @@ class wethenew:
         #Get all Products from the Site
         while True:
             response = self.scraper.get(f'https://sell.wethenew.com/api/products?skip={skip}&take=100&onlyWanted=true', proxies=proxy)
-            logging.info(msg=f'[wethenew] {response.text}')
             response.raise_for_status()
             r = response.json()
             for product in r["results"]:
