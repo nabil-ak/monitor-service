@@ -1,8 +1,8 @@
-from shutil import ExecError
 from user_agent import getcurrentChromeUseragent
 import cloudscraper
 from threading import Thread
 from datetime import datetime
+from timeout import timeout
 import requests as rq
 import time
 import json
@@ -21,6 +21,7 @@ class wethenew:
         self.proxytime = 0
         self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
         self.INSTOCK = []
+        self.timeout = timeout()
         
     def discord_webhook(self,group,sku,title, thumbnail, sizes):
         """
@@ -150,7 +151,7 @@ class wethenew:
                     print(f"[wethenew] {product_item}")
                     logging.info(msg=f"[wethenew] {product_item}")
                     
-                    if ping:
+                    if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group
                             Thread(target=self.discord_webhook,args=(
