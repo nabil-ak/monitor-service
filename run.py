@@ -54,7 +54,7 @@ def startMonitors():
     hardware_type = [HardwareType.MOBILE__PHONE]
     user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
     
-    """
+    
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
     for store in ABOUTYOUSTORES:
@@ -72,11 +72,11 @@ def startMonitors():
     #Create Slamjam Monitor
     slamjamProcess = shopify.shopify(groups=cookgroups,site="slamjam",url=settings["slamjam"]["url"],user_agents=user_agents,delay=settings["slamjam"]["delay"],keywords=settings["slamjam"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=slamjamProcess.monitor))
-    """
+    
     #Create Zalando Monitor
     zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=zalandoProcess.monitor))
-    """
+    
     #Create Swatch Monitor
     swatchProcess = swatch.swatch(groups=cookgroups,user_agents=user_agents,proxys=proxys,delay=2)
     monitorPool.append(Process(target=swatchProcess.monitor))
@@ -104,7 +104,7 @@ def startMonitors():
     #Create Wethenew Monitor
     wethenewProcess = wethenew.wethenew(groups=cookgroups,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=wethenewProcess.monitor))
-    """
+    
     #Start all Monitors
     for mon in monitorPool:
         mon.start()
