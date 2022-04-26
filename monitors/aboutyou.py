@@ -195,12 +195,14 @@ class aboutyou:
         start = 1
 
         # Initialising proxy and headers
-        proxy_no = 0
+        proxy_no = -1
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
     
         while True:
             try:
+                #Rotate Proxys on each request
+                proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                 proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                 startTime = time.time()
 

@@ -54,7 +54,7 @@ def startMonitors():
     hardware_type = [HardwareType.MOBILE__PHONE]
     user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
     
-    
+    """
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
     for store in ABOUTYOUSTORES:
@@ -64,19 +64,19 @@ def startMonitors():
     #Create NBB Monitor
     nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
     monitorPool.append(Process(target=nbbProcess.monitor))
-
+    
     #Create KITH Monitor
-    kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
+    kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=["5.230.71.207:6748"])
     monitorPool.append(Process(target=kithProcess.monitor))
-
+    
     #Create Slamjam Monitor
     slamjamProcess = shopify.shopify(groups=cookgroups,site="slamjam",url=settings["slamjam"]["url"],user_agents=user_agents,delay=settings["slamjam"]["delay"],keywords=settings["slamjam"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=slamjamProcess.monitor))
-
+    """
     #Create Zalando Monitor
     zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=zalandoProcess.monitor))
-
+    """
     #Create Swatch Monitor
     swatchProcess = swatch.swatch(groups=cookgroups,user_agents=user_agents,proxys=proxys,delay=2)
     monitorPool.append(Process(target=swatchProcess.monitor))
@@ -102,9 +102,9 @@ def startMonitors():
     monitorPool.append(Process(target=popitoProcess.monitor))
     
     #Create Wethenew Monitor
-    wethenewProcess = wethenew.wethenew(groups=cookgroups,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"])
+    wethenewProcess = wethenew.wethenew(groups=cookgroups,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=wethenewProcess.monitor))
-    
+    """
     #Start all Monitors
     for mon in monitorPool:
         mon.start()

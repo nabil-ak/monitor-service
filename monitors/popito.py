@@ -127,20 +127,23 @@ class popito:
         start = 1
 
         # Initialising proxy and headers
-        proxy_no = 0
+        proxy_no = -1
         headers = {
                 'user-agent': random.choice(self.user_agents)["user_agent"]
         }
         
         while True:
             try:
-                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                 startTime = time.time()
 
                 products = []
 
                 for query in self.querys:
-                # Makes request to site and stores products 
+                    #Rotate Proxys on each request
+                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
+                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
+
+                    # Makes request to site and stores products 
                     items = self.scrape_site(query, headers, proxy)
                     for product in items:
                         if product["sku"] not in self.blacksku:

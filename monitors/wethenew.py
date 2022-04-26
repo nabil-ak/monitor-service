@@ -8,6 +8,7 @@ import time
 import json
 import logging
 import traceback
+import random
 import urllib3
 
 class wethenew:
@@ -93,6 +94,12 @@ class wethenew:
             if r["pagination"]["totalPages"] == r["pagination"]["page"]:
                 break
             skip+=100
+
+            #Rotate proxy and delete Cookies after each request
+            p = random.choice(self.proxys)
+            proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{p}", "https": f"http://{p}"}
+            self.scraper.cookies.clear()
+            time.sleep(1)
 
 
         # Stores particular details in array

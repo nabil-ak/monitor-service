@@ -70,12 +70,11 @@ class swatch:
         logging.info(msg='[swatch] Successfully started monitor')
 
         # Initialising proxy and headers
-        proxy_no = 0
+        proxy_no = -1
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
         while True:
                 try:
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                     startTime = time.time()
 
                     watches = [{"name":"Mission to the Sun","image":"https://www.swatch.com/dw/image/v2/BDNV_PRD/on/demandware.static/-/Library-Sites-swarp-global/default/dw39e32ab0/images/Swatch/collections/2022/moonswatch/single-card/single_card_variation_2_Sun_670x670.jpg","sku":"SO33J100"},{"name":"Mission to Mercury","image":"https://www.swatch.com/dw/image/v2/BDNV_PRD/on/demandware.static/-/Library-Sites-swarp-global/default/dw6454db48/images/Swatch/collections/2022/moonswatch/single-card/single_card_variation_2_Mercury_670x670.jpg","sku":"SO33A100"},
@@ -86,6 +85,10 @@ class swatch:
                     {"name":"Mission to Pluto","image":"https://www.swatch.com/dw/image/v2/BDNV_PRD/on/demandware.static/-/Library-Sites-swarp-global/default/dw52419f75/images/Swatch/collections/2022/moonswatch/single-card/single_card_variation_2_Pluto_670x670.jpg","sku":"SO33M101"}]
                     # Makes request to site and stores products 
                     for watch in watches:
+                        #Rotate Proxys on each request
+                        proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
+                        proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
+
                         params = {
                             'pid': watch["sku"],
                             'pname': 'BLITE',
