@@ -56,7 +56,7 @@ def startMonitors():
     
     
     #Create all About You Monitors
-    ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
+    ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200]]
     for store in ABOUTYOUSTORES:
         a = aboutyou.aboutyou(cookgroups,store[0],store[1],user_agents,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"])
         monitorPool.append(Process(target=a.monitor))
@@ -76,10 +76,6 @@ def startMonitors():
     #Create Zalando Monitor
     zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=zalandoProcess.monitor))
-    
-    #Create Swatch Monitor
-    swatchProcess = swatch.swatch(groups=cookgroups,user_agents=user_agents,proxys=proxys,delay=2)
-    monitorPool.append(Process(target=swatchProcess.monitor))
     
     #Create Cultura Monitor
     culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":getcurrentChromeUseragent()}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
