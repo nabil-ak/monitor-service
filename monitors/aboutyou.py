@@ -33,17 +33,19 @@ class aboutyou:
                 return
 
             fields = []
-            fields.append({"name": "[ PRIZE ]", "value": prize, "inline": True})
-            fields.append({"name": "[ SKU ]", "value": sku, "inline": True})
-            fields.append({"name": "[ REGION ]", "value": store, "inline": True})
-            sizeField = {"name": "[ Sizes(stock) ]", "value": "", "inline": False}
-            formater = 0
+            fields.append({"name": "Prize", "value": f"```{prize} €```", "inline": True})
+            fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
+            fields.append({"name": "Region", "value": f"```{store}```", "inline": True})
+
+            sizesSTR = "\n"
+            stockSTR = ""
             for size in sizes:
-                formatcharacter = "\t" if formater%2 == 0 else "\n"
-                sizeField["value"]+=f"**{size}** ({stock[size]})"+formatcharacter
-                formater+=1
-            fields.append(sizeField)
-            links = {"name": "[ Links ]", 
+                sizesSTR+=size+"\n"
+                stockSTR+=f"{'🟢' if stock[size] >2 else '🟡'} {stock[size]}\n"
+            fields.append({"name": "Sizes", "value": f"```{sizesSTR}```", "inline": True})
+            fields.append({"name": "Stock", "value": f"```{stockSTR}```", "inline": True})
+
+            links = {"name": "Links", 
             "value": f"[CH](https://www.aboutyou.ch/p/nabil/nabil-{sku}) - [CZ](https://www.aboutyou.cz/p/nabil/nabil-{sku}) - [DE](https://www.aboutyou.de/p/nabil/nabil-{sku}) - [FR](https://www.aboutyou.fr/p/nabil/nabil-{sku}) - [IT](https://www.aboutyou.it/p/nabil/nabil-{sku}) - [PL](https://www.aboutyou.pl/p/nabil/nabil-{sku}) - [SK](https://www.aboutyou.sk/p/nabil/nabil-{sku}) - [ES](https://www.aboutyou.es/p/nabil/nabil-{sku}) - [NL](https://www.aboutyou.nl/p/nabil/nabil-{sku}) - [BE](https://www.aboutyou.nl/p/nabil/nabil-{sku})", "inline": False}
             fields.append(links)
 
