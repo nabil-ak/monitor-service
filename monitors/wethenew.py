@@ -243,12 +243,15 @@ class wethenew:
                 logging.error(e)
                 time.sleep(10)
 
-                try:
-                    # Update User_Agent
-                    self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
-                except Exception as ex:
-                    print(f"[wethenew] Exception found: {traceback.format_exc()}")
-                    logging.error(ex)
+
+                #Just update the User_Agent when the Proxy is set
+                if proxy != {}:
+                    try:
+                        # Update User_Agent
+                        self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
+                    except Exception as ex:
+                        print(f"[wethenew] Exception found: {traceback.format_exc()}")
+                        logging.error(ex)
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
