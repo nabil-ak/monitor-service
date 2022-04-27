@@ -66,7 +66,7 @@ def startMonitors():
     monitorPool.append(Process(target=nbbProcess.monitor))
     
     #Create KITH Monitor
-    kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=["5.230.71.207:6748"])
+    kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=kithProcess.monitor))
     
     #Create Slamjam Monitor
