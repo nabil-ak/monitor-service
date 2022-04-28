@@ -89,34 +89,42 @@ class nbb:
         print(f'STARTING NBB MONITOR')
         logging.info(msg='[NBB] Successfully started monitor')
 
+        # Ensures that first scrape does not notify all products
+        start = 1
+
         # Initialising proxy and headers
         proxy_no = -1
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
         while True:
                 try:
-                    #Rotate Proxys on each request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                     startTime = time.time()
 
                     items = []
                     skus = ["NVGFT080","NVGFT090","NVGFT070","NVGFT060T","NVGFT070T","NVGFT080T"]
                     # Makes request to site and stores products 
                     for sku in skus:
+                        #Rotate Proxys on each request
+                        proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
+                        proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                         response = rq.get(f"https://api.store.nvidia.com/partner/v1/feinventory?skus={sku}&locale=DE",headers=headers,proxies=proxy,timeout=10)
                         items.append(response.json()["listMap"][0])
+                        time.sleep(1)
                     logging.info(msg='[NBB] Successfully scraped site')
                     
                     
                     for product in items:
                         if product["is_active"] == "true" and product["fe_sku"] not in self.INSTOCK and "geforce" in product["product_url"]:
-                            for group in self.groups:
-                                Thread(target=self.discord_webhook,args=(group,product,)).start()
+                            #Just send Webhook after first scrape
+                            if start == 0:
+                                for group in self.groups:
+                                    Thread(target=self.discord_webhook,args=(group,product,)).start()
                             self.INSTOCK.append(product["fe_sku"])
                             print(f"[NBB] {product}")
                         if product["is_active"] == "false" and product["fe_sku"] in self.INSTOCK:
                             self.INSTOCK.remove(product["fe_sku"])
+
+                    start = 0
 
                     logging.info(msg=f'[NBB] Checked in {time.time()-startTime} seconds')
 
