@@ -62,8 +62,8 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
 
     #Create NBB Monitor
-    nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
-    monitorPool.append(Process(target=nbbProcess.monitor))
+    #nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
+    #monitorPool.append(Process(target=nbbProcess.monitor))
     
     #Create KITH Monitor
     kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
@@ -74,8 +74,8 @@ def startMonitors():
     monitorPool.append(Process(target=slamjamProcess.monitor))
     
     #Create Zalando Monitor
-    zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=zalandoProcess.monitor))
+    #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
+    #monitorPool.append(Process(target=zalandoProcess.monitor))
     
     #Create Cultura Monitor
     culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":getcurrentChromeUseragent()}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
