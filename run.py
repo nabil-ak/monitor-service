@@ -1,6 +1,8 @@
 import random
 import traceback
 import time
+
+from requests_toolbelt import user_agent
 from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew
 from multiprocessing import Process
 from threading import Thread
@@ -53,7 +55,13 @@ def startMonitors():
     software_names = [SoftwareName.CHROME.value]
     hardware_type = [HardwareType.MOBILE__PHONE]
     user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
-    
+
+    #Get newest Chrome Useragent
+    try:
+        chrome_user_agent = getcurrentChromeUseragent()
+    except:
+        print(f"[UPDATER] Cant fetch current Chrome User-Agent : {traceback.format_exc()}")
+        chrome_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
     
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200]]
@@ -78,7 +86,7 @@ def startMonitors():
     #monitorPool.append(Process(target=zalandoProcess.monitor))
     
     #Create Cultura Monitor
-    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":getcurrentChromeUseragent()}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
+    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
     monitorPool.append(Process(target=culturaProcess.monitor))
     
     #Create Micromania Monitor
@@ -98,7 +106,7 @@ def startMonitors():
     monitorPool.append(Process(target=popitoProcess.monitor))
     
     #Create Wethenew Monitor
-    wethenewProcess = wethenew.wethenew(groups=cookgroups,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
+    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=wethenewProcess.monitor))
     
     #Start all Monitors

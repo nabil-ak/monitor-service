@@ -12,7 +12,7 @@ import random
 import urllib3
 
 class wethenew:
-    def __init__(self,groups,blacksku=[],delay=1,keywords=[],proxys=[]):
+    def __init__(self,groups,user_agent,blacksku=[],delay=1,keywords=[],proxys=[]):
 
         self.groups = groups
         self.blacksku = blacksku
@@ -20,7 +20,7 @@ class wethenew:
         self.keywords= keywords
         self.proxys = proxys
         self.proxytime = 0
-        self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
+        self.scraper = cloudscraper.create_scraper(browser={'custom': user_agent})
         self.INSTOCK = []
         self.timeout = timeout()
         
