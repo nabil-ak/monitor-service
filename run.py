@@ -58,7 +58,7 @@ def startMonitors():
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200]]
     for store in ABOUTYOUSTORES:
-        a = aboutyou.aboutyou(cookgroups,store[0],store[1],user_agents,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"])
+        a = aboutyou.aboutyou(cookgroups,store[0],store[1],user_agents,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"],settings["aboutyou"]["whitesku"])
         monitorPool.append(Process(target=a.monitor))
 
     #Create NBB Monitor

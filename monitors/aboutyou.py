@@ -12,7 +12,7 @@ import urllib3
 
 
 class aboutyou:
-    def __init__(self,groups,store,storeid,user_agents,delay=1,keywords=[],proxys=[],blacksku=[]):
+    def __init__(self,groups,store,storeid,user_agents,delay=1,keywords=[],proxys=[],blacksku=[],whitesku=[]):
         self.user_agents = user_agents
         self.INSTOCK = []
         self.groups = groups
@@ -21,6 +21,7 @@ class aboutyou:
         self.proxys = proxys
         self.proxytime = 0
         self.blacksku = blacksku
+        self.whitesku = whitesku
         self.store = store
         self.storeid = storeid
         self.timeout = timeout()
@@ -212,8 +213,8 @@ class aboutyou:
                 items = self.scrape_site(f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=53709,61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}", proxy, headers)
                 for product in items:
                     if int(product['id']) not in self.blacksku:
-                        if len(self.keywords) == 0:
-                            # If no keywords set, checks whether item status has changed
+                        if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
+                            # If no keywords set or sku is whitelisted, checks whether item status has changed
                             self.comparitor(product, start)
 
                         else:
