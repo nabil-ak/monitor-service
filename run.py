@@ -70,8 +70,8 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
 
     #Create NBB Monitor
-    #nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
-    #monitorPool.append(Process(target=nbbProcess.monitor))
+    nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
+    monitorPool.append(Process(target=nbbProcess.monitor))
     
     #Create KITH Monitor
     kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)

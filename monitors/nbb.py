@@ -107,7 +107,7 @@ class nbb:
                         #Rotate Proxys on each request
                         proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                         proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-                        response = rq.get(f"https://api.store.nvidia.com/partner/v1/feinventory?skus={sku}&locale=DE",headers=headers,proxies=proxy,timeout=10)
+                        response = rq.get(f"https://api.store.nvidia.com/partner/v1/feinventory?skus={sku}&locale=DE",headers=headers,proxies=proxy,timeout=10,verify=False)
                         items.append(response.json()["listMap"][0])
                         time.sleep(1)
                     logging.info(msg='[NBB] Successfully scraped site')
