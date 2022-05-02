@@ -248,6 +248,7 @@ class cultura:
 
         # Initialising proxy and headers
         proxy_no = -1
+        proxy = {}
         headers = {
                 'authority': 'www.cultura.com',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -268,10 +269,6 @@ class cultura:
             try:
                 startTime = time.time()
                 for query in self.querys:
-                    #Rotate Proxys on each query-request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-                    
                     # Makes request to site and stores products 
                     items = self.scrape_site(query, headers, proxy)
                     for product in items:
@@ -294,10 +291,6 @@ class cultura:
                 time.sleep(60)
                 # Rotates headers
                 headers["user-agent"] = random.choice(self.user_agents)["user_agent"]
-
-                # Safe time to let the Monitor only use the Proxy for 60 min
-                if proxy == {}:
-                    self.proxytime = time.time()+3600
                 
                 if len(self.proxys) != 0:
                     # If optional proxy set, rotates if there are multiple proxies

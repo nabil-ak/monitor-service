@@ -2,7 +2,6 @@ import random
 import traceback
 import time
 
-from requests_toolbelt import user_agent
 from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew
 from multiprocessing import Process
 from threading import Thread
