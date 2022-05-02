@@ -294,9 +294,9 @@ class cultura:
                 # Rotates headers
                 headers["user-agent"] = random.choice(self.user_agents)["user_agent"]
 
-                # Safe time to let the Monitor only use the Proxy for 5 min
+                # Safe time to let the Monitor only use the Proxy for 60 min
                 if proxy == {}:
-                    self.proxytime = time.time()+300
+                    self.proxytime = time.time()+3600
                 
                 if len(self.proxys) != 0:
                     # If optional proxy set, rotates if there are multiple proxies

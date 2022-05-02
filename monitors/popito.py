@@ -99,7 +99,7 @@ class popito:
                         "prize":prize,
                         "image":product.find('a', {'class': 'product-content-image'}).find('img')["src"],
                         "url":title["href"],
-                        "ATC":"https://popito.fr/panier/?add-to-cart="+sku,
+                        "ATC":"https://popito.fr/commande/?add-to-cart="+sku,
                         "status":"RESERVATION" if product.find('div', {'class': 'pre_order_loop'}) != None else "INSTOCK",
                         }
                 items.append(product_item)

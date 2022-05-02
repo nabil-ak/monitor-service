@@ -34,6 +34,7 @@ def updateData():
         if settings != newSettings or newCookgroups != cookgroups:
             cookgroups = newCookgroups
             settings = newSettings
+            proxys = settings["proxys"]
             print("[UPDATER] Restart Monitors")
 
             #Restart every Monitor
@@ -86,7 +87,7 @@ def startMonitors():
     #monitorPool.append(Process(target=zalandoProcess.monitor))
     
     #Create Cultura Monitor
-    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
+    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"],proxys=proxys)
     monitorPool.append(Process(target=culturaProcess.monitor))
     
     #Create Micromania Monitor

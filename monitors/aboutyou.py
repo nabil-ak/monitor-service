@@ -204,24 +204,33 @@ class aboutyou:
     
         while True:
             try:
-                #Rotate Proxys on each request
-                proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                 startTime = time.time()
+                urls = [
+                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207&filters[brand]=53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}",
+                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20215&filters[brand]=53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}",
+                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207&filters[brand]=61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}",
+                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20215&filters[brand]=61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}"
+                ]
+            
+                #Fetch Nike Women, Nike Men, Jordan Women and Jordan Men from About-You
+                for url in urls:
+                    #Rotate Proxys on each request
+                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
+                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
-                # Makes request to site and stores products 
-                items = self.scrape_site(f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=53709,61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}", proxy, headers)
-                for product in items:
-                    if int(product['id']) not in self.blacksku:
-                        if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
-                            # If no keywords set or sku is whitelisted, checks whether item status has changed
-                            self.comparitor(product, start)
+                    # Makes request to site and stores products 
+                    items = self.scrape_site(url, proxy, headers)
+                    for product in items:
+                        if int(product['id']) not in self.blacksku:
+                            if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
+                                # If no keywords set or sku is whitelisted, checks whether item status has changed
+                                self.comparitor(product, start)
 
-                        else:
-                            # For each keyword, checks whether particular item status has changed
-                            for key in self.keywords:
-                                if key.lower() in product['title'].lower():
-                                    self.comparitor(product, start)
+                            else:
+                                # For each keyword, checks whether particular item status has changed
+                                for key in self.keywords:
+                                    if key.lower() in product['title'].lower():
+                                        self.comparitor(product, start)
 
                 # Allows changes to be notified
                 start = 0
