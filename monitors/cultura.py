@@ -18,7 +18,6 @@ class cultura:
         self.querys= querys
         self.proxys = proxys
         self.blacksku = blacksku
-        self.proxytime = 0
 
         self.stores = {'CGN': 'Agen', 'CAM': 'Amiens', 'CAG': 'Anglet', 'CAB': 'Aubagne', 'CAU': 'Aubière', 'CAX': 'Auxerre', 'CBP': 'Bagnolet', 'CBM': 'Balma', 'CBA': 'Barentin', 'CB2': 'Bay 2-Collégien', 'CBY': 'Bayonne', 'CBU': 'Beauvais', 'CBG': 'Bègles', 'CBE': 'Belle Epine', 'CBC': 'Besançon', 'CBZ': 'Béziers', 'CBX': 'Bordeaux Lac', 'CBB': 'Bourg En Bresse', 'CBO': 'Bourgoin Jallieu', 'CBT': 'Brest', 'CBV': 'Brive Centre', 'CBR': 'Brive La Gaillarde', 'CMD': 'Caen Mondeville', 'CCR': 'Carcassonne', 'CCE': 'Carré Senart', 'CCT': 'Chambray Les Tours', 'CDO': "Champagne Au Mont d'Or", 'CC2': 'Champniers', 'CRE': 'Chantepie', 'CCP': 'Chasseneuil Du Poitou', 'CHO': 'Cholet', 'CCS': 'Claye Souilly', 'CRM': 'Cormontreuil', 'CDI': 'Dijon', 'CEY': 'Epagny', 'CEP': 'Epinal', 'CEV': 'Evreux', 'CFE': 'Fenouillet', 'CBN': 'Fouquieres Les Bethune', 'CFR': 'Franconville', 'CGM': 'Geispolsheim', 'CGE': 'Gennevilliers', 'CGI': 'Givors', 'CHB': 'Hénin-Beaumont', 'C4T': 'La Défense', 'CLT': 'La Teste', 'CLV': 'La Valentine', 'CLA': 'Labège', 'CLG': 'Langueux', 'CLM': 'Le Mans', 'CLE': 'Lescar', 'CLI': 'Limoges', 'CMA': 'Mâcon', 'CCA': 'Mandelieu', 'CMS': 'Marsac', 'CME': 'Mérignac', 'CMM': 'Metz', 'CMT': 'Montauban', 'CLH': 'Montivilliers', 'CML': 'Montluçon', 'CMU': 'Mundolsheim', 'CNB': 'Narbonne', 'CRQ': 'Neuville-en-Ferrain', 'CNC': 'Nice', 'CNI': 'Nîmes', 'COR': 'Pince Vent', 'CPL': 'Les Clayes-sous-Bois', 'CPC': 'Plan De Campagne', 'CPO': 'Portet Sur Garonne', 'CPB': 'Publier', 'CPT': 'Puget', 'CP2': 'Puilboreau', 'CRB': 'Rambouillet', 'CRV': 'Rivesaltes', 'CSA': 'Saint Aunès', 'CSB': 'Saint Berthevin', 'CS2': 'Saint Doulchard', 'CGR': 'Saint Grégoire', 'CSM': 'Saint Malo', 'CMR': 'Saint Maur', 'CCL': 'Saint Maximin', 'CSQ': 'Saint Quentin Fayet', 'CGV': 'Geneviève Des Bois', 'CSR': 'Saran', 'CLP': 'Sorgues', 'CTE': 'Terville', 'CTL': 'Toulon', 'CTN': 'Tours', 'CTR': 'Trignac', 'CTO': 'Troyes - St Parres', 'CVA': 'Valence', 'CCO': 'Venette', 'CAN': 'Ville-la-Grand', 'CVF': 'Villefranche', 'CV2': "Villeneuve D'Ascq", 'CVS': 'Villennes Sur Seine', 'CWM': 'Wittenheim'}
 
@@ -112,7 +111,7 @@ class cultura:
         'sec-ch-ua-platform': '"Windows"',
         }
 
-        response = self.session.get(f"https://geo.captcha-delivery.com/captcha/check?cid={response.cookies.get('datadome')}&icid={response.headers.get('x-datadome-cid')}&ccid=&g-recaptcha-response={g_response['code']}&hash=0E1A81F31853AE662CAEC39D1CD529&ua={response.request.headers.get('user-agent')}&referer={response.url}&parent_url=https%3A%2F%2Fwww.cultura.com%2F&x-forwarded-for=&captchaChallenge=184826891&s=11861", headers=headers)
+        response = self.session.get(f"https://geo.captcha-delivery.com/captcha/check?cid={response.cookies.get('datadome')}&icid={response.headers.get('x-datadome-cid')}&ccid=&userEnv=dc102389f184556895384a91c0def8a99b8c769b5a93a315c11db73bbebda241&g-recaptcha-response={g_response['code']}&hash=0E1A81F31853AE662CAEC39D1CD529&ua={response.request.headers.get('user-agent')}&referer={response.url}&parent_url=https%3A%2F%2Fwww.cultura.com%2F&x-forwarded-for=&captchaChallenge=184826891&s=11861", headers=headers)
         response.raise_for_status()
         cookie = response.json()["cookie"]
         self.session.cookies.set("datadome", cookie[cookie.find("=")+1:cookie.find(";")])
@@ -296,6 +295,7 @@ class cultura:
                     # If optional proxy set, rotates if there are multiple proxies
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                     proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
+                    self.session.cookies.clear()
 
 
 if __name__ == '__main__':
@@ -305,7 +305,5 @@ if __name__ == '__main__':
         "Colour":1382451,
         "cultura":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
     }
-    logging.basicConfig(filename=f'cultura.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-    s = cultura(groups=[devgroup],user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36"}],querys=["spiderman no way home"])
+    s = cultura(groups=[devgroup],user_agents=[{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"}],querys=["spiderman no way home"], proxys=["142.93.59.151:8899"])
     s.monitor()

@@ -86,7 +86,7 @@ def startMonitors():
     #monitorPool.append(Process(target=zalandoProcess.monitor))
     
     #Create Cultura Monitor
-    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"],proxys=proxys)
+    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
     monitorPool.append(Process(target=culturaProcess.monitor))
     
     #Create Micromania Monitor
