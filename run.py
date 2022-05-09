@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -108,6 +108,10 @@ def startMonitors():
     #Create Wethenew Monitor
     wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=wethenewProcess.monitor))
+
+    #Create SVD Monitor
+    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxys=proxys)
+    monitorPool.append(Process(target=svdProcess.monitor))
     
     #Start all Monitors
     for mon in monitorPool:
