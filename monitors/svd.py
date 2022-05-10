@@ -19,7 +19,7 @@ class svd:
         self.blacksku = blacksku
         self.proxytime = 0
 
-        self.INSTOCK = []
+        self.INSTOCK = {}
         
     def discord_webhook(self,group,title,sku, url, thumbnail,prize):
         """
@@ -66,14 +66,14 @@ class svd:
             print(f'[svd] Successfully sent Discord notification to {group["svd"]}')
 
 
-    def scrape_site(self,headers, proxy):
+    def scrape_site(self,headers, proxy, category):
         """
         Scrapes the specified svd query site and adds items to array
         """
         items = []
 
         # Makes request to site
-        html = rq.get(f"https://www.sivasdescalzo.com/graphql?query=query%20categoryV2(%24id%3A%20Int!%2C%20%24pageSize%3A%20Int!%2C%20%24currentPage%3A%20Int!%2C%20%24filters%3A%20ProductAttributeFilterInput!%2C%20%24sort%3A%20ProductAttributeSortInput)%20%7B%0A%20%20category(id%3A%20%24id)%20%7B%0A%20%20%20%20name%0A%20%20%20%20__typename%0A%20%20%7D%0A%20%20products(pageSize%3A%20%24pageSize%2C%20currentPage%3A%20%24currentPage%2C%20filter%3A%20%24filters%2C%20sort%3A%20%24sort)%20%7B%0A%20%20%20%20items%20%7B%0A%20%20%20%20%20%20id%0A%20%20%20%20%20%20brand_name%0A%20%20%20%20%20%20name%0A%20%20%20%20%20%20sku%0A%20%20%20%20%20%20small_image%20%7B%0A%20%20%20%20%20%20%20%20url%0A%20%20%20%20%20%20%20%20__typename%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20url%0A%20%20%20%20%20%20original_price%0A%20%20%20%20%20%20final_price%0A%20%20%20%20%20%20percent_off%0A%20%20%20%20%20%20state%0A%20%20%20%20%20%20__typename%0A%20%20%20%20%7D%0A%20%20%20%20aggregations%20%7B%0A%20%20%20%20%20%20attribute_code%0A%20%20%20%20%20%20label%0A%20%20%20%20%20%20count%0A%20%20%20%20%20%20options%20%7B%0A%20%20%20%20%20%20%20%20label%0A%20%20%20%20%20%20%20%20value%0A%20%20%20%20%20%20%20%20count%0A%20%20%20%20%20%20%20%20__typename%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20__typename%0A%20%20%20%20%7D%0A%20%20%20%20page_info%20%7B%0A%20%20%20%20%20%20total_pages%0A%20%20%20%20%20%20__typename%0A%20%20%20%20%7D%0A%20%20%20%20total_count%0A%20%20%20%20__typename%0A%20%20%7D%0A%7D%0A&operationName=categoryV2&variables=%7B%22currentPage%22%3A1%2C%22id%22%3A4089%2C%22filters%22%3A%7B%22brand%22%3A%7B%22in%22%3A%5B%22adidas%20YEEZY%22%2C%22Nike%22%2C%22New%20Balance%22%5D%7D%2C%22category_id%22%3A%7B%22eq%22%3A%224089%22%7D%7D%2C%22pageSize%22%3A1000%2C%22sort%22%3A%7B%22sorting_date%22%3A%22DESC%22%7D%7D",  headers=headers, proxies=proxy, verify=False, timeout=10)
+        html = rq.get(f"https://www.sivasdescalzo.com/graphql?query=query%20categoryV2(%24id%3A%20Int!%2C%20%24pageSize%3A%20Int!%2C%20%24currentPage%3A%20Int!%2C%20%24filters%3A%20ProductAttributeFilterInput!%2C%20%24sort%3A%20ProductAttributeSortInput)%20%7B%0A%20%20category(id%3A%20%24id)%20%7B%0A%20%20%20%20name%0A%20%20%20%20__typename%0A%20%20%7D%0A%20%20products(pageSize%3A%20%24pageSize%2C%20currentPage%3A%20%24currentPage%2C%20filter%3A%20%24filters%2C%20sort%3A%20%24sort)%20%7B%0A%20%20%20%20items%20%7B%0A%20%20%20%20%20%20id%0A%20%20%20%20%20%20brand_name%0A%20%20%20%20%20%20name%0A%20%20%20%20%20%20sku%0A%20%20%20%20%20%20small_image%20%7B%0A%20%20%20%20%20%20%20%20url%0A%20%20%20%20%20%20%20%20__typename%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20url%0A%20%20%20%20%20%20original_price%0A%20%20%20%20%20%20final_price%0A%20%20%20%20%20%20percent_off%0A%20%20%20%20%20%20state%0A%20%20%20%20%20%20__typename%0A%20%20%20%20%7D%0A%20%20%20%20aggregations%20%7B%0A%20%20%20%20%20%20attribute_code%0A%20%20%20%20%20%20label%0A%20%20%20%20%20%20count%0A%20%20%20%20%20%20options%20%7B%0A%20%20%20%20%20%20%20%20label%0A%20%20%20%20%20%20%20%20value%0A%20%20%20%20%20%20%20%20count%0A%20%20%20%20%20%20%20%20__typename%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20__typename%0A%20%20%20%20%7D%0A%20%20%20%20page_info%20%7B%0A%20%20%20%20%20%20total_pages%0A%20%20%20%20%20%20__typename%0A%20%20%20%20%7D%0A%20%20%20%20total_count%0A%20%20%20%20__typename%0A%20%20%7D%0A%7D%0A&operationName=categoryV2&variables=%7B%22currentPage%22%3A1%2C%22id%22%3A4089%2C%22filters%22%3A%7B%22brand%22%3A%7B%22in%22%3A%5B%22adidas%20YEEZY%22%2C%22Nike%22%2C%22New%20Balance%22%5D%7D%2C%22category_id%22%3A%7B%22eq%22%3A%22{category}%22%7D%7D%2C%22pageSize%22%3A1000%2C%22sort%22%3A%7B%22sorting_date%22%3A%22DESC%22%7D%7D",  headers=headers, proxies=proxy, verify=False, timeout=10)
         html.raise_for_status()
         products = json.loads(html.text)['data']['products']['items']
 
@@ -85,6 +85,7 @@ class svd:
                     "prize":str(product["final_price"])+" €",
                     "image":"https://svd-image-proxy.nabil-ak.repl.co"+product["small_image"]["url"]+"?width=300",
                     "url":product["url"],
+                    "state":product["state"]
                     }
             items.append(product_item)
 
@@ -114,44 +115,53 @@ class svd:
         headers = {
                 'user-agent': random.choice(self.user_agents)["user_agent"]
         }
+
+        #Initialise categorys and instock items for each category
+        categorys = [4089,2900]
+        for c in categorys:
+            self.INSTOCK[c] = []
         
         while True:
             try:
                 startTime = time.time()
-                
-                #Rotate Proxys on each request
-                proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
                 # Makes request to site and stores products 
-                items = self.scrape_site(headers, proxy)
-                products = []
 
-                for product in items:
-                    if product["sku"] not in self.blacksku:
-                        #Check for Keywords
-                        if self.keywords and not any(key.lower() in product["name"].lower() for key in self.keywords):
-                            continue
+                for c in categorys:
+                    #Rotate Proxys on each request
+                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
+                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
-                        # Check if Product is INSTOCK
-                        if product["sku"] not in self.INSTOCK and start != 1:
-                                print(f"[svd] {product}")
-                                logging.info(msg=f"[svd] {product}")
-                                for group in self.groups:
-                                    #Send Ping to each Group
-                                    Thread(target=self.discord_webhook,args=(
-                                        group,
-                                        product['name'],
-                                        product['sku'],
-                                        product['url'],
-                                        product['image'],
-                                        product['prize']
-                                        )).start()
-                        products.append(product["sku"])
+                    items=self.scrape_site(headers, proxy, c)
 
-                self.INSTOCK = products
+                    products = []
 
-                time.sleep(self.delay)
+                    for product in items:
+                        if product["sku"] not in self.blacksku and product["state"] != "Sold Out":
+                            #Check for Keywords
+                            if self.keywords and not any(key.lower() in product["name"].lower() for key in self.keywords):
+                                continue
+
+                            # Check if Product is INSTOCK
+                            if product["sku"] not in self.INSTOCK[c] and start != 1:
+                                    print(f"[svd] {product}")
+                                    logging.info(msg=f"[svd] {product}")
+                                    for group in self.groups:
+                                        #Send Ping to each Group
+                                        Thread(target=self.discord_webhook,args=(
+                                            group,
+                                            product['name'],
+                                            product['sku'],
+                                            product['url'],
+                                            product['image'],
+                                            product['prize']
+                                            )).start()
+                            products.append(product["sku"])
+
+                    self.INSTOCK[c] = products
+
+                    time.sleep(self.delay/len(categorys))
+
 
                 # Allows changes to be notified
                 start = 0
@@ -161,7 +171,6 @@ class svd:
             except Exception as e:
                 print(f"[svd] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(60)
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
