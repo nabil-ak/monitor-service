@@ -89,7 +89,7 @@ class shopify:
                 continue
             product_item = {
                 'title': product['title'], 
-                'image': product['images'][0]['src'], 
+                'image': product['images'][0]['src'] if product['images'] else "", 
                 'handle': product['handle'],
                 'variants': product['variants']}
             items.append(product_item)
