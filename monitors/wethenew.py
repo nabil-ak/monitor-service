@@ -91,7 +91,7 @@ class wethenew:
             r = response.json()
             for product in r["results"]:
                 output.append(product)
-            if r["pagination"]["totalPages"] == r["pagination"]["page"]:
+            if r["pagination"]["totalPages"] <= r["pagination"]["page"]:
                 break
             skip+=100
 
