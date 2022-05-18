@@ -64,7 +64,7 @@ def startMonitors():
         chrome_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
     
     #Create all About You Monitors
-    ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200]]
+    ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200],["SE",655],["IE",657]]
     for store in ABOUTYOUSTORES:
         a = aboutyou.aboutyou(cookgroups,store[0],store[1],user_agents,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"],settings["aboutyou"]["whitesku"])
         monitorPool.append(Process(target=a.monitor))
@@ -80,6 +80,10 @@ def startMonitors():
     #Create Slamjam Monitor
     slamjamProcess = shopify.shopify(groups=cookgroups,site="slamjam",url=settings["slamjam"]["url"],user_agents=user_agents,delay=settings["slamjam"]["delay"],keywords=settings["slamjam"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=slamjamProcess.monitor))
+
+    #Create Asphaltgold Monitor
+    asphaltgoldProcess = shopify.shopify(groups=cookgroups,site="asphaltgold",url=settings["asphaltgold"]["url"],user_agents=user_agents,delay=settings["asphaltgold"]["delay"],keywords=settings["asphaltgold"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=asphaltgoldProcess.monitor))
     
     #Create Zalando Monitor
     #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)

@@ -85,7 +85,7 @@ class shopify:
         # Stores particular details in array
         for product in output:
             #Just scrape Sneakers and Sandals when the site is Kith or Slamjam
-            if self.site in ["kith","slamjam"] and product["product_type"] not in ["Sneakers","Sandals"]:
+            if self.site in ["kith","slamjam","asphaltgold"] and product["product_type"] not in ["Sneakers","Sandals","Footwear"]:
                 continue
             product_item = {
                 'title': product['title'], 
@@ -243,7 +243,5 @@ if __name__ == '__main__':
         "Colour":1382451,
         "kith":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
     }
-    logging.basicConfig(filename=f'kith.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-    s = shopify(site="kith",groups=[devgroup],url="https://eu.kith.com/products.json",proxys=["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"])
+    s = shopify(site="asphaltgold",groups=[devgroup],url="https://asphaltgold.com/products.json",user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}])
     s.monitor()
