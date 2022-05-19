@@ -85,7 +85,7 @@ class shopify:
         # Stores particular details in array
         for product in output:
             #Just scrape Sneakers and Sandals when the site is Kith or Slamjam
-            if self.site in ["kith","slamjam","asphaltgold"] and product["product_type"] not in ["Sneakers","Sandals","Footwear"]:
+            if self.site in ["kith","slamjam","asphaltgold"] and product["product_type"] not in ["Sneakers","Sandals","Footwear","Sandals and Slides"]:
                 continue
             product_item = {
                 'title': product['title'], 
