@@ -102,7 +102,7 @@ def startMonitors():
     monitorPool.append(Process(target=funkoeuropeProcess.monitor))
     
     #Create Popinabox Monitor
-    popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"])
+    popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"],proxys=proxys)
     monitorPool.append(Process(target=popinaboxProcess.monitor))
     
     #Create Popito Monitor
