@@ -84,6 +84,10 @@ def startMonitors():
     #Create Asphaltgold Monitor
     asphaltgoldProcess = shopify.shopify(groups=cookgroups,site="asphaltgold",url=settings["asphaltgold"]["url"],user_agents=user_agents,delay=settings["asphaltgold"]["delay"],keywords=settings["asphaltgold"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=asphaltgoldProcess.monitor))
+
+    #Create ESN Monitor
+    esnProcess = shopify.shopify(groups=cookgroups,site="esn",url=settings["esn"]["url"],user_agents=user_agents,delay=settings["esn"]["delay"],keywords=settings["esn"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=esnProcess.monitor))
     
     #Create Zalando Monitor
     #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
