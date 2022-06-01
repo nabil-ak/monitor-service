@@ -137,7 +137,7 @@ class svd:
                     products = []
 
                     for product in items:
-                        if product["sku"] not in self.blacksku and product["state"] not in ["Sold Out", "Raffle"]:
+                        if product["sku"] not in self.blacksku and product["state"] not in ["Sold Out", "Raffle"] and len(product["sku"]) > 1:
                             #Check for Keywords
                             if self.keywords and not any(key.lower() in product["name"].lower() for key in self.keywords):
                                 continue
