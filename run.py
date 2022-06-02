@@ -88,6 +88,10 @@ def startMonitors():
     #Create ESN Monitor
     esnProcess = shopify.shopify(groups=cookgroups,site="esn",url=settings["esn"]["url"],user_agents=user_agents,delay=settings["esn"]["delay"],keywords=settings["esn"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=esnProcess.monitor))
+
+    #Create Packyard Monitor
+    packyardProcess = shopify.shopify(groups=cookgroups,site="packyard",url=settings["packyard"]["url"],user_agents=user_agents,delay=settings["packyard"]["delay"],keywords=settings["packyard"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=packyardProcess.monitor))
     
     #Create Zalando Monitor
     #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
