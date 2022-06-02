@@ -20,7 +20,7 @@ def updateData():
     """
     Check settings and groups every 20 seconds for update
     """
-    global settings,cookgroups
+    global settings,cookgroups,proxys
     while True:
         try:
             newCookgroups = database.getGroups()
