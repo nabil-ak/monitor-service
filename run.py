@@ -92,6 +92,10 @@ def startMonitors():
     #Create Packyard Monitor
     packyardProcess = shopify.shopify(groups=cookgroups,site="packyard",url=settings["packyard"]["url"],user_agents=user_agents,delay=settings["packyard"]["delay"],keywords=settings["packyard"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=packyardProcess.monitor))
+
+    #Create Munkstore Monitor
+    munkstoreProcess = shopify.shopify(groups=cookgroups,site="munkstore",url=settings["munkstore"]["url"],user_agents=user_agents,delay=settings["munkstore"]["delay"],keywords=settings["munkstore"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=munkstoreProcess.monitor))
     
     #Create Zalando Monitor
     #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
