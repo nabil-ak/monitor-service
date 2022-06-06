@@ -68,34 +68,18 @@ def startMonitors():
     for store in ABOUTYOUSTORES:
         a = aboutyou.aboutyou(cookgroups,store[0],store[1],user_agents,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],proxys,settings["aboutyou"]["blacksku"],settings["aboutyou"]["whitesku"])
         monitorPool.append(Process(target=a.monitor))
+    
+    #Create all Shopify Monitors
+    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "munkstore", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "repokershops"]
+
+    for s in shopifyMonitores:
+        shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys)
+        monitorPool.append(Process(target=shopifyProcess.monitor))
+
 
     #Create NBB Monitor
     #nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
     #monitorPool.append(Process(target=nbbProcess.monitor))
-    
-    #Create KITH Monitor
-    kithProcess = shopify.shopify(groups=cookgroups,site="kith",url=settings["kith"]["url"],user_agents=user_agents,delay=settings["kith"]["delay"],keywords=settings["kith"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=kithProcess.monitor))
-    
-    #Create Slamjam Monitor
-    slamjamProcess = shopify.shopify(groups=cookgroups,site="slamjam",url=settings["slamjam"]["url"],user_agents=user_agents,delay=settings["slamjam"]["delay"],keywords=settings["slamjam"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=slamjamProcess.monitor))
-
-    #Create Asphaltgold Monitor
-    asphaltgoldProcess = shopify.shopify(groups=cookgroups,site="asphaltgold",url=settings["asphaltgold"]["url"],user_agents=user_agents,delay=settings["asphaltgold"]["delay"],keywords=settings["asphaltgold"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=asphaltgoldProcess.monitor))
-
-    #Create ESN Monitor
-    esnProcess = shopify.shopify(groups=cookgroups,site="esn",url=settings["esn"]["url"],user_agents=user_agents,delay=settings["esn"]["delay"],keywords=settings["esn"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=esnProcess.monitor))
-
-    #Create Packyard Monitor
-    packyardProcess = shopify.shopify(groups=cookgroups,site="packyard",url=settings["packyard"]["url"],user_agents=user_agents,delay=settings["packyard"]["delay"],keywords=settings["packyard"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=packyardProcess.monitor))
-
-    #Create Munkstore Monitor
-    munkstoreProcess = shopify.shopify(groups=cookgroups,site="munkstore",url=settings["munkstore"]["url"],user_agents=user_agents,delay=settings["munkstore"]["delay"],keywords=settings["munkstore"]["keywords"],proxys=proxys)
-    monitorPool.append(Process(target=munkstoreProcess.monitor))
     
     #Create Zalando Monitor
     #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
