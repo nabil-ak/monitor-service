@@ -248,6 +248,7 @@ class wethenew:
                 if proxy != {}:
                     try:
                         # Update User_Agent
+                        self.scraper.close()
                         self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
                     except Exception as ex:
                         print(f"[wethenew] Exception found: {traceback.format_exc()}")
