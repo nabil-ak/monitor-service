@@ -83,7 +83,7 @@ class svd:
                     "name":product["brand_name"]+" "+product["name"],
                     "sku":product["sku"],
                     "prize":str(product["final_price"])+" €",
-                    "image":"https://svd-image-proxy.nabil-ak.repl.co"+product["small_image"]["url"]+"?width=300",
+                    "image":"https://svd-image-proxy.nabil-ak.repl.co/https://media.sivasdescalzo.com/media/catalog/product/"+product["small_image"]["url"]+"?width=300",
                     "url":product["url"],
                     "state":product["state"]
                     }
