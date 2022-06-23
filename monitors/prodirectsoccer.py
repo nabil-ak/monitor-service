@@ -33,7 +33,7 @@ class prodirectsoccer:
         fields.append({"name": "Prize", "value": f"```{prize}£```", "inline": True})
         fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
         fields.append({"name": "Status", "value": f"```🟢 INSTOCK```", "inline": True})
-        print(thumbnail)
+        
 
         data = {
             "username": group["Name"],
@@ -41,7 +41,7 @@ class prodirectsoccer:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": thumbnail},
+            "thumbnail": {"url": "https://image-proxy.nabil-ak.repl.co/"+thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {
@@ -119,7 +119,7 @@ class prodirectsoccer:
         logging.info(msg=f'prodirectsoccer Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
-        start = 0
+        start = 1
 
         # Initialising proxy and headers
         proxy_no = -1

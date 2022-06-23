@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd,prodirectsoccer
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -14,6 +14,7 @@ import database
 cookgroups = database.getGroups()
 settings = database.getSettings()
 proxys = settings["proxys"]
+ISPproxys = settings["ISPproxys"]
 monitorPool = []
 
 def updateData():
@@ -112,6 +113,10 @@ def startMonitors():
     #Create SVD Monitor
     svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxys=proxys)
     monitorPool.append(Process(target=svdProcess.monitor))
+
+    #Create prodirectsoccer Monitor
+    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxys=ISPproxys)
+    monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
     
     #Start all Monitors
     for mon in monitorPool:
