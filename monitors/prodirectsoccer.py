@@ -21,8 +21,9 @@ class prodirectsoccer:
         self.proxytime = 0
 
         self.INSTOCK = []
+        self.RELEASEINSTOCK = []
         
-    def discord_webhook(self,group,title,sku, url, thumbnail,prize):
+    def discord_webhook(self,group,title,sku, url, thumbnail,prize,launchdate=None):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -32,7 +33,11 @@ class prodirectsoccer:
         fields = []
         fields.append({"name": "Prize", "value": f"```{prize}£```", "inline": True})
         fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
-        fields.append({"name": "Status", "value": f"```🟢 INSTOCK```", "inline": True})
+        if not launchdate:
+            fields.append({"name": "Status", "value": f"```🟢 INSTOCK```", "inline": True})
+        else:
+            fields.append({"name": "Status", "value": f"```🟡 RELEASE```", "inline": True})
+            fields.append({"name": "Launchdate", "value": f"```{launchdate[-2:]}/{launchdate[4:6]}/{launchdate[:4]}```", "inline": True})
         
 
         data = {
@@ -103,6 +108,36 @@ class prodirectsoccer:
         
         logging.info(msg=f'[prodirectsoccer] Successfully scraped Query {query}')
         return items
+
+    def scrape_release_site(self,query,headers, proxy):
+        """
+        Scrapes the specified prodirectsoccer release query site and adds items to array
+        """
+        items = []
+
+        # Makes request to site
+        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7Bsoccerengb%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=proxy, verify=False, timeout=10)
+        html.raise_for_status()
+
+        products = json.loads(html.text[14:-1])["suggestionGroups"][1]["suggestions"]
+       
+
+        # Stores particular details in array
+        for product in products:
+            product_item = {
+                    "name":product["name"],
+                    "sku":product["quickref"],
+                    "prize":product["currentprice"].replace("000",""),
+                    "image":product["_thumburl"],
+                    "url":product["producturl"],
+                    "launchdate":product["launchdate"]
+                    }
+            items.append(product_item)
+
+         
+        
+        logging.info(msg=f'[prodirectsoccer] Successfully scraped releases for query {query}')
+        return items
         
 
     def monitor(self):
@@ -138,7 +173,7 @@ class prodirectsoccer:
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                     proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
-                    # Makes request to site and stores products 
+                    # Makes request to query-site and stores products 
                     items = self.scrape_site(query, headers, proxy)
                     for product in items:
                         if product["sku"] not in self.blacksku:
@@ -158,9 +193,37 @@ class prodirectsoccer:
                                         )).start()
 
                             products.append(product["sku"])
+                    
+                    self.INSTOCK = products.copy()
+                    products.clear()
+                    
+                    # Make request to release-site and stores products
+                    items = self.scrape_release_site(query, headers, proxy)
+                    for product in items:
+                        if product["sku"] not in self.blacksku:
+                            # Check if Product is INSTOCK
+                            if product not in self.RELEASEINSTOCK and start != 1:
+                                print(f"[prodirectsoccer] {product}")
+                                logging.info(msg=f"[prodirectsoccer] {product}")
+                                for group in self.groups:
+                                    #Send Ping to each Group
+                                    Thread(target=self.discord_webhook,args=(
+                                        group,
+                                        product['name'],
+                                        product['sku'],
+                                        product['url'],
+                                        product['image'],
+                                        product['prize'],
+                                        product['launchdate']
+                                        )).start()
+
+                            products.append(product)
+
+                    self.RELEASEINSTOCK = products
+
                     time.sleep(self.delay)
 
-                self.INSTOCK = products
+                
 
                 # Allows changes to be notified
                 start = 0

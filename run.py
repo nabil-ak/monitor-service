@@ -13,7 +13,7 @@ import database
 
 cookgroups = database.getGroups()
 settings = database.getSettings()
-proxys = settings["proxys"]
+proxys = settings["ISPproxys"]
 ISPproxys = settings["ISPproxys"]
 monitorPool = []
 
