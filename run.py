@@ -34,7 +34,7 @@ def updateData():
         if settings != newSettings or newCookgroups != cookgroups:
             cookgroups = newCookgroups
             settings = newSettings
-            proxys = settings["proxys"]
+            proxys = settings["ISPproxys"]
             print("[UPDATER] Restart Monitors")
 
             #Restart every Monitor
@@ -71,7 +71,7 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
     
     #Create all Shopify Monitors
-    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios"]
+    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow"]
 
     for s in shopifyMonitores:
         shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys)
