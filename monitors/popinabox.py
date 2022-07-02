@@ -80,7 +80,7 @@ class popinabox:
         #Scrape all available Pages
         while page != pages:
             # Makes request to site
-            html = rq.get(f"{query}&pageNumber={page}",  headers=headers, proxies=proxy, verify=False, timeout=10)
+            html = rq.get(f"{query}&pageNumber={page}" if "?" in query else f"{query}?pageNumber={page}",  headers=headers, proxies=proxy, verify=False, timeout=10)
             html.raise_for_status()
             output = BeautifulSoup(html.text, 'html.parser')
             products = output.find_all('li', {'class': 'productListProducts_product'})
@@ -204,7 +204,6 @@ class popinabox:
             except Exception as e:
                 print(f"[popinabox] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(60)
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
