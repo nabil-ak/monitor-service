@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other
+from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -123,6 +123,10 @@ def startMonitors():
     for p in prodirect:
         prodirectProcess = prodirectsoccer_other.prodirectsoccer_other(name=p[0], releasecategory= p[1], groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxys=ISPproxys)
         monitorPool.append(Process(target=prodirectProcess.monitor))
+
+    #Create eleventeamsports Monitor
+    eleventeamsportsProcess = eleventeamsports.eleventeamsports(groups=cookgroups,user_agents=user_agents,delay=settings["eleventeamsports"]["delay"],querys=settings["eleventeamsports"]["query"],blacksku=settings["eleventeamsports"]["blacksku"],proxys=proxys)
+    monitorPool.append(Process(target=eleventeamsportsProcess.monitor))
     
     #Start all Monitors
     for mon in monitorPool:
