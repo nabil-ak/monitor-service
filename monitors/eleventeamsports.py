@@ -19,7 +19,7 @@ class eleventeamsports:
         self.blacksku = blacksku
         self.proxytime = 0
 
-        self.INSTOCK = {}
+        self.INSTOCK = []
         
     def discord_webhook(self,group,title,sku, url, thumbnail,prize):
         """
@@ -119,7 +119,9 @@ class eleventeamsports:
         while True:
             try:
                 startTime = time.time()
-
+                
+                products = []
+                
                 # Makes request to site and stores products 
                 for query in self.querys:
                     #Rotate Proxys on each request
@@ -127,8 +129,6 @@ class eleventeamsports:
                     proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
                     items=self.scrape_site(headers, proxy, query)
-
-                    products = []
 
                     for product in items:
                         if product["sku"] not in self.blacksku:
@@ -148,10 +148,9 @@ class eleventeamsports:
                                             )).start()
                             products.append(product["sku"])
 
-                    self.INSTOCK = products
-
                     time.sleep(self.delay/len(self.querys))
 
+                self.INSTOCK = products
 
                 # Allows changes to be notified
                 start = 0
