@@ -80,14 +80,17 @@ class eleventeamsports:
         # Stores particular details in array
         for product in products:
             product = product["fields"]
-            product_item = {
-                    "name":product["title"],
-                    "sku":product["sku"],
-                    "prize":str(product["price"])+" €",
-                    "image":product["media_file"],
-                    "url":product["deeplink"]
-                    }
-            items.append(product_item)
+
+            #Only Ping shoes
+            if "Schuhe" in product["category"]:
+                product_item = {
+                        "name":product["title"],
+                        "sku":product["sku"],
+                        "prize":str(product["price"])+" €",
+                        "image":product["media_file"],
+                        "url":product["deeplink"]
+                        }
+                items.append(product_item)
 
         
         logging.info(msg=f'[eleventeamsports] Successfully scraped site')
