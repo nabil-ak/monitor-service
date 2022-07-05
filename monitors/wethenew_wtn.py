@@ -38,7 +38,7 @@ class wethenew_wtn:
         for size in sizes:
             s+=f"`{size['size']}`\n"
             prices+=f"`{size['price']}€`\n"
-            links+=f"[✅](https://sell.wethenew.com/sell-now/{size['id']})\n"
+            links+=f"[ATC](https://sell.wethenew.com/sell-now/{size['id']})\n"
         fields.append({"name": "Sizes", "value": s, "inline": True})
         fields.append({"name": "Prices", "value": prices, "inline": True})
         fields.append({"name": "Accept", "value": links, "inline": True})
