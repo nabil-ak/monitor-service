@@ -1,5 +1,6 @@
 from threading import Thread
 from datetime import datetime
+from turtle import ht
 from bs4 import BeautifulSoup
 import random
 import requests as rq
@@ -81,7 +82,7 @@ class popito:
         while True:
             # Makes request to site
             html = rq.get(f"https://popito.fr/page/{page}/?s={query}&post_type=product&product_cat=0",  headers=headers, proxies=proxy, verify=False, timeout=10)
-            if html.status_code == 404:
+            if html.status_code == 404 or "produit" in html.url:
                     break
             html.raise_for_status()
 
