@@ -32,17 +32,16 @@ class wethenew_wtn:
             return
 
         fields = []
-        fields.append({"name": "Status", "value": f"```🟢 SELL NOW```", "inline": False})
         s = ""
         prices = ""
         links = "\n"
         for size in sizes:
-            s+=size["size"]+"\n"
-            prices+=str(size["price"])+"€\n"
-            links+=f"[ATC](https://sell.wethenew.com/sell-now/{size['id']})\n"
+            s+=f"`{size['size']}`\n"
+            prices+=f"`{size['price']}€`\n"
+            links+=f"[✅](https://sell.wethenew.com/sell-now/{size['id']})\n"
         fields.append({"name": "Sizes", "value": s, "inline": True})
         fields.append({"name": "Prices", "value": prices, "inline": True})
-        fields.append({"name": "Links", "value": links, "inline": True})
+        fields.append({"name": "Accept", "value": links, "inline": True})
         
         
         data = {
@@ -59,7 +58,7 @@ class wethenew_wtn:
                 "icon_url": group["Avatar_Url"]
                 },
             "author": {
-                "name": "wethenew"
+                "name": "sell.wethenew.com"
             }
             }]
         }
@@ -200,7 +199,7 @@ class wethenew_wtn:
         logging.info(msg=f'[wethenew_wtn] Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
-        start = 1
+        start = 0
 
         # Initialising proxy and headers
         proxy_no = 0
