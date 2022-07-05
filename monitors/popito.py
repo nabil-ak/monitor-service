@@ -1,6 +1,5 @@
 from threading import Thread
 from datetime import datetime
-from turtle import ht
 from bs4 import BeautifulSoup
 import random
 import requests as rq
