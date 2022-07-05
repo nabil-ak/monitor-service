@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,nbb,shopify,zalando,swatch,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports
+from monitors import aboutyou,shopify,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -109,6 +109,10 @@ def startMonitors():
     #Create Wethenew Monitor
     wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxys=proxys)
     monitorPool.append(Process(target=wethenewProcess.monitor))
+
+    #Create Wethenew-WTN Monitor
+    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxys=proxys)
+    monitorPool.append(Process(target=wethenew_wtnProcess.monitor))
 
     #Create SVD Monitor
     svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxys=proxys)
