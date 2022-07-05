@@ -199,7 +199,7 @@ class wethenew_wtn:
         logging.info(msg=f'[wethenew_wtn] Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
-        start = 0
+        start = 1
 
         # Initialising proxy and headers
         proxy_no = 0
