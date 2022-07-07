@@ -74,7 +74,8 @@ def startMonitors():
     shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor"]
 
     for s in shopifyMonitores:
-        shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys)
+        blacksku = [] if "blacksku" not in settings[s] else settings[s]["blacksku"]
+        shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys,blacksku=blacksku)
         monitorPool.append(Process(target=shopifyProcess.monitor))
 
 

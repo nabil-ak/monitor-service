@@ -10,7 +10,7 @@ import traceback
 import urllib3
 
 class shopify:
-    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],proxys=[]):
+    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],proxys=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
@@ -20,6 +20,7 @@ class shopify:
         self.keywords= keywords
         self.proxys = proxys
         self.proxytime = 0
+        self.blacksku = blacksku
 
         self.INSTOCK = []
         self.timeout = timeout()
@@ -199,16 +200,16 @@ class shopify:
                     # Makes request to site and stores products 
                     items = self.scrape_site(self.url,page, headers, proxy)
                     for product in items:
+                        if product["handle"] not in self.blacksku:
+                            if len(self.keywords) == 0:
+                                # If no keywords set, checks whether item status has changed
+                                self.comparitor(product, start)
 
-                        if len(self.keywords) == 0:
-                            # If no keywords set, checks whether item status has changed
-                            self.comparitor(product, start)
-
-                        else:
-                            # For each keyword, checks whether particular item status has changed
-                            for key in self.keywords:
-                                if key.lower() in product['title'].lower():
-                                    self.comparitor(product, start)
+                            else:
+                                # For each keyword, checks whether particular item status has changed
+                                for key in self.keywords:
+                                    if key.lower() in product['title'].lower():
+                                        self.comparitor(product, start)
                     page+=1
 
                 # Allows changes to be notified
