@@ -42,6 +42,7 @@ class wethenew_wtn:
         fields.append({"name": "Sizes", "value": s, "inline": True})
         fields.append({"name": "Prices", "value": prices, "inline": True})
         fields.append({"name": "Accept", "value": links, "inline": True})
+        fields.append({"name": "Links", "value": f"[STOCKX](https://stockx.com/search?s={title}) | [WETHENEW](https://wethenew.com/search?type=product&q={title})", "inline": True})
         
         
         data = {

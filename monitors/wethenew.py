@@ -40,6 +40,7 @@ class wethenew:
             status+="🟡 WTB\n"
         fields.append({"name": "Sizes", "value": f"```{s}```", "inline": True})
         fields.append({"name": "Status", "value": f"```{status}```", "inline": True})
+        fields.append({"name": "Links", "value": f"[STOCKX](https://stockx.com/search?s={title}) | [WETHENEW](https://wethenew.com/search?type=product&q={title})", "inline": False})
         
         
         data = {
