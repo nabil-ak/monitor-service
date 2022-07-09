@@ -1,5 +1,5 @@
 from threading import Thread
-from datetime import datetime
+from datetime import datetime,timedelta
 from bs4 import BeautifulSoup
 import random
 import requests as rq
@@ -211,7 +211,8 @@ class prodirectsoccer_other:
                     # Make request to release-site and stores products
                     items = self.scrape_release_site(query, headers, proxy)
                     for product in items:
-                        if product["sku"] not in self.blacksku:
+                        date = datetime.strptime(f"{product['launchdate'][-2:]}/{product['launchdate'][4:6]}/{product['launchdate'][:4]}","%d/%m/%Y")
+                        if product["sku"] not in self.blacksku and date>(datetime.now()-timedelta(days=1)):
                             # Check if Product is INSTOCK
                             if product not in self.RELEASEINSTOCK and start != 1:
                                 print(f"[{self.name}] {product}")
