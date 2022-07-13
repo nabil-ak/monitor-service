@@ -4,8 +4,10 @@ TIMEOUT = 30
 PINGDELAY = 10
 
 class timeout:
-    def __init__(self):
+    def __init__(self,timeout=TIMEOUT,pingdelay=PINGDELAY):
         self.pings = []
+        self.timeout = timeout
+        self.pingdelay = pingdelay
     
     def ping(self,product):
         """
@@ -16,14 +18,14 @@ class timeout:
                 if ping["timeout"] >= time.time():
                     return False
                 if ping["lastpingtimeout"] >= time.time():
-                    ping["timeout"] = time.time()+TIMEOUT
+                    ping["timeout"] = time.time()+self.timeout
                     return False
-                ping["lastpingtimeout"] = time.time()+PINGDELAY
+                ping["lastpingtimeout"] = time.time()+self.pingdelay
                 return True
 
         self.pings.append({
             "product":product,
-            "lastpingtimeout":time.time()+PINGDELAY,
+            "lastpingtimeout":time.time()+self.pingdelay,
             "timeout":-1
         })
         return True

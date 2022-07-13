@@ -1,5 +1,6 @@
 from threading import Thread
 from datetime import datetime
+from timeout import timeout
 import random
 import requests as rq
 import time
@@ -18,6 +19,7 @@ class eleventeamsports:
         self.proxys = proxys
         self.blacksku = blacksku
         self.proxytime = 0
+        self.timeout = timeout(timeout=120, pingdelay=20)
 
         self.INSTOCK = []
         
@@ -136,7 +138,7 @@ class eleventeamsports:
                     for product in items:
                         if product["sku"] not in self.blacksku:
                             # Check if Product is INSTOCK
-                            if product["sku"] not in self.INSTOCK and start != 1:
+                            if product["sku"] not in self.INSTOCK and start != 1 and self.timeout.ping(product):
                                     print(f"[eleventeamsports] {product}")
                                     logging.info(msg=f"[eleventeamsports] {product}")
                                     for group in self.groups:
