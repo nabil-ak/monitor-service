@@ -58,11 +58,8 @@ def startMonitors():
     user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
 
     #Get newest Chrome Useragent
-    try:
-        chrome_user_agent = getcurrentChromeUseragent()
-    except:
-        print(f"[UPDATER] Cant fetch current Chrome User-Agent : {traceback.format_exc()}")
-        chrome_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+    chrome_user_agent = getcurrentChromeUseragent()
+
     
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200],["SE",655],["IE",657]]
