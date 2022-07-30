@@ -117,7 +117,13 @@ class svd:
         }
 
         #Initialise categorys and instock items for each category
-        categorys = [4089,2900]
+        # 4089 = Sneakers (https://www.sivasdescalzo.com/en/footwear/sneakers)
+        # 2900 = New Arrivals (https://www.sivasdescalzo.com/en/new-arrivals)
+        # 2513 = Adidas Yeezy (https://www.sivasdescalzo.com/en/brands/adidas/yeezy)
+        # 2479 = Adidas (https://www.sivasdescalzo.com/en/brands/adidas)
+        # 3558 = Jordan Sneakers (https://www.sivasdescalzo.com/en/brands/jordan/sneakers)
+        # 3473 = Nike Sneakers(https://www.sivasdescalzo.com/en/brands/nike/sneakers)
+        categorys = [4089,2900,2513,2479,3558,3473]
         for c in categorys:
             self.INSTOCK[c] = []
         
@@ -143,7 +149,7 @@ class svd:
                                 continue
 
                             # Check if Product is INSTOCK
-                            if product["sku"] not in self.INSTOCK[c] and start != 1:
+                            if not any([product["sku"] in cat for cat in self.INSTOCK.values()]) and start != 1:
                                     print(f"[svd] {product}")
                                     logging.info(msg=f"[svd] {product}")
                                     for group in self.groups:
