@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,shopify,cultura,micromania,funkoeurope,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn
+from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
