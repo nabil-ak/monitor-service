@@ -77,10 +77,8 @@ class shopify:
         """
         items = []
 
-        # Makes request to site
-        s = rq.Session()
-        
-        html = s.get(url + f'?page={page}&limit=250', headers=headers, proxies=proxy, verify=False, timeout=10)
+        #Fetch the Shopify-Page
+        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=proxy, verify=False, timeout=10)
         output = json.loads(html.text)['products']
         
         # Stores particular details in array
@@ -96,7 +94,6 @@ class shopify:
             items.append(product_item)
         
         logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
-        s.close()
         return items
 
     def remove(self,handle):
@@ -216,7 +213,7 @@ class shopify:
                 start = 0
 
                 logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-
+                
                 # User set delay
                 time.sleep(float(self.delay))
 

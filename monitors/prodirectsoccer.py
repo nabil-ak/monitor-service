@@ -172,30 +172,6 @@ class prodirectsoccer:
                     #Rotate Proxys on each request
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                     proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-
-                    # Makes request to query-site and stores products 
-                    items = self.scrape_site(query, headers, proxy)
-                    for product in items:
-                        if product["sku"] not in self.blacksku:
-                            # Check if Product is INSTOCK
-                            if product["sku"] not in self.INSTOCK and start != 1:
-                                print(f"[prodirectsoccer] {product}")
-                                logging.info(msg=f"[prodirectsoccer] {product}")
-                                for group in self.groups:
-                                    #Send Ping to each Group
-                                    Thread(target=self.discord_webhook,args=(
-                                        group,
-                                        product['name'],
-                                        product['sku'],
-                                        product['url'],
-                                        product['image'],
-                                        product['prize']
-                                        )).start()
-
-                            products.append(product["sku"])
-                    
-                    self.INSTOCK = products.copy()
-                    products.clear()
                     
                     # Make request to release-site and stores products
                     items = self.scrape_release_site(query, headers, proxy)
@@ -220,11 +196,34 @@ class prodirectsoccer:
 
                             products.append(product)
 
-                    self.RELEASEINSTOCK = products
+                    self.RELEASEINSTOCK = products.copy()
+                    products.clear()
+
+
+                    # Makes request to query-site and stores products 
+                    items = self.scrape_site(query, headers, proxy)
+                    for product in items:
+                        if product["sku"] not in self.blacksku:
+                            # Check if Product is INSTOCK
+                            if product["sku"] not in self.INSTOCK and start != 1:
+                                print(f"[prodirectsoccer] {product}")
+                                logging.info(msg=f"[prodirectsoccer] {product}")
+                                for group in self.groups:
+                                    #Send Ping to each Group
+                                    Thread(target=self.discord_webhook,args=(
+                                        group,
+                                        product['name'],
+                                        product['sku'],
+                                        product['url'],
+                                        product['image'],
+                                        product['prize']
+                                        )).start()
+
+                            products.append(product["sku"])
+                    
+                    self.INSTOCK = products
 
                     time.sleep(self.delay)
-
-                
 
                 # Allows changes to be notified
                 start = 0
