@@ -68,11 +68,12 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
     
     #Create all Shopify Monitors
-    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor"]
+    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor", "funkoeurope"]
 
     for s in shopifyMonitores:
         blacksku = [] if "blacksku" not in settings[s] else settings[s]["blacksku"]
-        shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys,blacksku=blacksku)
+        tags = [] if "tags" not in settings[s] else settings[s]["tags"]
+        shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],tags=tags,proxys=proxys,blacksku=blacksku)
         monitorPool.append(Process(target=shopifyProcess.monitor))
 
 
@@ -91,10 +92,6 @@ def startMonitors():
     #Create Micromania Monitor
     micromaniaProcess = micromania.micromania(groups=cookgroups,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=settings["micromania"]["query"],delay=settings["micromania"]["delay"],blacksku=settings["micromania"]["blacksku"])
     monitorPool.append(Process(target=micromaniaProcess.monitor))
-    
-    #Create Funkoeurope Monitor
-    funkoeuropeProcess = funkoeurope.funkoeurope(groups=cookgroups,site="funkoeurope",url=settings["funkoeurope"]["url"],user_agents=user_agents,delay=settings["funkoeurope"]["delay"],tags=settings["funkoeurope"]["tags"],proxys=proxys)
-    monitorPool.append(Process(target=funkoeuropeProcess.monitor))
     
     #Create Popinabox Monitor
     popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"],proxys=proxys)

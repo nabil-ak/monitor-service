@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime
-from timeout import timeout 
+from timeout import timeout
+from multiprocessing.pool import ThreadPool 
 import random
 import requests as rq
 import time
@@ -10,7 +11,7 @@ import traceback
 import urllib3
 
 class shopify:
-    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],proxys=[],blacksku=[]):
+    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],tags=[],proxys=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
@@ -18,6 +19,7 @@ class shopify:
         self.url = url
         self.delay = delay
         self.keywords= keywords
+        self.tags = tags
         self.proxys = proxys
         self.proxytime = 0
         self.blacksku = blacksku
@@ -79,6 +81,7 @@ class shopify:
 
         #Fetch the Shopify-Page
         html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=proxy, verify=False, timeout=10)
+        html.raise_for_status()
         output = json.loads(html.text)['products']
         
         # Stores particular details in array
@@ -90,7 +93,9 @@ class shopify:
                 'title': product['title'], 
                 'image': product['images'][0]['src'] if product['images'] else "", 
                 'handle': product['handle'],
-                'variants': product['variants']}
+                'variants': product['variants'],
+                'tags':product['tags']
+                }
             items.append(product_item)
         
         logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
@@ -182,24 +187,38 @@ class shopify:
         # Initialising proxy and headers
         proxy_no = -1
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
+        
 
+        maxpage = 20
         
         while True:
             try:
                 startTime = time.time()
-                items = [1]
-                page = 1
-                while items:
+
+                args = []
+                for page in range(1,maxpage):
                     #Rotate Proxys on each request
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                     proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
+                    args.append((self.url, page, proxy, headers))
 
-                    # Makes request to site and stores products 
-                    items = self.scrape_site(self.url,page, headers, proxy)
-                    for product in items:
+                # Makes request to the pages and stores products 
+                threadpool = ThreadPool(maxpage)
+                items = threadpool.starmap(self.scrape_site, args)
+                
+                #Check if maxpage is reached otherwise increase by 5
+                try:
+                    maxpage = items.index([])+2
+                except:
+                    maxpage+=5
+                    start = 1
+
+                items = sum(items, [])
+
+                for product in items:
                         if product["handle"] not in self.blacksku:
-                            if len(self.keywords) == 0:
-                                # If no keywords set, checks whether item status has changed
+                            if len(self.keywords) == 0 and len(self.tags) == 0:
+                                # If no keywords and tags set, checks whether item status has changed
                                 self.comparitor(product, start)
 
                             else:
@@ -207,13 +226,18 @@ class shopify:
                                 for key in self.keywords:
                                     if key.lower() in product['title'].lower():
                                         self.comparitor(product, start)
-                    page+=1
+
+                                # For each tag, checks whether particular item status has changed
+                                for tag in self.tags:
+                                    if tag in product['tags']:
+                                        self.comparitor(product, start)
+
+
+                logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
 
                 # Allows changes to be notified
                 start = 0
 
-                logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-                
                 # User set delay
                 time.sleep(float(self.delay))
 
