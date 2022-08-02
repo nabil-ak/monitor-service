@@ -186,6 +186,7 @@ class shopify:
 
         # Initialising proxy and headers
         proxy_no = -1
+        proxy = {}
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
         
 
@@ -204,16 +205,9 @@ class shopify:
 
                 # Makes request to the pages and stores products 
                 threadpool = ThreadPool(maxpage)
-                items = threadpool.starmap(self.scrape_site, args)
-                
-                #Check if maxpage is reached otherwise increase by 5
-                try:
-                    maxpage = items.index([])+2
-                except:
-                    maxpage+=5
-                    start = 1
+                itemsSplited = threadpool.starmap(self.scrape_site, args)
 
-                items = sum(items, [])
+                items = sum(itemsSplited, [])
 
                 for product in items:
                         if product["handle"] not in self.blacksku:
@@ -234,9 +228,17 @@ class shopify:
 
 
                 logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+                
 
                 # Allows changes to be notified
                 start = 0
+
+                #Check if maxpage is reached otherwise increase by 5
+                try:
+                    maxpage = itemsSplited.index([])+2
+                except:
+                    maxpage+=5
+                    start = 1
 
                 # User set delay
                 time.sleep(float(self.delay))
@@ -251,11 +253,6 @@ class shopify:
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
                     self.proxytime = time.time()+300
-                
-                if len(self.proxys) != 0:
-                    # If optional proxy set, rotates if there are multiple proxies
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
 
 if __name__ == '__main__':
