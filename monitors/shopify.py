@@ -201,7 +201,7 @@ class shopify:
                     #Rotate Proxys on each request
                     proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
                     proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-                    args.append((self.url, page, proxy, headers))
+                    args.append((self.url, page, headers, proxy))
 
                 # Makes request to the pages and stores products 
                 threadpool = ThreadPool(maxpage)
