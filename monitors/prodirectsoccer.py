@@ -257,5 +257,5 @@ if __name__ == '__main__':
     }
     logging.basicConfig(filename=f'logs/prodirectsoccer.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
-    s = prodirectsoccer(groups=[devgroup],user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=["dunk"])
+    s = prodirectsoccer(groups=[devgroup],delay=5,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=["jordan retro"])
     s.monitor()
