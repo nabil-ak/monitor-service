@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn
+from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn,magento
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -75,6 +75,13 @@ def startMonitors():
         tags = [] if "tags" not in settings[s] else settings[s]["tags"]
         shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],tags=tags,proxys=proxys,blacksku=blacksku)
         monitorPool.append(Process(target=shopifyProcess.monitor))
+
+    #Create all Magento Monitors
+    magentoMonitores = ["topps"]
+
+    for s in magentoMonitores:
+        magentoProcess = magento.magento(groups=cookgroups,site=s,url=settings[s]["url"],store_id=settings[s]["store_id"],user_agent=chrome_user_agent,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys,blacksku=settings[s]["blacksku"])
+        monitorPool.append(Process(target=magentoProcess.monitor))
 
 
     #Create NBB Monitor
