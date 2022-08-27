@@ -77,11 +77,12 @@ def startMonitors():
         monitorPool.append(Process(target=shopifyProcess.monitor))
 
     #Create all Magento Monitors
+    '''
     magentoMonitores = ["topps"]
 
     for s in magentoMonitores:
         magentoProcess = magento.magento(groups=cookgroups,site=s,url=settings[s]["url"],store_id=settings[s]["store_id"],user_agent=chrome_user_agent,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys,blacksku=settings[s]["blacksku"])
-        monitorPool.append(Process(target=magentoProcess.monitor))
+        monitorPool.append(Process(target=magentoProcess.monitor))'''
 
 
     #Create NBB Monitor
