@@ -21,7 +21,7 @@ class magento:
         self.delay = delay
         self.keywords= keywords
         self.proxys = proxys
-        self.proxytime = 0
+        self.proxytime = 9999999999999999999999
         self.blacksku = blacksku
         self.user_agent = user_agent
 
@@ -80,6 +80,7 @@ class magento:
 
         #Fetch the magento-Page
         scraper = cloudscraper.create_scraper(browser={'custom': self.user_agent})
+        print(proxy)
         scraper.headers["Accept"] = "application/json"
         html = scraper.get(f'{self.url}/V1/products-render-info?searchCriteria[pageSize]=100&storeId={self.store_id}&currencyCode=EUR&searchCriteria[currentPage]={page}&searchCriteria[filter_groups][0][filters][0][field]=name&searchCriteria[filter_groups][0][filters][0][value]={random.randint(10000,999999)}&searchCriteria[filter_groups][0][filters][0][condition_type]=nin', proxies=proxy, timeout=10)
         html.raise_for_status()
