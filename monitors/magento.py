@@ -96,7 +96,7 @@ class magento:
                 'is_salable': str(product['is_salable'])
                 }
             items.append(product_item)
-        
+        scraper.close()
         logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
         return items
 
