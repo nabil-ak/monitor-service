@@ -47,7 +47,7 @@ class prodirectsoccer_other:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": "https://image-proxy.nabil-ak.repl.co/"+thumbnail},
+            "thumbnail": {"url": "http://202.61.192.38:8080/"+thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {
