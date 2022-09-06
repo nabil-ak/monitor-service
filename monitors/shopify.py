@@ -204,41 +204,41 @@ class shopify:
                     args.append((self.url, page, headers, proxy))
 
                 # Makes request to the pages and stores products 
-                threadpool = ThreadPool(maxpage)
-                itemsSplited = threadpool.starmap(self.scrape_site, args)
+                with ThreadPool(maxpage) as threadpool:
+                    itemsSplited = threadpool.starmap(self.scrape_site, args)
 
-                items = sum(itemsSplited, [])
+                    items = sum(itemsSplited, [])
 
-                for product in items:
-                        if product["handle"] not in self.blacksku:
-                            if len(self.keywords) == 0 and len(self.tags) == 0:
-                                # If no keywords and tags set, checks whether item status has changed
-                                self.comparitor(product, start)
+                    for product in items:
+                            if product["handle"] not in self.blacksku:
+                                if len(self.keywords) == 0 and len(self.tags) == 0:
+                                    # If no keywords and tags set, checks whether item status has changed
+                                    self.comparitor(product, start)
 
-                            else:
-                                # For each keyword, checks whether particular item status has changed
-                                for key in self.keywords:
-                                    if key.lower() in product['title'].lower():
-                                        self.comparitor(product, start)
+                                else:
+                                    # For each keyword, checks whether particular item status has changed
+                                    for key in self.keywords:
+                                        if key.lower() in product['title'].lower():
+                                            self.comparitor(product, start)
 
-                                # For each tag, checks whether particular item status has changed
-                                for tag in self.tags:
-                                    if tag in product['tags']:
-                                        self.comparitor(product, start)
+                                    # For each tag, checks whether particular item status has changed
+                                    for tag in self.tags:
+                                        if tag in product['tags']:
+                                            self.comparitor(product, start)
 
 
-                logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-                
+                    logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+                    
 
-                # Allows changes to be notified
-                start = 0
+                    # Allows changes to be notified
+                    start = 0
 
-                #Check if maxpage is reached otherwise increase by 5
-                try:
-                    maxpage = itemsSplited.index([])+2
-                except:
-                    maxpage+=5
-                    start = 1
+                    #Check if maxpage is reached otherwise increase by 5
+                    try:
+                        maxpage = itemsSplited.index([])+2
+                    except:
+                        maxpage+=5
+                        start = 1
 
                 # User set delay
                 time.sleep(float(self.delay))
@@ -246,6 +246,7 @@ class shopify:
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
+                time.sleep(30)
 
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
