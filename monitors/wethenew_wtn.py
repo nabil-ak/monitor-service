@@ -1,9 +1,9 @@
 from user_agent import getcurrentChromeUseragent
-import cloudscraper
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
 import requests as rq
+import tls
 import time
 import json
 import logging
@@ -20,7 +20,7 @@ class wethenew_wtn:
         self.keywords= keywords
         self.proxys = proxys
         self.proxytime = 0
-        self.scraper = cloudscraper.create_scraper(browser={'custom': user_agent})
+        self.user_agent = user_agent
         self.INSTOCK = []
         self.timeout = timeout()
         
@@ -89,7 +89,9 @@ class wethenew_wtn:
 
         #Get all Products from the Site
         while True:
-            response = self.scraper.get(f'https://sell.wethenew.com/api/sell-nows?skip={skip}&take=100', proxies=proxy)
+            response = tls.get(f'https://api-sell.wethenew.com/sell-nows?skip={skip}&take=100', proxies=proxy, headers={
+                'user-agent': self.user_agent
+            })
             response.raise_for_status()
             r = response.json()
             for product in r["results"]:
@@ -101,8 +103,6 @@ class wethenew_wtn:
             #Rotate proxy and delete Cookies after each request
             p = "" if len(self.proxys) == 0 else random.choice(self.proxys)
             proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{p}", "https": f"http://{p}"}
-            self.scraper.cookies.clear()
-            time.sleep(1)
 
 
         # Stores particular details in array
@@ -244,13 +244,6 @@ class wethenew_wtn:
                 print(f"[wethenew_wtn] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(10)
-
-
-                #Just update the User_Agent when the Proxy is set
-                if proxy != {}:
-                    # Update User_Agent
-                    self.scraper.close()
-                    self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:

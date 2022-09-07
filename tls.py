@@ -1,57 +1,71 @@
-import requests
-import json
-import cloudscraper
+import requests as rq
 
-s = requests.Session()
+if __name__ == "__main__":
+    TLSCLIENT = "http://202.61.192.38:8082"
+else:
+    TLSCLIENT = "http://127.0.0.1:8082"
 
-def makeReq(url, headers={}, payload={}):
-    if(payload != {}):  #if payload setted do post, if not do get
-        res = s.post(url, headers=headers, data=payload)
-        
-        #append session cookies to session:
-        sescookies = res.headers["session-cookies"].split('; ')
-        for x in range(len(sescookies)):
-            if sescookies[x] == "":
-                continue
-            domain = url.split('://')[1]
-            if '/' in domain:
-                domain = domain.split('/')[0]
-            s.cookies.set(sescookies[x].split('=')[0], sescookies[x].split('=')[1], domain=domain)
-    else:
-        res = s.get(url, headers=headers)
-        
-        #append session cookies to session:
-        sescookies = res.headers["session-cookies"].split('; ')
-        for x in range(len(sescookies)):
-            if sescookies[x] == "":
-                continue
-            domain = url.split('://')[1]
-            if '/' in domain:
-                domain = domain.split('/')[0]
-            s.cookies.set(sescookies[x].split('=')[0], sescookies[x].split('=')[1], domain=domain)
+
+def addParamsToHeader(url, headers, proxies):
+    """
+    Add the url and the proxy to the headers to let the tlsclient use them
+    """
+    if proxies != {}:
+        headers["Poptls-Proxy"] = proxies["http"]
+    headers["Poptls-Url"] = url
+    return headers
+
+def parseCookies(res, url):
+    """
+    Parse the cookies from the headers into the cookiejar of the response
+    """
+    res.cookies.clear()
+    sescookies = res.headers["session-cookies"].split('; ')
+    for x in range(len(sescookies)):
+        if sescookies[x] == "":
+            continue
+        domain = url.split('://')[1]
+        if '/' in domain:
+            domain = domain.split('/')[0]
+        res.cookies.set(sescookies[x].split('=')[0], sescookies[x].split('=')[1], domain=domain)
+    del res.headers["session-cookies"]
     return res
 
-headersGet = {
-    'Poptls-Proxy':'http://porter683:131RNU@109.160.39.171:61234/',
-    'Poptls-Url': 'https://tls.peet.ws/api/all',
-    'accept': 'application/json',
-    'accept-language': 'en-US,en;q=0.9',
-    'cache-control': 'max-age=0',
-    'if-modified-since': 'Mon, 29 Aug 2022 14:39:20 GMT',
-    'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="104"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Linux"',
-    'sec-fetch-dest': 'document',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': 'none',
-    'sec-fetch-user': '?1',
-    'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36',
-}
+def get(url, headers={}, proxies={}, timeout=10):
+    """
+    get request wrapper
+    """
+    headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
+    
+    res = rq.get(TLSCLIENT, headers=headers, proxies=proxies, timeout=timeout)
+    
+    res = parseCookies(res, url)
 
-scraper = cloudscraper.create_scraper(browser={"custom": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36"}, debug=True)
-#getReq = makeReq('http://202.61.192.38:8082', headers=headersGet)
-getReq = scraper.get("https://tls.peet.ws/api/all"
-)
-print(getReq.text)
-print(getReq.status_code)
+    return res
+
+def post(url, headers={}, data={}, proxies={}, timeout=10):
+    """
+    post request wrapper
+    """
+    headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
+    
+    res = rq.post(TLSCLIENT, headers=headers, data=data, proxies=proxies, timeout=timeout)
+    
+    res = parseCookies(res, url)
+
+    return res
+
+if __name__ == "__main__":
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
+    }
+    getReq = get('https://api-sell.wethenew.com/products?skip=100&take=100&onlyWanted=true', headers=headers,
+        proxies={
+            "http":"http://porter683:131RNU@109.160.39.171:61234",
+            "https":"http://porter683:131RNU@109.160.39.171:61234"
+        }
+    )
+    print(getReq.text)
+    print(getReq.status_code)
+    print(getReq.cookies)
+    print(getReq.headers)
