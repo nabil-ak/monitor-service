@@ -68,7 +68,7 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
     
     #Create all Shopify Monitors
-    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor", "funkoeurope", "tenuedenimes"]
+    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor", "funkoeurope", "tenuedenimes", "maha-amsterdam"]
 
     for s in shopifyMonitores:
         blacksku = [] if "blacksku" not in settings[s] else settings[s]["blacksku"]

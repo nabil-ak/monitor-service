@@ -8,12 +8,14 @@ import json
 import logging
 import traceback
 import urllib3
+import cloudscraper
+from user_agent import getcurrentChromeUseragent
 
 
 
 class aboutyou:
-    def __init__(self,groups,store,storeid,user_agents,delay=1,keywords=[],proxys=[],blacksku=[],whitesku=[]):
-        self.user_agents = user_agents
+    def __init__(self,groups,store,storeid,user_agent,delay=1,keywords=[],proxys=[],blacksku=[],whitesku=[]):
+        self.scraper = cloudscraper.create_scraper(browser={'custom': user_agent})
         self.INSTOCK = []
         self.groups = groups
         self.delay = delay
@@ -83,16 +85,13 @@ class aboutyou:
                 print(f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
 
 
-    def scrape_site(self,url, headers, proxy):
+    def scrape_site(self,url, proxy):
         """
         Scrapes the specified About You site and adds items to array
         """
         items = []
-
-        # Makes request to site
-        s = rq.Session()
     
-        html = s.get(url, headers=headers, proxies=proxy, verify=False, timeout=10)
+        html = self.scraper.get(url, proxies=proxy, timeout=10)
         output = json.loads(html.text)['entities']
         
         # Stores particular details in array
@@ -107,7 +106,7 @@ class aboutyou:
         
         
         logging.info(msg=f'[ABOUT YOU {self.store}] Successfully scraped site')
-        s.close()
+        self.scraper.close()
         return items
 
     def remove(self,id):
@@ -199,38 +198,31 @@ class aboutyou:
 
         # Initialising proxy and headers
         proxy_no = -1
-        headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
     
         while True:
             try:
                 startTime = time.time()
-                urls = [
-                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207&filters[brand]=53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}",
-                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20215&filters[brand]=53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}",
-                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207&filters[brand]=61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}",
-                    f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20215&filters[brand]=61263&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage=2000&forceNonLegacySuffix=true&shopId={self.storeid}"
-                ]
+                url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
             
-                #Fetch Nike Women, Nike Men, Jordan Women and Jordan Men from About-You
-                for url in urls:
-                    #Rotate Proxys on each request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
+                
+                #Rotate Proxys on each request
+                proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
+                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
-                    # Makes request to site and stores products 
-                    items = self.scrape_site(url, proxy, headers)
-                    for product in items:
-                        if int(product['id']) not in self.blacksku:
-                            if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
-                                # If no keywords set or sku is whitelisted, checks whether item status has changed
-                                self.comparitor(product, start)
+                # Makes request to site and stores products 
+                items = self.scrape_site(url, proxy)
+                for product in items:
+                    if int(product['id']) not in self.blacksku:
+                        if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
+                            # If no keywords set or sku is whitelisted, checks whether item status has changed
+                            self.comparitor(product, start)
 
-                            else:
-                                # For each keyword, checks whether particular item status has changed
-                                for key in self.keywords:
-                                    if key.lower() in product['title'].lower():
-                                        self.comparitor(product, start)
+                        else:
+                            # For each keyword, checks whether particular item status has changed
+                            for key in self.keywords:
+                                if key.lower() in product['title'].lower():
+                                    self.comparitor(product, start)
 
                 # Allows changes to be notified
                 start = 0
@@ -245,8 +237,11 @@ class aboutyou:
                 print(f"[ABOUT YOU {self.store}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
 
-                # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
+                #Just update the User_Agent when the Proxy is set
+                if proxy != {}:
+                    # Update User_Agent
+                    self.scraper.close()
+                    self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
 
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
@@ -269,5 +264,6 @@ if __name__ == '__main__':
     logging.basicConfig(filename=f'aboutyou.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
     for store in STORES:
-        a = aboutyou(groups=[devgroup],proxys=["padifozj-rotate:36cjopf6jt4p@154.13.90.91:80"],keywords=[],delay=0.1,store=store[0],storeid=store[1])
+        a = aboutyou(groups=[devgroup],keywords=[],delay=0.1,store=store[0],storeid=store[1],
+        user_agent=getcurrentChromeUseragent())
         Thread(target=a.monitor).start()
