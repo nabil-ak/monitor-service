@@ -37,7 +37,7 @@ def get(url, headers={}, proxies={}, timeout=10):
     """
     headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
     
-    res = rq.get(TLSCLIENT, headers=headers, proxies=proxies, timeout=timeout)
+    res = rq.get(TLSCLIENT, headers=headers, timeout=timeout)
     
     res = parseCookies(res, url)
 
@@ -49,7 +49,7 @@ def post(url, headers={}, data={}, proxies={}, timeout=10):
     """
     headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
     
-    res = rq.post(TLSCLIENT, headers=headers, data=data, proxies=proxies, timeout=timeout)
+    res = rq.post(TLSCLIENT, headers=headers, data=data, timeout=timeout)
     
     res = parseCookies(res, url)
 
@@ -59,11 +59,7 @@ if __name__ == "__main__":
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
     }
-    getReq = get('https://api-sell.wethenew.com/products?skip=100&take=100&onlyWanted=true', headers=headers,
-        proxies={
-            "http":"http://porter683:131RNU@109.160.39.171:61234",
-            "https":"http://porter683:131RNU@109.160.39.171:61234"
-        }
+    getReq = get('https://api-sell.wethenew.com/products?skip=100&take=100&onlyWanted=true', headers=headers
     )
     print(getReq.text)
     print(getReq.status_code)
