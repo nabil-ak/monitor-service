@@ -89,7 +89,9 @@ class wethenew_wtn:
 
         #Get all Products from the Site
         while True:
-            response = tls.get(f'https://api-sell.wethenew.com/sell-nows?skip={skip}&take=100', proxies=proxy, headers={
+            url = f'https://api-sell.wethenew.com/sell-nows?skip={skip}&take=100'
+            logging.info(msg=f'[wethenew_wtn] Scrape {url}')
+            response = tls.get(url, proxies=proxy, headers={
                 'user-agent': self.user_agent
             })
             response.raise_for_status()
