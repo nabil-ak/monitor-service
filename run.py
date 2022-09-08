@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn,magento
+from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_other,eleventeamsports,wethenew_wtn,magento,asos
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -60,6 +60,11 @@ def startMonitors():
     #Get newest Chrome Useragent
     chrome_user_agent = getcurrentChromeUseragent()
 
+    #Create all Asos Monitors
+    ASOSREGIONS = [["de","eur"], ["fr","eur"], ["es","eur"] , ["it","eur"], ["com","eur"], ["roe","eur"]]
+    for region in ASOSREGIONS:
+        a = asos.asos(groups=cookgroups,skus=settings["asos"]["skus"],delay=settings["asos"]["delay"],region=region[0],currency=region[1],user_agents=user_agents,proxys=proxys)
+        monitorPool.append(Process(target=a.monitor))
     
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200],["SE",655],["IE",657]]
@@ -68,7 +73,7 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
     
     #Create all Shopify Monitors
-    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor", "funkoeurope", "tenuedenimes", "maha-amsterdam"]
+    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor", "funkoeurope", "tenuedenimes", "maha-amsterdam", "mattel"]
 
     for s in shopifyMonitores:
         blacksku = [] if "blacksku" not in settings[s] else settings[s]["blacksku"]
