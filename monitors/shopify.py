@@ -80,7 +80,7 @@ class shopify:
         items = []
 
         #Fetch the Shopify-Page
-        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=proxy, verify=False, timeout=10)
+        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=proxy, verify=False, timeout=20)
         html.raise_for_status()
         output = json.loads(html.text)['products']
         
