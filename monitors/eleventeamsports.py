@@ -83,7 +83,7 @@ class eleventeamsports:
         # Stores particular details in array
         for product in products:
             product = product["fields"]
-            
+
             product_item = {
                     "name":product["title"],
                     "sku":product["sku"],
@@ -164,6 +164,8 @@ class eleventeamsports:
             except Exception as e:
                 print(f"[eleventeamsports] Exception found: {traceback.format_exc()}")
                 logging.error(e)
+                time.sleep(30)
+                
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
