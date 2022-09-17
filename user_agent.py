@@ -15,6 +15,7 @@ def getcurrentChromeUseragent():
         proxys = database.getSettings()["ResiProxys"]
         proxy = random.choice(proxys)
         r = requests.get("https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome", proxies={"http": "http://"+proxy, "https": "http://"+proxy})
+        r.raise_for_status()
         output = BeautifulSoup(r.text, 'html.parser')
     except Exception as e:
             print(f"[USERAGENT_Fetcher] Exception found: {traceback.format_exc()}")
