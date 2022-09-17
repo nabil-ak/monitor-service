@@ -8,6 +8,7 @@ import json
 import logging
 import traceback
 import urllib3
+import tls
 
 class eleventeamsports:
     def __init__(self,groups,user_agents,delay=2,querys=[],blacksku=[],proxys=[]):
@@ -75,24 +76,22 @@ class eleventeamsports:
         items = []
 
         # Makes request to site
-        html = rq.get(f"https://www.11teamsports.com/de-de/ds/?type=deep_search&q={query}&limit=10000&offset=0&sort=sold_count+desc",  headers=headers, proxies=proxy, verify=False, timeout=10)
+        html = tls.get(f"https://www.11teamsports.com/de-de/ds/?type=deep_search&q={query}&limit=10000&offset=0&sort=created+desc",  headers=headers, proxies=proxy)
         html.raise_for_status()
         products = html.json()["hits"]["hit"]
 
         # Stores particular details in array
         for product in products:
             product = product["fields"]
-
-            #Only Ping shoes
-            if "Schuhe" in product["category"]:
-                product_item = {
-                        "name":product["title"],
-                        "sku":product["sku"],
-                        "prize":str(product["price"])+" €",
-                        "image":product["media_file"],
-                        "url":product["deeplink"]
-                        }
-                items.append(product_item)
+            
+            product_item = {
+                    "name":product["title"],
+                    "sku":product["sku"],
+                    "prize":str(product["price"])+" €",
+                    "image":product["media_file"],
+                    "url":product["deeplink"]
+                    }
+            items.append(product_item)
 
         
         logging.info(msg=f'[eleventeamsports] Successfully scraped site')
