@@ -61,7 +61,7 @@ def startMonitors():
     chrome_user_agent = getcurrentChromeUseragent()
 
     #Create all Asos Monitors
-    ASOSREGIONS = [["de","eur"], ["fr","eur"], ["es","eur"] , ["it","eur"], ["com","gbp"], ["roe","eur"]]
+    ASOSREGIONS = [["de","eur"], ["fr","eur"], ["es","eur"] , ["it","eur"], ["com","gbp"], ["roe","eur"], ["us","usd"]]
     for region in ASOSREGIONS:
         a = asos.asos(groups=cookgroups,skus=settings["asos"]["skus"],delay=settings["asos"]["delay"],region=region[0],currency=region[1],user_agents=user_agents,proxys=proxys)
         monitorPool.append(Process(target=a.monitor))
