@@ -237,12 +237,6 @@ class aboutyou:
                 print(f"[ABOUT YOU {self.store}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
 
-                #Just update the User_Agent when the Proxy is set
-                if proxy != {}:
-                    # Update User_Agent
-                    self.scraper.close()
-                    self.scraper = cloudscraper.create_scraper(browser={'custom': getcurrentChromeUseragent()})
-
                 # Safe time to let the Monitor only use the Proxy for 5 min
                 if proxy == {}:
                     self.proxytime = time.time()+300
