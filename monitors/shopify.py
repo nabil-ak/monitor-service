@@ -32,8 +32,8 @@ class shopify:
         Sends a Discord webhook notification to the specified webhook URL
         """
         
-        if self.site in group:
-            webhook = self.site
+        if self.site in group and len(group[self.site]) != 0:
+            webhook = group[self.site]
         elif "shopify" in group:
             webhook = group["shopify"]
         else:
