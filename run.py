@@ -73,12 +73,13 @@ def startMonitors():
         monitorPool.append(Process(target=a.monitor))
     
     #Create all Shopify Monitors
-    shopifyMonitores = ["kith", "slamjam", "asphaltgold", "esn", "packyard", "renouveau", "shoechapter", "stimm", "e5store", "beststreetclub", "sovtstudios", "sourcelugano", "canary---yellow", "sneakerbaas", "bouncewear", "thenextdoor", "funkoeurope", "tenuedenimes", "maha-amsterdam", "mattel"]
-
-    for s in shopifyMonitores:
-        blacksku = [] if "blacksku" not in settings[s] else settings[s]["blacksku"]
-        tags = [] if "tags" not in settings[s] else settings[s]["tags"]
-        shopifyProcess = shopify.shopify(groups=cookgroups,site=s,url=settings[s]["url"],user_agents=user_agents,delay=settings[s]["delay"],keywords=settings[s]["keywords"],tags=tags,proxys=proxys,blacksku=blacksku)
+    shopifyGlobal = settings["shopify"]
+    for s in shopifyGlobal["sites"]:
+        keywords = shopifyGlobal["keywords"] if "keywords" not in s else s["keywords"]+shopifyGlobal["keywords"]
+        blacksku = shopifyGlobal["blacksku"] if "blacksku" not in s else s["blacksku"]+shopifyGlobal["blacksku"]
+        tags = shopifyGlobal["tags"] if "tags" not in s else s["tags"]+shopifyGlobal["tags"]
+        delay = shopifyGlobal["delay"] if "delay" not in s else s["delay"]
+        shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,tags=tags,proxys=proxys,blacksku=blacksku)
         monitorPool.append(Process(target=shopifyProcess.monitor))
 
     #Create all Magento Monitors
@@ -88,15 +89,6 @@ def startMonitors():
     for s in magentoMonitores:
         magentoProcess = magento.magento(groups=cookgroups,site=s,url=settings[s]["url"],store_id=settings[s]["store_id"],user_agent=chrome_user_agent,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys,blacksku=settings[s]["blacksku"])
         monitorPool.append(Process(target=magentoProcess.monitor))'''
-
-
-    #Create NBB Monitor
-    #nbbProcess = nbb.nbb(cookgroups,user_agents,settings["nbb"]["delay"],proxys)
-    #monitorPool.append(Process(target=nbbProcess.monitor))
-    
-    #Create Zalando Monitor
-    #zalandoProcess = zalando.zalando(groups=cookgroups,user_agents=user_agents,blacksku=settings["zalando"]["blacksku"],delay=settings["zalando"]["delay"],keywords=settings["zalando"]["keywords"],proxys=proxys)
-    #monitorPool.append(Process(target=zalandoProcess.monitor))
     
     #Create Cultura Monitor
     culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
