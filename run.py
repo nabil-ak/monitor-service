@@ -75,9 +75,39 @@ def startMonitors():
     #Create all Shopify Monitors
     shopifyGlobal = settings["shopify"]
     for s in shopifyGlobal["sites"]:
-        keywords = shopifyGlobal["keywords"] if "keywords" not in s else s["keywords"]+shopifyGlobal["keywords"]
-        blacksku = shopifyGlobal["blacksku"] if "blacksku" not in s else s["blacksku"]+shopifyGlobal["blacksku"]
-        tags = shopifyGlobal["tags"] if "tags" not in s else s["tags"]+shopifyGlobal["tags"]
+        """
+        Check if keywords are set if so combine them with global keywords otherwise just use the global keywords if "local" keywords dosent exist.
+        """
+        if "keywords" in s:
+            if not s["keywords"]:
+                keywords = s["keywords"]
+            else:
+                keywords = s["keywords"]+shopifyGlobal["keywords"]
+        else:
+            keywords = shopifyGlobal["keywords"]
+        
+        """
+        Check if tags are set if so combine them with global tags otherwise just use the global tags if "local" tags dosent exist.
+        """
+        if "tags" in s:
+            if not s["tags"]:
+                tags = s["tags"]
+            else:
+                tags = s["tags"]+shopifyGlobal["tags"]
+        else:
+            tags = shopifyGlobal["tags"]
+
+        """
+        Check if blackskus are set if so combine them with global blackskus otherwise just use the global blackskus if "local" blackskus dosent exist.
+        """
+        if "blacksku" in s:
+            if not s["blacksku"]:
+                blacksku = s["blacksku"]
+            else:
+                blacksku = s["blacksku"]+shopifyGlobal["blacksku"]
+        else:
+            blacksku = shopifyGlobal["blacksku"]
+
         delay = shopifyGlobal["delay"] if "delay" not in s else s["delay"]
         shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,tags=tags,proxys=proxys,blacksku=blacksku)
         monitorPool.append(Process(target=shopifyProcess.monitor))
