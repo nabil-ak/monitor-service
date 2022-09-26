@@ -27,11 +27,16 @@ class shopify:
         self.INSTOCK = []
         self.timeout = timeout()
         
-    def discord_webhook(self,group,site,title,sku, url, thumbnail,prize, sizes):
+    def discord_webhook(self, group, site, title, sku, url, thumbnail, prize, sizes):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if self.site not in group:
+        
+        if self.site in group:
+            webhook = self.site
+        elif "shopify" in group:
+            webhook = group["shopify"]
+        else:
             return
 
         fields = []
@@ -61,7 +66,7 @@ class shopify:
         }
         
         
-        result = rq.post(group[self.site], data=json.dumps(data), headers={"Content-Type": "application/json"})
+        result = rq.post(webhook, data=json.dumps(data), headers={"Content-Type": "application/json"})
         
         try:
             result.raise_for_status()
