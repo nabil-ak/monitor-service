@@ -108,8 +108,19 @@ def startMonitors():
         else:
             blacksku = shopifyGlobal["blacksku"]
 
+        """
+        Check if negativkeywords are set if so combine them with global negativkeywords otherwise just use the global negativkeywords if "local" negativkeywords dosent exist.
+        """
+        if "negativkeywords" in s:
+            if not s["negativkeywords"]:
+                negativkeywords = s["negativkeywords"]
+            else:
+                negativkeywords = s["negativkeywords"]+shopifyGlobal["negativkeywords"]
+        else:
+            negativkeywords = shopifyGlobal["negativkeywords"]
+
         delay = shopifyGlobal["delay"] if "delay" not in s else s["delay"]
-        shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,tags=tags,proxys=proxys,blacksku=blacksku)
+        shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,negativkeywords=negativkeywords,tags=tags,proxys=proxys,blacksku=blacksku)
         monitorPool.append(Process(target=shopifyProcess.monitor))
 
     #Create all Magento Monitors

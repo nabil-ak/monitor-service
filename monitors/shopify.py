@@ -11,7 +11,7 @@ import traceback
 import urllib3
 
 class shopify:
-    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],tags=[],proxys=[],blacksku=[]):
+    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],negativkeywords=[],tags=[],proxys=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
@@ -19,6 +19,7 @@ class shopify:
         self.url = url
         self.delay = delay
         self.keywords= keywords
+        self.negativkeywords = negativkeywords
         self.tags = tags
         self.proxys = proxys
         self.proxytime = 0
@@ -217,7 +218,7 @@ class shopify:
                     items = sum(itemsSplited, [])
 
                     for product in items:
-                            if product["handle"] not in self.blacksku:
+                            if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
                                     self.comparitor(product, start)
