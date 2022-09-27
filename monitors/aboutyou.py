@@ -203,7 +203,19 @@ class aboutyou:
         while True:
             try:
                 startTime = time.time()
-                url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
+                """
+                Brands:
+                53709 = Nike Sportwear
+                61263 = Jordan
+
+                Categorys:
+                20207,20215 = Men and Women 
+                190025 = Boys GS
+                189974 = Boys PS
+                189879 = Girls GS
+                189823 = Girls PS
+                """
+                url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
             
                 
                 #Rotate Proxys on each request
