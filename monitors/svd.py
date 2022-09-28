@@ -122,8 +122,11 @@ class svd:
         # 2513 = Adidas Yeezy (https://www.sivasdescalzo.com/en/brands/adidas/yeezy)
         # 2479 = Adidas (https://www.sivasdescalzo.com/en/brands/adidas)
         # 3558 = Jordan Sneakers (https://www.sivasdescalzo.com/en/brands/jordan/sneakers)
+        # 2552 = Jordan (https://www.sivasdescalzo.com/en/brands/jordan)
         # 3473 = Nike Sneakers(https://www.sivasdescalzo.com/en/brands/nike/sneakers)
-        categorys = [4089,2900,2513,2479,3558,3473]
+        # 2572 = Nike (https://www.sivasdescalzo.com/en/brands/nike)
+        # 33 = Footwear (https://www.sivasdescalzo.com/en/footwear)
+        categorys = [4089,2900,2513,2479,3558,2552,3473,2572,33]
         for c in categorys:
             self.INSTOCK[c] = []
         
