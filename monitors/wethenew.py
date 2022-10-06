@@ -2,6 +2,7 @@ from user_agent import getcurrentChromeUseragent
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
+from proxymanager import ProxyManager
 import requests as rq
 import tls
 import time
@@ -12,13 +13,13 @@ import random
 import urllib3
 
 class wethenew:
-    def __init__(self,groups,user_agent,blacksku=[],delay=1,keywords=[],proxys=[]):
+    def __init__(self,groups,user_agent,blacksku=[],delay=1,keywords=[],proxygroups=[]):
 
         self.groups = groups
         self.blacksku = blacksku
         self.delay = delay
         self.keywords= keywords
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.user_agent = user_agent
         self.proxytime = 0
         self.INSTOCK = []
@@ -75,7 +76,7 @@ class wethenew:
             print(f'[wethenew] Successfully sent Discord notification to {group["wethenew"]}')
 
 
-    def scrape_site(self, proxy):
+    def scrape_site(self):
         """
         Scrapes Wethenew site and adds items to array
         """
@@ -89,7 +90,7 @@ class wethenew:
         while True:
             url = f'https://api-sell.wethenew.com/products?skip={skip}&take=100&onlyWanted=true'
             logging.info(msg=f'[wethenew] Scrape {url}')
-            response = tls.get(url, proxies=proxy, headers={
+            response = tls.get(url, proxies=self.proxys.next(), headers={
                 'user-agent': self.user_agent
             })
             response.raise_for_status()
@@ -99,10 +100,6 @@ class wethenew:
             if r["pagination"]["totalPages"] <= r["pagination"]["page"]:
                 break
             skip+=100
-
-            #Rotate proxy after each request
-            p = "" if len(self.proxys) == 0 else random.choice(self.proxys)
-            proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{p}", "https": f"http://{p}"}
 
 
         # Stores particular details in array
@@ -203,18 +200,13 @@ class wethenew:
         # Ensures that first scrape does not notify all products
         start = 1
 
-        # Initialising proxy and headers
-        proxy_no = 0
-
         
         while True:
             try:
-                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
                 startTime = time.time()
                 
-                
                 # Makes request to site and stores products 
-                items = self.scrape_site(proxy)
+                items = self.scrape_site()
 
                 #Remove duplicates
                 items = self.removeduplicate(items)
@@ -245,15 +237,6 @@ class wethenew:
                 print(f"[wethenew] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(10)
-    
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
-                
-                if len(self.proxys) != 0:
-                    # If optional proxy set, rotates if there are multiple proxies
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
 
 if __name__ == '__main__':

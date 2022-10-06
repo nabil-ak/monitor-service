@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
+from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -11,13 +12,13 @@ import urllib3
 import tls
 
 class eleventeamsports:
-    def __init__(self,groups,user_agents,delay=2,querys=[],blacksku=[],proxys=[]):
-        self.user_agents = user_agents
+    def __init__(self,groups,user_agent,delay=2,querys=[],blacksku=[],proxygroups=[]):
+        self.user_agent = user_agent
 
         self.groups = groups
         self.delay = delay
         self.querys= querys
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
         self.timeout = timeout(timeout=120, pingdelay=20)
@@ -69,14 +70,18 @@ class eleventeamsports:
             print(f'[eleventeamsports] Successfully sent Discord notification to {group["eleventeamsports"]}')
 
 
-    def scrape_site(self,headers, proxy, query):
+    def scrape_site(self, query):
         """
         Scrapes the specified eleventeamsports query site and adds items to array
         """
         items = []
 
+        headers = {
+                'user-agent': self.user_agent
+        }
+
         # Makes request to site
-        html = tls.get(f"https://www.11teamsports.com/de-de/ds/?type=deep_search&q={query}&limit=10000&offset=0&sort=created+desc",  headers=headers, proxies=proxy)
+        html = tls.get(f"https://www.11teamsports.com/de-de/ds/?type=deep_search&q={query}&limit=10000&offset=0&sort=created+desc",  headers=headers, proxies=self.proxys.next())
         html.raise_for_status()
         products = html.json()["hits"]["hit"]
 
@@ -115,12 +120,6 @@ class eleventeamsports:
 
         # Ensures that first scrape does not notify all products
         start = 1
-
-        # Initialising proxy and headers
-        proxy_no = -1
-        headers = {
-                'user-agent': random.choice(self.user_agents)["user_agent"]
-        }
         
         while True:
             try:
@@ -130,11 +129,8 @@ class eleventeamsports:
                 
                 # Makes request to site and stores products 
                 for query in self.querys:
-                    #Rotate Proxys on each request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
-                    items=self.scrape_site(headers, proxy, query)
+                    items=self.scrape_site(query)
 
                     for product in items:
                         if product["sku"] not in self.blacksku:
@@ -167,18 +163,6 @@ class eleventeamsports:
                 print(f"[eleventeamsports] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(30)
-                
-                # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
-                
-                if len(self.proxys) != 0:
-                    # If optional proxy set, rotates if there are multiple proxies
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime,timedelta
 from bs4 import BeautifulSoup
+from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -10,14 +11,14 @@ import traceback
 import urllib3
 
 class prodirectsoccer_other:
-    def __init__(self,name,releasecategory,groups,user_agents,delay=2,querys=[],blacksku=[],proxys=[]):
+    def __init__(self,name,releasecategory,groups,user_agents,delay=2,querys=[],blacksku=[],proxygroups=[]):
         self.user_agents = user_agents
         self.name = name
         self.releasecategory = releasecategory
         self.groups = groups
         self.delay = delay
         self.querys= querys
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
 
@@ -73,7 +74,7 @@ class prodirectsoccer_other:
             print(f'[{self.name}] Successfully sent Discord notification to {group[self.name]}')
 
 
-    def scrape_site(self,query,headers, proxy):
+    def scrape_site(self,query,headers):
         """
         Scrapes the specified prodirectsoccer query site and adds items to array
         """
@@ -93,7 +94,7 @@ class prodirectsoccer_other:
             headers["referer"] = url
 
             # Makes request to site
-            html = rq.get(url,  headers=headers, proxies=proxy, verify=False, timeout=10)
+            html = rq.get(url,  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
             html.raise_for_status()
 
             output = BeautifulSoup(html.text, 'html.parser')
@@ -120,14 +121,14 @@ class prodirectsoccer_other:
         logging.info(msg=f'[{self.name}] Successfully scraped Query {query}')
         return items
 
-    def scrape_release_site(self,query,headers, proxy):
+    def scrape_release_site(self,query,headers):
         """
         Scrapes the specified prodirectsoccer release query site and adds items to array
         """
         items = []
 
         # Makes request to site
-        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7B{self.releasecategory}%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=proxy, verify=False, timeout=10)
+        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7B{self.releasecategory}%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
         html.raise_for_status()
 
         products = json.loads(html.text[14:-1])["suggestionGroups"][1]["suggestions"]
@@ -167,8 +168,7 @@ class prodirectsoccer_other:
         # Ensures that first scrape does not notify all products
         start = 1
 
-        # Initialising proxy and headers
-        proxy_no = -1
+        # Initialising headers
         headers = {
                 'user-agent': random.choice(self.user_agents)["user_agent"]
         }
@@ -180,12 +180,9 @@ class prodirectsoccer_other:
                 products = []
 
                 for query in self.querys:
-                    #Rotate Proxys on each request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
                     # Make request to release-site and stores products
-                    items = self.scrape_release_site(query, headers, proxy)
+                    items = self.scrape_release_site(query, headers)
                     for product in items:
                         date = datetime.strptime(f"{product['launchdate'][-2:]}/{product['launchdate'][4:6]}/{product['launchdate'][:4]}","%d/%m/%Y")
                         if product["sku"] not in self.blacksku and date>(datetime.now()-timedelta(days=1)):
@@ -211,7 +208,7 @@ class prodirectsoccer_other:
                     products.clear()    
 
                     # Makes request to query-site and stores products 
-                    items = self.scrape_site(query, headers, proxy)
+                    items = self.scrape_site(query, headers)
                     for product in items:
                         if product["sku"] not in self.blacksku:
                             # Check if Product is INSTOCK
@@ -249,15 +246,6 @@ class prodirectsoccer_other:
                 logging.error(e)
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
-                
-                if len(self.proxys) != 0:
-                    # If optional proxy set, rotates if there are multiple proxies
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
 
 if __name__ == '__main__':

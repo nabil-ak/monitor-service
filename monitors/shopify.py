@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
+from proxymanager import ProxyManager
 from multiprocessing.pool import ThreadPool 
 import random
 import requests as rq
@@ -11,7 +12,7 @@ import traceback
 import urllib3
 
 class shopify:
-    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],negativkeywords=[],tags=[],proxys=[],blacksku=[]):
+    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],negativkeywords=[],tags=[],proxygroups=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
@@ -21,7 +22,7 @@ class shopify:
         self.keywords= keywords
         self.negativkeywords = negativkeywords
         self.tags = tags
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.proxytime = 0
         self.blacksku = blacksku
 
@@ -81,14 +82,14 @@ class shopify:
             print(f'[{self.site}] Successfully sent Discord notification to {group[self.site]}')
 
 
-    def scrape_site(self,url,page,headers, proxy):
+    def scrape_site(self,url,page,headers):
         """
         Scrapes the specified Shopify site and adds items to array
         """
         items = []
 
         #Fetch the Shopify-Page
-        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=proxy, verify=False, timeout=20)
+        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=self.proxys.next(), verify=False, timeout=20)
         html.raise_for_status()
         output = json.loads(html.text)['products']
         
@@ -192,9 +193,7 @@ class shopify:
         # Ensures that first scrape does not notify all products
         start = 1
 
-        # Initialising proxy and headers
-        proxy_no = -1
-        proxy = {}
+        # Initialising headers
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
         
 
@@ -206,10 +205,7 @@ class shopify:
 
                 args = []
                 for page in range(1,maxpage):
-                    #Rotate Proxys on each request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-                    args.append((self.url, page, headers, proxy))
+                    args.append((self.url, page, headers))
 
                 # Makes request to the pages and stores products 
                 with ThreadPool(maxpage) as threadpool:
@@ -258,10 +254,6 @@ class shopify:
 
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
 
 
 if __name__ == '__main__':

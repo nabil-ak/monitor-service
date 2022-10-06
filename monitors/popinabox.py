@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime
 from bs4 import BeautifulSoup
+from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -10,13 +11,13 @@ import traceback
 import urllib3
 
 class popinabox:
-    def __init__(self,groups,user_agents,delay=1,querys=[],blacksku=[],proxys=[]):
+    def __init__(self,groups,user_agents,delay=1,querys=[],blacksku=[],proxygroups=[]):
         self.user_agents = user_agents
 
         self.groups = groups
         self.delay = delay
         self.querys= querys
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
 
@@ -67,7 +68,7 @@ class popinabox:
             print(f'[popinabox] Successfully sent Discord notification to {group["popinabox"]}')
 
 
-    def scrape_site(self,query,headers, proxy):
+    def scrape_site(self,query,headers):
         """
         Scrapes the specified popinabox query site and adds items to array
         """
@@ -80,7 +81,7 @@ class popinabox:
         #Scrape all available Pages
         while page != pages:
             # Makes request to site
-            html = rq.get(f"{query}&pageNumber={page}" if "?" in query else f"{query}?pageNumber={page}",  headers=headers, proxies=proxy, verify=False, timeout=10)
+            html = rq.get(f"{query}&pageNumber={page}" if "?" in query else f"{query}?pageNumber={page}",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
             html.raise_for_status()
             output = BeautifulSoup(html.text, 'html.parser')
             products = output.find_all('li', {'class': 'productListProducts_product'})
@@ -172,8 +173,7 @@ class popinabox:
         # Ensures that first scrape does not notify all products
         start = 1
 
-        # Initialising proxy and headers
-        proxy_no = -1
+        # Initialising headers
         headers = {
                 'user-agent': random.choice(self.user_agents)["user_agent"]
         }
@@ -182,12 +182,8 @@ class popinabox:
             try:
                 startTime = time.time()
                 for query in self.querys:
-                    #Rotate Proxys on each request
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
-                    
                     # Makes request to site and stores products 
-                    items = self.scrape_site(query, headers, proxy)
+                    items = self.scrape_site(query, headers)
                     for product in items:
                         if product["sku"] not in self.blacksku:
                             # Check if Item Status has changed
@@ -206,15 +202,6 @@ class popinabox:
                 logging.error(e)
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
-                
-                if len(self.proxys) != 0:
-                    # If optional proxy set, rotates if there are multiple proxies
-                    proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                    proxy = {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
 
 if __name__ == '__main__':

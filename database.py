@@ -11,6 +11,15 @@ def getGroups():
         groups.append(group)
     return groups
 
+def getProxys():
+    """
+    Get all Proxys from the Database
+    """
+    proxys = {}
+    for proxy in client["proxys"].find({},{'_id': False}):
+        proxys[proxy["name"]] = proxy["proxys"]
+    return proxys
+
 
 def getSettings():
     """

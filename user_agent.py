@@ -11,6 +11,7 @@ def getcurrentChromeUseragent():
     """
     Get the latest Chrome User_Agent from whatismybrowser.com
     """
+    """
     try:
         proxys = database.getSettings()["ResiProxys"]
         proxy = random.choice(proxys)
@@ -20,4 +21,5 @@ def getcurrentChromeUseragent():
     except Exception as e:
             print(f"[USERAGENT_Fetcher] Exception found: {traceback.format_exc()}")
             return USERAGENT
-    return output.find('span', {'class': 'code'}).text
+    return output.find('span', {'class': 'code'}).text"""
+    return USERAGENT

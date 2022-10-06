@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
+from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -14,13 +15,13 @@ from user_agent import getcurrentChromeUseragent
 
 
 class aboutyou:
-    def __init__(self,groups,store,storeid,user_agent,delay=1,keywords=[],proxys=[],blacksku=[],whitesku=[]):
+    def __init__(self,groups,store,storeid,user_agent,delay=1,keywords=[],proxygroups=[],blacksku=[],whitesku=[]):
         self.scraper = cloudscraper.create_scraper(browser={'custom': user_agent})
         self.INSTOCK = []
         self.groups = groups
         self.delay = delay
         self.keywords = keywords
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.proxytime = 0
         self.blacksku = blacksku
         self.whitesku = whitesku
@@ -85,13 +86,13 @@ class aboutyou:
                 print(f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
 
 
-    def scrape_site(self,url, proxy):
+    def scrape_site(self,url):
         """
         Scrapes the specified About You site and adds items to array
         """
         items = []
     
-        html = self.scraper.get(url, proxies=proxy, timeout=10)
+        html = self.scraper.get(url, proxies=self.proxys.next(), timeout=10)
         output = json.loads(html.text)['entities']
         
         # Stores particular details in array
@@ -196,9 +197,6 @@ class aboutyou:
         # Ensures that first scrape does not notify all products
         start = 1
 
-        # Initialising proxy and headers
-        proxy_no = -1
-
     
         while True:
             try:
@@ -216,14 +214,9 @@ class aboutyou:
                 189823 = Girls PS
                 """
                 url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
-            
-                
-                #Rotate Proxys on each request
-                proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
 
                 # Makes request to site and stores products 
-                items = self.scrape_site(url, proxy)
+                items = self.scrape_site(url)
                 for product in items:
                     if int(product['id']) not in self.blacksku:
                         if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
@@ -248,10 +241,6 @@ class aboutyou:
             except Exception as e:
                 print(f"[ABOUT YOU {self.store}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
 
 
 if __name__ == '__main__':

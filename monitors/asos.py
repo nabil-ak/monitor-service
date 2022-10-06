@@ -1,6 +1,7 @@
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
+from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -12,7 +13,7 @@ import urllib3
 
 
 class asos:
-    def __init__(self,groups,region,currency,user_agents,skus,delay=1,proxys=[]):
+    def __init__(self,groups,region,currency,user_agents,skus,delay=1,proxygroups=[]):
         self.INSTOCK = []
         self.groups = groups
         self.region = region
@@ -20,7 +21,7 @@ class asos:
         self.user_agents = user_agents
         self.skus = skus
         self.delay = delay
-        self.proxys = proxys
+        self.proxys = ProxyManager(proxygroups)
         self.proxytime = 0
         self.timeout = timeout()
 
@@ -88,13 +89,13 @@ class asos:
             if sku == product["sku"]:
                 return product["title"]
 
-    def scrape_site(self,url, proxy, headers):
+    def scrape_site(self,url,headers):
         """
         Scrapes the specified Asos site and adds items to array
         """
         items = []
     
-        html = rq.get(url, proxies=proxy, headers=headers, timeout=10)
+        html = rq.get(url, proxies=self.proxys.next(), headers=headers, timeout=10)
         products = html.json()
         
         # Stores particular details in array
@@ -196,20 +197,16 @@ class asos:
         start = 1
 
         # Initialising proxy and headers
-        proxy_no = -1
         headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
     
         while True:
             try:
                 startTime = time.time()
                 url = f"https://www.asos.com/api/product/catalogue/v3/stockprice?productIds={(''.join([sku['sku']+',' for sku in self.skus]))[:-1]}&store={self.region}&currency={self.currency}&keyStoreDataversion=dup0qtf-35&cache={random.randint(10000,999999999)}"
-        
-                #Rotate Proxys on each request
-                proxy_no = 0 if proxy_no == (len(self.proxys) - 1) else proxy_no + 1
-                proxy = {} if len(self.proxys) == 0 or self.proxytime <= time.time() else {"http": f"http://{self.proxys[proxy_no]}", "https": f"http://{self.proxys[proxy_no]}"}
+    
 
                 # Makes request to site and stores products 
-                items = self.scrape_site(url, proxy, headers)
+                items = self.scrape_site(url, headers)
                 for product in items:
                     self.comparitor(product, start)
 
@@ -228,10 +225,6 @@ class asos:
 
                 #Rotate user_agent
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-                # Safe time to let the Monitor only use the Proxy for 5 min
-                if proxy == {}:
-                    self.proxytime = time.time()+300
 
 
 if __name__ == '__main__':
