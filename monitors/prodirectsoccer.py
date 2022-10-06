@@ -1,7 +1,6 @@
 from threading import Thread
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -11,13 +10,13 @@ import traceback
 import urllib3
 
 class prodirectsoccer:
-    def __init__(self,groups,user_agents,delay=2,querys=[],blacksku=[],proxygroups=[]):
+    def __init__(self,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
+        self.proxys = proxymanager
         self.delay = delay
         self.querys= querys
-        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
 

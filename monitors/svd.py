@@ -10,15 +10,14 @@ import traceback
 import urllib3
 
 class svd:
-    def __init__(self,groups,user_agents,delay=1,keywords=[],blacksku=[],proxygroups=[]):
+    def __init__(self,groups,user_agents,proxymanager,delay=1,keywords=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
         self.delay = delay
         self.keywords= keywords
-        self.proxys = ProxyManager(proxygroups)
+        self.proxys = proxymanager
         self.blacksku = blacksku
-        self.proxytime = 0
 
         self.INSTOCK = {}
         

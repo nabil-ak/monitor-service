@@ -15,13 +15,13 @@ from user_agent import getcurrentChromeUseragent
 
 
 class aboutyou:
-    def __init__(self,groups,store,storeid,user_agent,delay=1,keywords=[],proxygroups=[],blacksku=[],whitesku=[]):
+    def __init__(self,groups,store,storeid,user_agent,proxymanager,delay=1,keywords=[],blacksku=[],whitesku=[]):
         self.scraper = cloudscraper.create_scraper(browser={'custom': user_agent})
         self.INSTOCK = []
         self.groups = groups
+        self.proxys = proxymanager
         self.delay = delay
         self.keywords = keywords
-        self.proxys = ProxyManager(proxygroups)
         self.proxytime = 0
         self.blacksku = blacksku
         self.whitesku = whitesku

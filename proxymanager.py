@@ -40,7 +40,7 @@ class ProxyManager():
         else:
             self.proxys = PROXYS.values()
         self.proxys = sum(self.proxys, [])
-        self.currentProxy = random.randint(0, len(self.proxys)-1)
+        self.currentProxy = random.randint(0, len(self.proxys)-1) if self.proxys else 0
 
 
     def next(self):

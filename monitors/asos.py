@@ -13,15 +13,15 @@ import urllib3
 
 
 class asos:
-    def __init__(self,groups,region,currency,user_agents,skus,delay=1,proxygroups=[]):
+    def __init__(self,groups,region,currency,user_agents,skus,proxymanager,delay=1):
         self.INSTOCK = []
         self.groups = groups
         self.region = region
         self.currency = currency
         self.user_agents = user_agents
         self.skus = skus
+        self.proxys = proxymanager
         self.delay = delay
-        self.proxys = ProxyManager(proxygroups)
         self.proxytime = 0
         self.timeout = timeout()
 

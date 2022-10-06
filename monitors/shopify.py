@@ -1,7 +1,6 @@
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
-from proxymanager import ProxyManager
 from multiprocessing.pool import ThreadPool 
 import random
 import requests as rq
@@ -12,17 +11,17 @@ import traceback
 import urllib3
 
 class shopify:
-    def __init__(self,groups,site,url,user_agents,delay=1,keywords=[],negativkeywords=[],tags=[],proxygroups=[],blacksku=[]):
+    def __init__(self,groups,site,url,user_agents,proxymanager,delay=1,keywords=[],negativkeywords=[],tags=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
         self.site = site
         self.url = url
+        self.proxys = proxymanager
         self.delay = delay
         self.keywords= keywords
         self.negativkeywords = negativkeywords
         self.tags = tags
-        self.proxys = ProxyManager(proxygroups)
         self.proxytime = 0
         self.blacksku = blacksku
 

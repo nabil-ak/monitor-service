@@ -12,13 +12,13 @@ import urllib3
 import tls
 
 class eleventeamsports:
-    def __init__(self,groups,user_agent,delay=2,querys=[],blacksku=[],proxygroups=[]):
+    def __init__(self,groups,user_agent,proxymanager,delay=2,querys=[],blacksku=[]):
         self.user_agent = user_agent
 
         self.groups = groups
+        self.proxys = proxymanager
         self.delay = delay
         self.querys= querys
-        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
         self.timeout = timeout(timeout=120, pingdelay=20)

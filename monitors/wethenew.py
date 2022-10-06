@@ -13,13 +13,13 @@ import random
 import urllib3
 
 class wethenew:
-    def __init__(self,groups,user_agent,blacksku=[],delay=1,keywords=[],proxygroups=[]):
+    def __init__(self,groups,user_agent,proxymanager,blacksku=[],delay=1,keywords=[]):
 
         self.groups = groups
         self.blacksku = blacksku
         self.delay = delay
         self.keywords= keywords
-        self.proxys = ProxyManager(proxygroups)
+        self.proxys = proxymanager
         self.user_agent = user_agent
         self.proxytime = 0
         self.INSTOCK = []

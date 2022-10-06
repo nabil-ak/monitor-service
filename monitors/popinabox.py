@@ -11,13 +11,13 @@ import traceback
 import urllib3
 
 class popinabox:
-    def __init__(self,groups,user_agents,delay=1,querys=[],blacksku=[],proxygroups=[]):
+    def __init__(self,groups,user_agents,proxymanager,delay=1,querys=[],blacksku=[]):
         self.user_agents = user_agents
 
         self.groups = groups
+        self.proxys = proxymanager
         self.delay = delay
         self.querys= querys
-        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
 

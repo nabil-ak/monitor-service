@@ -11,14 +11,14 @@ import traceback
 import urllib3
 
 class prodirectsoccer_other:
-    def __init__(self,name,releasecategory,groups,user_agents,delay=2,querys=[],blacksku=[],proxygroups=[]):
+    def __init__(self,name,releasecategory,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
         self.user_agents = user_agents
         self.name = name
         self.releasecategory = releasecategory
         self.groups = groups
+        self.proxys = proxymanager
         self.delay = delay
         self.querys= querys
-        self.proxys = ProxyManager(proxygroups)
         self.blacksku = blacksku
         self.proxytime = 0
 
