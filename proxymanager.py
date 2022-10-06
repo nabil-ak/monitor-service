@@ -1,6 +1,7 @@
 import database
 import traceback
 import time
+import random
 from multiprocessing import Lock
 
 PROXYS = {}
@@ -31,7 +32,6 @@ class ProxyManager():
     def __init__(self, proxygroups=[]):
         self.proxygroups = proxygroups
         self.proxys = []
-        self.currentProxy = 0
         self.lock = Lock()
         if self.proxygroups:
             for group in PROXYS:
@@ -40,6 +40,7 @@ class ProxyManager():
         else:
             self.proxys = PROXYS.values()
         self.proxys = sum(self.proxys, [])
+        self.currentProxy = random.randint(0, len(self.proxys)-1)
 
 
     def next(self):
