@@ -60,9 +60,6 @@ def startMonitors():
     #Get newest Chrome Useragent
     chrome_user_agent = getcurrentChromeUseragent()
 
-    #Standard Proxymanager to use all available proxys
-    proxymanager = ProxyManager()
-
     #Create all Asos Monitors
     ASOSREGIONS = [["de","eur"], ["fr","eur"], ["es","eur"] , ["it","eur"], ["com","gbp"], ["roe","eur"], ["us","usd"]]
     for region in ASOSREGIONS:
@@ -72,7 +69,7 @@ def startMonitors():
     #Create all About You Monitors
     ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200],["SE",655],["IE",657]]
     for store in ABOUTYOUSTORES:
-        a = aboutyou.aboutyou(cookgroups,store[0],store[1],chrome_user_agent,proxymanager,settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],settings["aboutyou"]["blacksku"],settings["aboutyou"]["whitesku"])
+        a = aboutyou.aboutyou(cookgroups,store[0],store[1],chrome_user_agent,ProxyManager(),settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],settings["aboutyou"]["blacksku"],settings["aboutyou"]["whitesku"])
         monitorPool.append(Process(target=a.monitor))
     
     #Create all Shopify Monitors
@@ -123,7 +120,7 @@ def startMonitors():
             negativkeywords = shopifyGlobal["negativkeywords"]
 
         delay = shopifyGlobal["delay"] if "delay" not in s else s["delay"]
-        shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,negativkeywords=negativkeywords,tags=tags,blacksku=blacksku,proxymanager=proxymanager)
+        shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,negativkeywords=negativkeywords,tags=tags,blacksku=blacksku,proxymanager=ProxyManager())
         monitorPool.append(Process(target=shopifyProcess.monitor))
 
     #Create all Magento Monitors
@@ -143,7 +140,7 @@ def startMonitors():
     monitorPool.append(Process(target=micromaniaProcess.monitor))
     
     #Create Popinabox Monitor
-    popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"],proxymanager=proxymanager)
+    popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=popinaboxProcess.monitor))
     
     #Create Popito Monitor
@@ -151,15 +148,15 @@ def startMonitors():
     monitorPool.append(Process(target=popitoProcess.monitor))
     
     #Create Wethenew Monitor
-    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=proxymanager)
+    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create Wethenew-WTN Monitor
-    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=proxymanager)
+    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=wethenew_wtnProcess.monitor))
 
     #Create SVD Monitor
-    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=proxymanager)
+    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=svdProcess.monitor))
 
     #Create prodirectsoccer Monitor
@@ -167,7 +164,7 @@ def startMonitors():
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
 
     #Create prodirectsoccer_release Monitor
-    prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=proxymanager)
+    prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
 
     """
@@ -178,7 +175,7 @@ def startMonitors():
         monitorPool.append(Process(target=prodirectProcess.monitor))"""
 
     #Create eleventeamsports Monitor
-    eleventeamsportsProcess = eleventeamsports.eleventeamsports(groups=cookgroups,user_agent=chrome_user_agent,delay=settings["eleventeamsports"]["delay"],querys=settings["eleventeamsports"]["query"],blacksku=settings["eleventeamsports"]["blacksku"],proxymanager=proxymanager)
+    eleventeamsportsProcess = eleventeamsports.eleventeamsports(groups=cookgroups,user_agent=chrome_user_agent,delay=settings["eleventeamsports"]["delay"],querys=settings["eleventeamsports"]["query"],blacksku=settings["eleventeamsports"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=eleventeamsportsProcess.monitor))
     
     #Start all Monitors
