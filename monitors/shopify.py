@@ -22,7 +22,6 @@ class shopify:
         self.keywords= keywords
         self.negativkeywords = negativkeywords
         self.tags = tags
-        self.proxytime = 0
         self.blacksku = blacksku
 
         self.INSTOCK = []

@@ -1,7 +1,6 @@
 from threading import Thread
 from datetime import datetime
 from bs4 import BeautifulSoup
-from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -19,7 +18,6 @@ class popinabox:
         self.delay = delay
         self.querys= querys
         self.blacksku = blacksku
-        self.proxytime = 0
 
         self.INSTOCK = []
         

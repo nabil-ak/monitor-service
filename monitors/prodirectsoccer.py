@@ -18,7 +18,6 @@ class prodirectsoccer:
         self.delay = delay
         self.querys= querys
         self.blacksku = blacksku
-        self.proxytime = 0
 
         self.INSTOCK = []
         self.RELEASEINSTOCK = []

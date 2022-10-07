@@ -1,7 +1,6 @@
 from threading import Thread
 from datetime import datetime,timedelta
 from bs4 import BeautifulSoup
-from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -20,7 +19,6 @@ class prodirectsoccer_other:
         self.delay = delay
         self.querys= querys
         self.blacksku = blacksku
-        self.proxytime = 0
 
         self.INSTOCK = []
         self.RELEASEINSTOCK = []

@@ -1,15 +1,12 @@
-from user_agent import getcurrentChromeUseragent
 from threading import Thread
 from datetime import datetime
 from timeout import timeout
-from proxymanager import ProxyManager
 import requests as rq
 import tls
 import time
 import json
 import logging
 import traceback
-import random
 import urllib3
 
 class wethenew:
@@ -21,7 +18,6 @@ class wethenew:
         self.keywords= keywords
         self.proxys = proxymanager
         self.user_agent = user_agent
-        self.proxytime = 0
         self.INSTOCK = []
         self.timeout = timeout()
         
