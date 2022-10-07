@@ -20,7 +20,6 @@ class prodirectsoccer:
         self.blacksku = blacksku
 
         self.INSTOCK = []
-        self.RELEASEINSTOCK = []
         
     def discord_webhook(self,group,title,sku, url, thumbnail,prize,launchdate=None):
         """
@@ -167,34 +166,6 @@ class prodirectsoccer:
                 products = []
 
                 for query in self.querys:
-        
-                    # Make request to release-site and stores products
-                    items = self.scrape_release_site(query, headers)
-                    for product in items:
-                        date = datetime.strptime(f"{product['launchdate'][-2:]}/{product['launchdate'][4:6]}/{product['launchdate'][:4]}","%d/%m/%Y")
-                        if product["sku"] not in self.blacksku and date>(datetime.now()-timedelta(days=1)):
-                            # Check if Product is INSTOCK
-                            if product not in self.RELEASEINSTOCK and start != 1:
-                                print(f"[prodirectsoccer] {product}")
-                                logging.info(msg=f"[prodirectsoccer] {product}")
-                                for group in self.groups:
-                                    #Send Ping to each Group
-                                    Thread(target=self.discord_webhook,args=(
-                                        group,
-                                        product['name'],
-                                        product['sku'],
-                                        product['url'],
-                                        product['image'],
-                                        product['prize'],
-                                        product['launchdate']
-                                        )).start()
-
-                            products.append(product)
-
-                    self.RELEASEINSTOCK = products.copy()
-                    products.clear()
-
-
                     # Makes request to query-site and stores products 
                     items = self.scrape_site(query, headers)
                     for product in items:
@@ -216,9 +187,9 @@ class prodirectsoccer:
 
                             products.append(product["sku"])
                     
-                    self.INSTOCK = products
+                self.INSTOCK = products
 
-                    time.sleep(self.delay)
+                time.sleep(self.delay)
 
                 # Allows changes to be notified
                 start = 0

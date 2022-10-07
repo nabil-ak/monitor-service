@@ -150,9 +150,9 @@ class prodirectsoccer_release:
 
                             products.append(product)
 
-                    self.INSTOCK = products
+                self.INSTOCK = products
 
-                    time.sleep(self.delay)
+                time.sleep(self.delay)
 
                 # Allows changes to be notified
                 start = 0
