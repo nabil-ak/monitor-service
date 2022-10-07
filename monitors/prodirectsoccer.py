@@ -106,36 +106,6 @@ class prodirectsoccer:
         
         logging.info(msg=f'[prodirectsoccer] Successfully scraped Query {query}')
         return items
-
-    def scrape_release_site(self,query,headers):
-        """
-        Scrapes the specified prodirectsoccer release query site and adds items to array
-        """
-        items = []
-
-        # Makes request to site
-        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7Bsoccerengb%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
-        html.raise_for_status()
-
-        products = json.loads(html.text[14:-1])["suggestionGroups"][1]["suggestions"]
-       
-
-        # Stores particular details in array
-        for product in products:
-            product_item = {
-                    "name":product["name"],
-                    "sku":product["quickref"],
-                    "prize":product["currentprice"].replace("000",""),
-                    "image":product["_thumburl"],
-                    "url":product["producturl"],
-                    "launchdate":product["launchdate"]
-                    }
-            items.append(product_item)
-
-         
-        
-        logging.info(msg=f'[prodirectsoccer] Successfully scraped releases for query {query}')
-        return items
         
 
     def monitor(self):
@@ -189,7 +159,6 @@ class prodirectsoccer:
                     
                 self.INSTOCK = products
 
-                time.sleep(self.delay)
 
                 # Allows changes to be notified
                 start = 0
@@ -197,6 +166,7 @@ class prodirectsoccer:
                 #Shuffle Query Order
                 random.shuffle(self.querys)
                 logging.info(msg=f'[prodirectsoccer] Checked all querys in {time.time()-startTime} seconds')
+                time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[prodirectsoccer] Exception found: {traceback.format_exc()}")

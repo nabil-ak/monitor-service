@@ -152,14 +152,13 @@ class prodirectsoccer_release:
 
                 self.INSTOCK = products
 
-                time.sleep(self.delay)
-
                 # Allows changes to be notified
                 start = 0
 
                 #Shuffle Query Order
                 random.shuffle(self.querys)
                 logging.info(msg=f'[prodirectsoccer_release] Checked all querys in {time.time()-startTime} seconds')
+                time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[prodirectsoccer_release] Exception found: {traceback.format_exc()}")
