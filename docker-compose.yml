@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  watchtower:
+    image: index.docker.io/containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.json:/config.json
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: --interval 30
+  monitor:
+    image: index.docker.io/xwe10/monitor-service
+    env_file:
+      - .env
+  keyword:
+    image: index.docker.io/xwe10/monitor-service-keyword-pinger
+    env_file:
+      - .env
+  imageproxy:
+    image: index.docker.io/xwe10/image-proxy
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+  tls:
+    image: index.docker.io/xwe10/tls-api
+    ports:
+      - "8082:8082"

@@ -9,6 +9,7 @@ import json
 import logging
 import traceback
 import urllib3
+import os
 
 
 
@@ -103,7 +104,7 @@ class asos:
             #Format each Product
             product_item = {
                 'title': self.getTitle(str(product['productId'])), 
-                'image': f"http://202.61.192.38:8080/https://images.asos-media.com/products/nabil/{product['productId']}-2", 
+                'image': f"{os.environ['IMAGEPROXY']}/https://images.asos-media.com/products/nabil/{product['productId']}-2", 
                 'id': str(product['productId']),
                 'variants': product['variants']}
             items.append(product_item)

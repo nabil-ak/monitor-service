@@ -1,9 +1,10 @@
 import requests as rq
+import os
 
 if __name__ == "__main__":
     TLSCLIENT = "http://202.61.192.38:8082"
 else:
-    TLSCLIENT = "http://127.0.0.1:8082"
+    TLSCLIENT = f"http://{os.environ['GATEWAY']}:8082"
 
 
 def addParamsToHeader(url, headers, proxies):

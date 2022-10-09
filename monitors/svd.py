@@ -8,6 +8,7 @@ import json
 import logging
 import traceback
 import urllib3
+import os
 
 class svd:
     def __init__(self,groups,user_agents,proxymanager,delay=1,keywords=[],blacksku=[]):
@@ -83,7 +84,7 @@ class svd:
                     "name":product["brand_name"]+" "+product["name"],
                     "sku":product["sku"],
                     "prize":str(product["final_price"])+" €",
-                    "image":"http://202.61.192.38:8080/https://media.sivasdescalzo.com/media/catalog/product/"+product["small_image"]["url"]+"?width=300",
+                    "image":f"{os.environ['IMAGEPROXY']}/https://media.sivasdescalzo.com/media/catalog/product/"+product["small_image"]["url"]+"?width=300",
                     "url":product["url"],
                     "state":product["state"]
                     }

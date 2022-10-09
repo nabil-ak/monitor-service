@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import traceback
 import time
+import os
 
 def getGroups():
     """
@@ -34,7 +35,7 @@ def Connect():
     """
     global client
     try:
-        client = MongoClient("mongodb+srv://monitor:BfdiEzEhx1ZpXMgp@monitorsolutions.yerbc.mongodb.net/monitorsolutions?retryWrites=true&w=majority")["monitorsolutions"]
+        client = MongoClient(os.environ['DB'])["monitorsolutions"]
     except Exception as e:
         print(f"[DATABASE] Exception found: {traceback.format_exc()}")
         time.sleep(10)

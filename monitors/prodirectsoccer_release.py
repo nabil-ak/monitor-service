@@ -7,6 +7,7 @@ import json
 import logging
 import traceback
 import urllib3
+import os
 
 class prodirectsoccer_release:
     def __init__(self,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
@@ -40,7 +41,7 @@ class prodirectsoccer_release:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": "http://202.61.192.38:8080/"+thumbnail},
+            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}/"+thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {
