@@ -2,5 +2,6 @@
 __pycache__
 dev
 env
+logs
 monitor.log
 debug.py
