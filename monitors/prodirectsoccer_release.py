@@ -114,7 +114,7 @@ class prodirectsoccer_release:
         logging.info(msg=f'prodirectsoccer_release Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
-        start = 0
+        start = 1
 
         # Initialising headers
         headers = {
