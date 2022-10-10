@@ -41,7 +41,7 @@ class prodirectsoccer_release:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}/"+thumbnail},
+            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}/"+thumbnail.replace(" ","")},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {
@@ -53,6 +53,7 @@ class prodirectsoccer_release:
             }
             }]
         }
+        print(data)
         
         
         result = rq.post(group["prodirectsoccer_release"], data=json.dumps(data), headers={"Content-Type": "application/json"})
@@ -113,7 +114,7 @@ class prodirectsoccer_release:
         logging.info(msg=f'prodirectsoccer_release Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
-        start = 1
+        start = 0
 
         # Initialising headers
         headers = {
