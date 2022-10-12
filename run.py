@@ -148,11 +148,11 @@ def startMonitors():
     monitorPool.append(Process(target=popitoProcess.monitor))
     
     #Create Wethenew Monitor
-    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager())
+    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager(["porter"]))
     monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create Wethenew-WTN Monitor
-    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=ProxyManager())
+    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=ProxyManager(["porter"]))
     monitorPool.append(Process(target=wethenew_wtnProcess.monitor))
 
     #Create SVD Monitor
