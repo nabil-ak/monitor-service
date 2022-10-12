@@ -158,11 +158,12 @@ def startMonitors():
     #Create SVD Monitor
     svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=svdProcess.monitor))
-
+    """
     #Create prodirectsoccer Monitor
     prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["porter"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
-
+    """
+    
     #Create prodirectsoccer_release Monitor
     prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
