@@ -19,6 +19,10 @@ services:
     image: index.docker.io/xwe10/monitor-service-keyword-pinger
     env_file:
       - .env
+  toolbox:
+    image: index.docker.io/xwe10/toolbox
+    env_file:
+      - .env
   imageproxy:
     image: index.docker.io/xwe10/image-proxy
     env_file:
