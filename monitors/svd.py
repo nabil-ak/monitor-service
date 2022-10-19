@@ -84,7 +84,7 @@ class svd:
                     "name":product["brand_name"]+" "+product["name"],
                     "sku":product["sku"],
                     "prize":str(product["final_price"])+" €",
-                    "image":f"{os.environ['IMAGEPROXY']}/https://media.sivasdescalzo.com/media/catalog/product/"+product["small_image"]["url"]+"?width=300",
+                    "image":f"{os.environ['IMAGEPROXY']}https://media.sivasdescalzo.com/media/catalog/product/"+product["small_image"]["url"]+"?width=300",
                     "url":product["url"],
                     "state":product["state"]
                     }

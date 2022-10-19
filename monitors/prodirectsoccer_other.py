@@ -47,7 +47,7 @@ class prodirectsoccer_other:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}/"+thumbnail},
+            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}"+thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {
