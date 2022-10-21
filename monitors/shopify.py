@@ -76,8 +76,8 @@ class shopify:
             logging.error(err)
             print(f"[{self.site}] Exception found: {err}")
         else:
-            logging.info(msg=f'[{self.site}] Successfully sent Discord notification to {group[self.site]}')
-            print(f'[{self.site}] Successfully sent Discord notification to {group[self.site]}')
+            logging.info(msg=f'[{self.site}] Successfully sent Discord notification to {webhook}')
+            print(f'[{self.site}] Successfully sent Discord notification to {webhook}')
 
 
     def scrape_site(self,url,page,headers):
