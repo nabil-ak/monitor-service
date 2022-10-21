@@ -63,7 +63,7 @@ def startMonitors():
     #Create all Asos Monitors
     ASOSREGIONS = [["de","eur"], ["fr","eur"], ["es","eur"] , ["it","eur"], ["com","gbp"], ["roe","eur"], ["us","usd"]]
     for region in ASOSREGIONS:
-        a = asos.asos(groups=cookgroups,skus=settings["asos"]["skus"],delay=settings["asos"]["delay"],region=region[0],currency=region[1],user_agents=user_agents,proxymanager=ProxyManager(["porter"]))
+        a = asos.asos(groups=cookgroups,skus=settings["asos"]["skus"],delay=settings["asos"]["delay"],region=region[0],currency=region[1],user_agents=user_agents,proxymanager=ProxyManager(["porter","erling"]))
         monitorPool.append(Process(target=a.monitor))
     
     #Create all About You Monitors
@@ -148,21 +148,21 @@ def startMonitors():
     monitorPool.append(Process(target=popitoProcess.monitor))
     
     #Create Wethenew Monitor
-    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager(["porter"]))
+    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager(["erling"]))
     monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create Wethenew-WTN Monitor
-    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=ProxyManager(["porter"]))
+    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=ProxyManager(["erling"]))
     monitorPool.append(Process(target=wethenew_wtnProcess.monitor))
 
     #Create SVD Monitor
     svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager())
     monitorPool.append(Process(target=svdProcess.monitor))
-    """
+    
     #Create prodirectsoccer Monitor
-    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["porter"]))
+    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["erling"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
-    """
+    
     
     #Create prodirectsoccer_release Monitor
     prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager())
@@ -172,7 +172,7 @@ def startMonitors():
     #Create all other prodirect Monitor
     prodirect = [["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
     for p in prodirect:
-        prodirectProcess = prodirectsoccer_other.prodirectsoccer_other(name=p[0], releasecategory= p[1], groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["porter"]))
+        prodirectProcess = prodirectsoccer_other.prodirectsoccer_other(name=p[0], releasecategory= p[1], groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["erling"]))
         monitorPool.append(Process(target=prodirectProcess.monitor))"""
 
     #Create eleventeamsports Monitor
