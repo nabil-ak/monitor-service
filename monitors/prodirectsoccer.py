@@ -12,8 +12,8 @@ import os
 import tls
 
 class prodirectsoccer:
-    def __init__(self,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
-        self.user_agents = user_agents
+    def __init__(self,groups,user_agent,proxymanager,delay=2,querys=[],blacksku=[]):
+        self.user_agent = user_agent
 
         self.groups = groups
         self.proxys = proxymanager
@@ -128,7 +128,7 @@ class prodirectsoccer:
 
         # Initialising headers
         headers = {
-                'user-agent': random.choice(self.user_agents)["user_agent"]
+                'user-agent': self.user_agent
         }
         
         while True:

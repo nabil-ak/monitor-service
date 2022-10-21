@@ -160,7 +160,7 @@ def startMonitors():
     monitorPool.append(Process(target=svdProcess.monitor))
     
     #Create prodirectsoccer Monitor
-    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["erling"]))
+    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["erling"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
     
     
