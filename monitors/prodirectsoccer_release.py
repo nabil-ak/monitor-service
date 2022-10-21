@@ -9,6 +9,8 @@ import traceback
 import urllib3
 import os
 
+LAUNCHTIMEDELTA = 946684800 #01.01.2000 00.00H
+
 class prodirectsoccer_release:
     def __init__(self,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
         self.user_agents = user_agents
@@ -21,7 +23,7 @@ class prodirectsoccer_release:
 
         self.INSTOCK = []
         
-    def discord_webhook(self, group, title, sku, url, thumbnail, prize, launchdate):
+    def discord_webhook(self, group, title, sku, url, thumbnail, prize, launch):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -31,8 +33,8 @@ class prodirectsoccer_release:
         fields = []
         fields.append({"name": "Prize", "value": f"```{prize}£```", "inline": True})
         fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
-        fields.append({"name": "Status", "value": f"```🟡 RELEASE```", "inline": True})
-        fields.append({"name": "Launchdate", "value": f"```{launchdate[-2:]}/{launchdate[4:6]}/{launchdate[:4]}```", "inline": True})
+        fields.append({"name": "Type", "value": f"```🟡 RELEASE```", "inline": True})
+        fields.append({"name": "Launch-Time", "value": f"<t:{launch}>", "inline": True})
         
 
         data = {
@@ -90,7 +92,7 @@ class prodirectsoccer_release:
                     "prize":product["currentprice"].replace("000",""),
                     "image":product["_thumburl"],
                     "url":product["producturl"],
-                    "launchdate":product["launchdate"]
+                    "launch":LAUNCHTIMEDELTA+(int(product["launchtimedelta"])*60)
                     }
             items.append(product_item)
 
@@ -132,8 +134,7 @@ class prodirectsoccer_release:
                     # Make request to release-site and stores products
                     items = self.scrape_release_site(query, headers)
                     for product in items:
-                        date = datetime.strptime(f"{product['launchdate'][-2:]}/{product['launchdate'][4:6]}/{product['launchdate'][:4]}","%d/%m/%Y")
-                        if product["sku"] not in self.blacksku and date>(datetime.now()-timedelta(days=1)):
+                        if product["sku"] not in self.blacksku and datetime.fromtimestamp(product['launch'])>(datetime.now()-timedelta(days=1)):
                             # Check if Product is INSTOCK
                             if product not in self.INSTOCK and start != 1:
                                 print(f"[prodirectsoccer_release] {product}")
@@ -147,7 +148,7 @@ class prodirectsoccer_release:
                                         product['url'],
                                         product['image'],
                                         product['prize'],
-                                        product['launchdate']
+                                        product['launch']
                                         )).start()
 
                             products.append(product)
