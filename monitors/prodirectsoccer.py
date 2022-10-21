@@ -8,6 +8,8 @@ import json
 import logging
 import traceback
 import urllib3
+import os
+import tls
 
 class prodirectsoccer:
     def __init__(self,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
@@ -44,7 +46,7 @@ class prodirectsoccer:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": "http://202.61.192.38:8080/"+thumbnail},
+            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}"+thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {
@@ -82,7 +84,7 @@ class prodirectsoccer:
         #Scrape all available Pages
         while True:
             # Makes request to site
-            html = rq.get(f"https://www.prodirectsoccer.com/search/?qq={query}&pg={page}",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
+            html = tls.get(f"https://www.prodirectsoccer.com/search/?qq={query}&pg={page}",  headers=headers, proxies=self.proxys.next())
             html.raise_for_status()
 
             output = BeautifulSoup(html.text, 'html.parser')
