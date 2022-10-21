@@ -173,8 +173,6 @@ class prodirectsoccer:
             except Exception as e:
                 print(f"[prodirectsoccer] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
 
 if __name__ == '__main__':
