@@ -85,10 +85,14 @@ class shopify:
         Scrapes the specified Shopify site and adds items to array
         """
         items = []
-
+        p = self.proxys.next()
         #Fetch the Shopify-Page
-        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=self.proxys.next(), verify=False, timeout=20)
-        html.raise_for_status()
+        try:
+            html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=p, verify=False, timeout=20)
+            html.raise_for_status()
+        except rq.exceptions.ProxyError as e:
+            print(p)
+            raise(e)
         output = json.loads(html.text)['products']
         
         # Stores particular details in array
