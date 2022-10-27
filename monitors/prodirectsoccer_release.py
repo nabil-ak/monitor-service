@@ -12,9 +12,11 @@ import os
 LAUNCHTIMEDELTA = 946684800 #01.01.2000 00.00H
 
 class prodirectsoccer_release:
-    def __init__(self,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
+    def __init__(self,site,releasecategory,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
         self.user_agents = user_agents
-
+        
+        self.site = site
+        self.releasecategory = releasecategory
         self.groups = groups
         self.proxys = proxymanager
         self.delay = delay
@@ -78,7 +80,7 @@ class prodirectsoccer_release:
         items = []
 
         # Makes request to site
-        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7Bsoccerengb%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
+        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7B{self.releasecategory}%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
         html.raise_for_status()
 
         products = json.loads(html.text[14:-1])["suggestionGroups"][1]["suggestions"]
@@ -109,7 +111,7 @@ class prodirectsoccer_release:
         """
 
         #Initiate the Logger
-        logging.basicConfig(filename=f'logs/prodirectsoccer_release.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+        logging.basicConfig(filename=f'logs/{self.site}_release.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
         print(f'STARTING prodirectsoccer_release MONITOR')

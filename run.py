@@ -163,10 +163,11 @@ def startMonitors():
     prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["erling"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
     
-    
-    #Create prodirectsoccer_release Monitor
-    prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager(["noez","fineproxy"]))
-    monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
+    prodirect = [["prodirectsoccer", "soccerengb"], ["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
+    #Create prodirectsoccer_release Monitors
+    for p in prodirect:
+        prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(site=p[0],releasecategory=p[1],groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager(["noez","fineproxy"]))
+        monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
 
     """
     #Create all other prodirect Monitor
