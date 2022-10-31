@@ -132,8 +132,8 @@ def startMonitors():
         monitorPool.append(Process(target=magentoProcess.monitor))'''
     
     #Create Cultura Monitor
-    culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
-    monitorPool.append(Process(target=culturaProcess.monitor))
+    #culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
+    #monitorPool.append(Process(target=culturaProcess.monitor))
     
     #Create Micromania Monitor
     micromaniaProcess = micromania.micromania(groups=cookgroups,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=settings["micromania"]["query"],delay=settings["micromania"]["delay"],blacksku=settings["micromania"]["blacksku"])
