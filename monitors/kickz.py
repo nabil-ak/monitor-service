@@ -186,7 +186,7 @@ class kickz:
 
                     self.INSTOCK = products
 
-                    time.sleep(self.delay/len(categorys))
+                    time.sleep(self.delay)
 
 
                     # Allows changes to be notified
