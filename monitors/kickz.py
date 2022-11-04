@@ -198,8 +198,6 @@ class kickz:
                 print(f"[kickz-{self.region}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(2)
-                # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
 
 if __name__ == '__main__':
