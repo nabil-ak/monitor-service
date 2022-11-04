@@ -2,7 +2,7 @@ import random
 import traceback
 import time
 
-from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,wethenew_wtn,magento,asos
+from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,wethenew_wtn,magento,asos,kickz
 from multiprocessing import Process
 from threading import Thread
 from random_user_agent.params import SoftwareName, HardwareType
@@ -159,6 +159,11 @@ def startMonitors():
     svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["noez"]))
     monitorPool.append(Process(target=svdProcess.monitor))
     
+    #Create kickz Monitor
+    for region in settings["kickz"]["regions"]:
+        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["erling","fineproxy"]))
+        monitorPool.append(Process(target=kickzProcess.monitor))
+
     #Create prodirectsoccer Monitor
     prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["erling"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
