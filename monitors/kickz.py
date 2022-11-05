@@ -109,8 +109,15 @@ class kickz:
         
         logging.info(msg=f'[kickz-{self.region}] Successfully scraped category {category}')
         return items
-        
 
+    def restock(self, save):
+        for p in self.INSTOCK:
+            if save == p:
+                return False
+            if save["sku"] == p["sku"] and p["status"] == "RESTOCK":
+                return False
+        return True
+        
     def monitor(self):
         urllib3.disable_warnings()
         """
@@ -169,10 +176,7 @@ class kickz:
 
                             # Check if Product is INSTOCK
                             if not save in products:
-                                if not save in self.INSTOCK and not {
-                                    "sku":product["sku"],
-                                    "status":"RAFFLE_OVER"
-                                    } in self.INSTOCK and save["status"] != "RAFFLE_OVER" and start != 1:
+                                if self.restock(save) and start != 1:
                                             print(f"[kickz-{self.region}] {product}")
                                             logging.info(msg=f"[kickz-{self.region}] {product}")
                                             for group in self.groups:
