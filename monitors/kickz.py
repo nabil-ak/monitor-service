@@ -174,12 +174,12 @@ class kickz:
                             
                             save = {
                                 "sku":product["sku"],
-                                "status":product["status"]
+                                "status":product["status"].replace("\n","").replace(" ","")
                             }
 
                             # Check if Product is INSTOCK
-                            if not save in products:
-                                if self.restock(save) and start != 1:
+                            if save not in products:
+                                if save not in self.INSTOCK and start != 1:
                                             print(f"[kickz-{self.region}] {product}")
                                             logging.info(msg=f"[kickz-{self.region}] {product}")
                                             for group in self.groups:
