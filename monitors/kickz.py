@@ -168,21 +168,25 @@ class kickz:
                             }
 
                             # Check if Product is INSTOCK
-                            if not save in self.INSTOCK and not save in products and save["status"] != "RAFFLE_OVER" and start != 1:
-                                    print(f"[kickz-{self.region}] {product}")
-                                    logging.info(msg=f"[kickz-{self.region}] {product}")
-                                    for group in self.groups:
-                                        #Send Ping to each Group
-                                        Thread(target=self.discord_webhook,args=(
-                                            group,
-                                            product['name'],
-                                            product['sku'],
-                                            product['url'],
-                                            product['image'],
-                                            product['prize'],
-                                            product['status']
-                                            )).start()
-                            products.append(save)
+                            if not save in products:
+                                if not save in self.INSTOCK and not {
+                                    "sku":product["sku"],
+                                    "status":"RAFFLE_OVER"
+                                    } in self.INSTOCK and save["status"] != "RAFFLE_OVER" and start != 1:
+                                            print(f"[kickz-{self.region}] {product}")
+                                            logging.info(msg=f"[kickz-{self.region}] {product}")
+                                            for group in self.groups:
+                                                #Send Ping to each Group
+                                                Thread(target=self.discord_webhook,args=(
+                                                    group,
+                                                    product['name'],
+                                                    product['sku'],
+                                                    product['url'],
+                                                    product['image'],
+                                                    product['prize'],
+                                                    product['status']
+                                                    )).start()
+                                products.append(save)
 
                     self.INSTOCK = products
 
