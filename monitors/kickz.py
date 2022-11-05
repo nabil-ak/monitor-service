@@ -186,13 +186,12 @@ class kickz:
 
                     self.INSTOCK = products
 
-                    time.sleep(self.delay)
-
-
                     # Allows changes to be notified
                     start = 0
 
                     logging.info(msg=f'[kickz-{self.region}] Checked all querys in {time.time()-startTime} seconds')
+
+                    time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[kickz-{self.region}] Exception found: {traceback.format_exc()}")
