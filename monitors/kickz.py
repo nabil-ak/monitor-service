@@ -168,7 +168,7 @@ class kickz:
 
                             # Check if Product is INSTOCK
                             if save not in products:
-                                if save not in self.INSTOCK and start != 1:
+                                if save not in self.INSTOCK and save["status"] != "RAFFLE_OVER" and start != 1:
                                             print(f"[kickz-{self.region}] {product}")
                                             logging.info(msg=f"[kickz-{self.region}] {product}")
                                             for group in self.groups:
