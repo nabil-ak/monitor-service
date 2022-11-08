@@ -156,7 +156,7 @@ def startMonitors():
     monitorPool.append(Process(target=wethenew_wtnProcess.monitor))
 
     #Create SVD Monitor
-    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["noez"]))
+    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["erling","fineproxy"]))
     monitorPool.append(Process(target=svdProcess.monitor))
     
     #Create kickz Monitor
