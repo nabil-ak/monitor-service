@@ -25,7 +25,7 @@ class kickz:
 
         self.INSTOCK = []
         
-    def discord_webhook(self, group, title, sku, url, thumbnail, prize, status):
+    def discord_webhook(self, group, title, sku, url, thumbnail, prize, status, raffle_date=None):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -40,7 +40,7 @@ class kickz:
             fields.append({"name": "Status", "value": f"```🟢 INSTOCK```", "inline": True})
         else:
             fields.append({"name": "Status", "value": f"```🟡 RAFFLE```", "inline": True})
-            fields.append({"name": "Ending", "value": f"```{status.replace('Release: ','')}```", "inline": True})
+            fields.append({"name": "Ending", "value": f"```{raffle_date.replace('Release: ','')}```", "inline": True})
 
         data = {
             "username": group["Name"],
@@ -90,7 +90,8 @@ class kickz:
             button = product.find("a", {"class": "b-product_tile-link"})
 
             if product.find("div", {"class": "b-product_tile-release"}):
-                status = product.find("div", {"class": "b-product_tile-release"}).text
+                status = "RAFFLE"
+                raffle_date = product.find("div", {"class": "b-product_tile-release"}).text
             elif product.find("div", {"class": "b-raffle-tile_attr"}):
                 status = "RAFFLE_OVER"
             else:
@@ -102,7 +103,8 @@ class kickz:
                     "prize":product.find("span", {"class": "b-price-item"}).text,
                     "image": f"{os.environ['IMAGEPROXY']}{product.find('img')['src']}",
                     "url":"https://www.kickz.com"+button["href"],
-                    "status": status
+                    "status": status,
+                    "raffle_date":raffle_date
                     }
             items.append(product_item)
 
@@ -163,7 +165,7 @@ class kickz:
                             
                             save = {
                                 "sku":product["sku"],
-                                "status":product["status"].replace("\n","").replace(" ","")
+                                "status":product["status"]
                             }
 
                             # Check if Product is INSTOCK
@@ -180,7 +182,8 @@ class kickz:
                                                     product['url'],
                                                     product['image'],
                                                     product['prize'],
-                                                    product['status']
+                                                    product['status'],
+                                                    product['raffle_date']
                                                     )).start()
                                 products.append(save)
 
