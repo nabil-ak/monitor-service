@@ -10,9 +10,10 @@ import traceback
 import urllib3
 
 class wethenew:
-    def __init__(self,groups,user_agent,proxymanager,blacksku=[],delay=1,keywords=[]):
+    def __init__(self,groups,endpoint,user_agent,proxymanager,blacksku=[],delay=1,keywords=[]):
 
         self.groups = groups
+        self.endpoint = endpoint
         self.blacksku = blacksku
         self.delay = delay
         self.keywords= keywords
@@ -20,23 +21,43 @@ class wethenew:
         self.user_agent = user_agent
         self.INSTOCK = []
         self.timeout = timeout()
+
+        self.sizesKey = {
+            "products":"wantedSizes",
+            "sell-nows":"sellNows",
+            "consignment-slots":"sizes"
+        }
+
         
     def discord_webhook(self,group,sku,title, thumbnail, sizes):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if "wethenew" not in group:
+        if not any(["wethenew" not in g for g in group]):
             return
 
         fields = []
-        fields.append({"name": "SKU", "value": f"```{sku}```", "inline": False})
-        s = ""
-        status = ""
-        for size in sizes:
-            s+=size+"\n"
-            status+="🟡 WTB\n"
-        fields.append({"name": "Sizes", "value": f"```{s}```", "inline": True})
-        fields.append({"name": "Status", "value": f"```{status}```", "inline": True})
+        if self.endpoint == "sell-nows":
+            s = ""
+            prices = ""
+            links = "\n"
+            for size in sizes:
+                s+=f"`{size['size']}`\n"
+                prices+=f"`{size['price']}€`\n"
+                links+=f"[ATC](https://sell.wethenew.com/instant-sales/{size['id']})\n"
+            fields.append({"name": "Sizes", "value": s, "inline": True})
+            fields.append({"name": "Prices", "value": prices, "inline": True})
+            fields.append({"name": "Accept", "value": links, "inline": True})
+        else:
+            s = ""
+            status = ""
+            for size in sizes:
+                s+=size+"\n"
+                status+="🟡 WTB\n"
+            fields.append({"name": "SKU", "value": f"```{sku}```", "inline": False})
+            fields.append({"name": "Sizes", "value": f"```{s}```", "inline": True})
+            fields.append({"name": "Status", "value": f"```{status}```", "inline": True})
+        
         fields.append({"name": "Links", "value": f"[STOCKX](https://stockx.com/search?s={title.replace(' ', '+')}) | [WETHENEW](https://wethenew.com/search?type=product&q={title.replace(' ', '+')})", "inline": False})
         
         
@@ -45,7 +66,7 @@ class wethenew:
             "avatar_url": group["Avatar_Url"],
             "embeds": [{
             "title": title,
-            "url": "https://sell.wethenew.com/listing/product/"+sku, 
+            "url": f"https://sell.wethenew.com/{'consignment' if self.endpoint == 'consignment-slots' else 'listing'}/product/"+sku, 
             "thumbnail": {"url": thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
@@ -54,22 +75,22 @@ class wethenew:
                 "icon_url": group["Avatar_Url"]
                 },
             "author": {
-                "name": "wethenew"
+                "name": f"wethenew-{self.endpoint}"
             }
             }]
         }
         
         
-        result = rq.post(group["wethenew"], data=json.dumps(data), headers={"Content-Type": "application/json"})
+        result = rq.post(group[f"wethenew-{self.endpoint}"], data=json.dumps(data), headers={"Content-Type": "application/json"})
         
         try:
             result.raise_for_status()
         except rq.exceptions.HTTPError as err:
             logging.error(err)
-            print(f"[wethenew] Exception found: {err}")
+            print(f"[wethenew-{self.endpoint}] Exception found: {err}")
         else:
-            logging.info(msg=f'[wethenew] Successfully sent Discord notification to {group["wethenew"]}')
-            print(f'[wethenew] Successfully sent Discord notification to {group["wethenew"]}')
+            logging.info(msg=f'[wethenew-{self.endpoint}] Successfully sent Discord notification to {group["wethenew-{self.endpoint}"]}')
+            print(f'[wethenew-{self.endpoint}] Successfully sent Discord notification to {group["wethenew-{self.endpoint}"]}')
 
 
     def scrape_site(self):
@@ -84,7 +105,7 @@ class wethenew:
 
         #Get all Products from the Site
         while True:
-            url = f'https://api-sell.wethenew.com/products?skip={skip}&take=100&onlyWanted=true'
+            url = f"https://api-sell.wethenew.com/{self.endpoint}?skip={skip}&take=100&onlyWanted=true"
             logging.info(msg=f'[wethenew] Scrape {url}')
             response = tls.get(url, proxies=self.proxys.next(), headers={
                 'user-agent': self.user_agent
@@ -104,11 +125,11 @@ class wethenew:
                 'title': product['brand'] + " " + product['name'], 
                 'image': product['image'], 
                 'sku': str(product['id']),
-                'variants': product['wantedSizes']
+                'variants': product[self.sizesKey[self.endpoint]]
             }
             items.append(product_item)
         
-        logging.info(msg=f'[wethenew] Successfully scraped site')
+        logging.info(msg=f'[wethenew-{self.endpoint}] Successfully scraped site')
         return items
 
     def remove(self,sku):
@@ -163,8 +184,8 @@ class wethenew:
                 
                 self.INSTOCK.append(product_item)
                 if start == 0:
-                    print(f"[wethenew] {product_item}")
-                    logging.info(msg=f"[wethenew] {product_item}")
+                    print(f"[wethenew-{self.endpoint}] {product_item}")
+                    logging.info(msg=f"[wethenew-{self.endpoint}] {product_item}")
                     
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
@@ -187,11 +208,11 @@ class wethenew:
         """
 
         #Initiate the Logger
-        logging.basicConfig(filename=f'logs/wethenew.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+        logging.basicConfig(filename=f'logs/wethenew-{self.endpoint}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
-        print(f'STARTING wethenew MONITOR')
-        logging.info(msg=f'[wethenew] Successfully started monitor')
+        print(f'STARTING wethenew-{self.endpoint} MONITOR')
+        logging.info(msg=f'[wethenew-{self.endpoint}] Successfully started monitor')
 
         # Ensures that first scrape does not notify all products
         start = 1
@@ -224,13 +245,13 @@ class wethenew:
                 # Allows changes to be notified
                 start = 0
 
-                logging.info(msg=f'[wethenew] Checked in {time.time()-startTime} seconds')
+                logging.info(msg=f'[wethenew-{self.endpoint}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
                 time.sleep(float(self.delay))
 
             except Exception as e:
-                print(f"[wethenew] Exception found: {traceback.format_exc()}")
+                print(f"[wethenew-{self.endpoint}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(10)
 

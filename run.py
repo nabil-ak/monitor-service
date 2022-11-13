@@ -144,16 +144,13 @@ def startMonitors():
     monitorPool.append(Process(target=popinaboxProcess.monitor))
     
     #Create Popito Monitor
-    popitoProcess = popito.popito(groups=cookgroups,user_agents=user_agents,querys=settings["popito"]["query"],delay=settings["popito"]["delay"],blacksku=settings["popito"]["blacksku"])
-    monitorPool.append(Process(target=popitoProcess.monitor))
+    #popitoProcess = popito.popito(groups=cookgroups,user_agents=user_agents,querys=settings["popito"]["query"],delay=settings["popito"]["delay"],blacksku=settings["popito"]["blacksku"])
+    #monitorPool.append(Process(target=popitoProcess.monitor))
     
-    #Create Wethenew Monitor
-    wethenewProcess = wethenew.wethenew(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager(["round"]))
-    monitorPool.append(Process(target=wethenewProcess.monitor))
-
-    #Create Wethenew-WTN Monitor
-    wethenew_wtnProcess = wethenew_wtn.wethenew_wtn(groups=cookgroups,user_agent=chrome_user_agent,blacksku=settings["wethenew_wtn"]["blacksku"],delay=settings["wethenew_wtn"]["delay"],keywords=settings["wethenew_wtn"]["keywords"],proxymanager=ProxyManager(["round"]))
-    monitorPool.append(Process(target=wethenew_wtnProcess.monitor))
+    #Create all Wethenew Monitor
+    for endpoint in ["products", "sell-nows", "consignment-slots"]:
+        wethenewProcess = wethenew.wethenew(groups=cookgroups,endpoint=endpoint,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager(["theproxyclub"]))
+        monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create SVD Monitor
     svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["round"]))
