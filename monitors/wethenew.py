@@ -33,7 +33,7 @@ class wethenew:
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if not any(["wethenew" not in g for g in group]):
+        if not any([g in ["wethenew-products", "wethenew-sell-nows", "wethenew-consignment-slots"] for g in group]):    
             return
 
         fields = []
