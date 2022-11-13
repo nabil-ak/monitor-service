@@ -106,7 +106,7 @@ class wethenew:
         #Get all Products from the Site
         while True:
             url = f"https://api-sell.wethenew.com/{self.endpoint}?skip={skip}&take=100&onlyWanted=true"
-            logging.info(msg=f'[wethenew] Scrape {url}')
+            logging.info(msg=f'[wethenew-{self.endpoint}] Scrape {url}')
             response = tls.get(url, proxies=self.proxys.next(), headers={
                 'user-agent': self.user_agent
             })
