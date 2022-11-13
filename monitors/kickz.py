@@ -25,7 +25,7 @@ class kickz:
 
         self.INSTOCK = []
         
-    def discord_webhook(self, group, title, sku, url, thumbnail, prize, status, raffle_date=None):
+    def discord_webhook(self, group, title, sku, url, thumbnail, prize, status, raffle_date):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -88,6 +88,7 @@ class kickz:
         # Stores particular details in array
         for product in products:
             button = product.find("a", {"class": "b-product_tile-link"})
+            raffle_date = ""
 
             if product.find("div", {"class": "b-product_tile-release"}):
                 status = "RAFFLE"
