@@ -45,7 +45,7 @@ class prodirectsoccer_release:
             "embeds": [{
             "title": title,
             "url": url, 
-            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}"+thumbnail.replace(" ","")},
+            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}?url={thumbnail.replace(' ','')}&proxy={','.join(self.proxys.proxygroups)}"},
             "fields": fields,
             "color": int(group['Colour']),
             "footer": {

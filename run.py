@@ -168,7 +168,7 @@ def startMonitors():
     prodirect = [["prodirectsoccer", "soccerengb"], ["prodirectsport","sportengb"], ["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
     #Create prodirectsoccer_release Monitors
     for p in prodirect:
-        prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(site=p[0],releasecategory=p[1],groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager())
+        prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(site=p[0],releasecategory=p[1],groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager(["round","theproxyclub"]))
         monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
 
     """

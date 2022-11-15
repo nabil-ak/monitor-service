@@ -104,7 +104,7 @@ class asos:
             #Format each Product
             product_item = {
                 'title': self.getTitle(str(product['productId'])), 
-                'image': f"{os.environ['IMAGEPROXY']}https://images.asos-media.com/products/nabil/{product['productId']}-2", 
+                'image': f"{os.environ['IMAGEPROXY']}?url=https://images.asos-media.com/products/nabil/{product['productId']}-2&proxy={','.join(self.proxys.proxygroups)}", 
                 'id': str(product['productId']),
                 'variants': product['variants']}
             items.append(product_item)

@@ -102,7 +102,7 @@ class kickz:
                     "name":button.text,
                     "sku":button["data-pid"],
                     "prize":product.find("span", {"class": "b-price-item"}).text,
-                    "image": f"{os.environ['IMAGEPROXY']}{product.find('img')['src']}",
+                    "image": f"{os.environ['IMAGEPROXY']}?url={product.find('img')['src']}&proxy={','.join(self.proxys.proxygroups)}",
                     "url":"https://www.kickz.com"+button["href"],
                     "status": status,
                     "raffle_date":raffle_date
