@@ -158,7 +158,7 @@ def startMonitors():
     
     #Create kickz Monitor
     for region in settings["kickz"]["regions"]:
-        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["round","fineproxy"]))
+        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["round","theproxyclub"]))
         monitorPool.append(Process(target=kickzProcess.monitor))
 
     #Create prodirectsoccer Monitor
