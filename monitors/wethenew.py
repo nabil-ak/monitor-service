@@ -253,7 +253,7 @@ class wethenew:
             except Exception as e:
                 print(f"[wethenew-{self.endpoint}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(10)
+                time.sleep(5)
 
 
 if __name__ == '__main__':
