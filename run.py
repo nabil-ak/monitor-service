@@ -149,7 +149,8 @@ def startMonitors():
     
     #Create all Wethenew Monitor
     for endpoint in ["products", "sell-nows", "consignment-slots"]:
-        wethenewProcess = wethenew.wethenew(groups=cookgroups,endpoint=endpoint,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=ProxyManager(["packet"]))
+        proxyManager = ProxyManager(["theproxyclub"])
+        wethenewProcess = wethenew.wethenew(groups=cookgroups,endpoint=endpoint,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=proxyManager)
         monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create SVD Monitor
