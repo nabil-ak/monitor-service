@@ -154,16 +154,16 @@ def startMonitors():
         monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create SVD Monitor
-    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["round"]))
+    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["theproxyclub"]))
     monitorPool.append(Process(target=svdProcess.monitor))
     
     #Create kickz Monitor
     for region in settings["kickz"]["regions"]:
-        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["round","theproxyclub"]))
+        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["round","fineproxy"]))
         monitorPool.append(Process(target=kickzProcess.monitor))
 
     #Create prodirectsoccer Monitor
-    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["round"]))
+    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["theproxyclub"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
     
     prodirect = [["prodirectsoccer", "soccerengb"], ["prodirectsport","sportengb"], ["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
