@@ -176,6 +176,7 @@ class svd:
             except Exception as e:
                 print(f"[svd] Exception found: {traceback.format_exc()}")
                 logging.error(e)
+                time.sleep(3)
                 # Rotates headers
                 headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
 
