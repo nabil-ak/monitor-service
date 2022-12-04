@@ -183,6 +183,7 @@ class prodirectsoccer:
             except Exception as e:
                 print(f"[prodirectsoccer] Exception found: {traceback.format_exc()}")
                 logging.error(e)
+                time.sleep(5)
 
 
 if __name__ == '__main__':
