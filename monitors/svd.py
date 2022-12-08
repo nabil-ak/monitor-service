@@ -40,7 +40,7 @@ class svd:
             "avatar_url": group["Avatar_Url"],
             "embeds": [{
             "title": title,
-            "url": url, 
+            "url": "https://www.sivasdescalzo.com"+url if "sivasdescalzo" not in url else url, 
             "thumbnail": {"url": thumbnail},
             "fields": fields,
             "color": int(group['Colour']),
