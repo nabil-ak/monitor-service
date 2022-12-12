@@ -149,34 +149,34 @@ def startMonitors():
     
     #Create all Wethenew Monitor
     for endpoint in ["products", "sell-nows", "consignment-slots"]:
-        proxyManager = ProxyManager(["packet"])
+        proxyManager = ProxyManager(["boiling"])
         wethenewProcess = wethenew.wethenew(groups=cookgroups,endpoint=endpoint,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=proxyManager)
         monitorPool.append(Process(target=wethenewProcess.monitor))
 
     #Create SVD Monitor
-    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["theproxyclub"]))
+    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(["boiling","theproxyclub"]))
     monitorPool.append(Process(target=svdProcess.monitor))
     
     #Create kickz Monitor
     for region in settings["kickz"]["regions"]:
-        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["round","fineproxy"]))
+        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(["boiling","fineproxy"]))
         monitorPool.append(Process(target=kickzProcess.monitor))
 
     #Create prodirectsoccer Monitor
-    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["theproxyclub"]))
+    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["boiling","theproxyclub"]))
     monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
     
     prodirect = [["prodirectsoccer", "soccerengb"], ["prodirectsport","sportengb"], ["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
     #Create prodirectsoccer_release Monitors
     for p in prodirect:
-        prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(site=p[0],releasecategory=p[1],groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager(["round","theproxyclub"]))
+        prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(site=p[0],releasecategory=p[1],groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager(["boiling","theproxyclub"]))
         monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
 
     """
     #Create all other prodirect Monitor
     prodirect = [["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
     for p in prodirect:
-        prodirectProcess = prodirectsoccer_other.prodirectsoccer_other(name=p[0], releasecategory= p[1], groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["round"]))
+        prodirectProcess = prodirectsoccer_other.prodirectsoccer_other(name=p[0], releasecategory= p[1], groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["boiling"]))
         monitorPool.append(Process(target=prodirectProcess.monitor))"""
 
     #Create eleventeamsports Monitor
