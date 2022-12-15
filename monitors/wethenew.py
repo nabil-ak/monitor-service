@@ -117,6 +117,7 @@ class wethenew:
             if r["pagination"]["totalPages"] <= r["pagination"]["page"]:
                 break
             skip+=100
+            time.sleep(1)
 
 
         # Stores particular details in array
