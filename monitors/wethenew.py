@@ -117,7 +117,6 @@ class wethenew:
             if r["pagination"]["totalPages"] <= r["pagination"]["page"]:
                 break
             skip+=100
-            time.sleep(1)
 
 
         # Stores particular details in array
@@ -254,7 +253,7 @@ class wethenew:
             except Exception as e:
                 print(f"[wethenew-{self.endpoint}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(10)
+                time.sleep(4)
 
 
 if __name__ == '__main__':
