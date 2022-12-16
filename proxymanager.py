@@ -5,6 +5,7 @@ import random
 from multiprocessing import Lock
 
 PROXYS = {}
+EXCLUDE = ["packet"]
 
 class ProxyManager():
     @staticmethod
@@ -33,12 +34,11 @@ class ProxyManager():
         self.proxygroups = proxygroups
         self.proxys = []
         self.lock = Lock()
-        if self.proxygroups:
-            for group in PROXYS:
-                if group in self.proxygroups:
-                    self.proxys.append(PROXYS[group])
-        else:
-            self.proxys = PROXYS.values()
+
+        for group in PROXYS:
+            if group in self.proxygroups or (not self.proxygroups and group not in EXCLUDE):
+                self.proxys.append(PROXYS[group])
+        
         self.proxys = sum(self.proxys, [])
         self.currentProxy = random.randint(0, len(self.proxys)-1) if self.proxys else 0
 
