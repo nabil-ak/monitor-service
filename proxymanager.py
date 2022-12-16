@@ -36,7 +36,7 @@ class ProxyManager():
         self.lock = Lock()
 
         for group in PROXYS:
-            if group in self.proxygroups or (not self.proxygroups and group not in EXCLUDE):
+            if (self.proxygroups and group in self.proxygroups) or (not self.proxygroups and group not in EXCLUDE):
                 self.proxys.append(PROXYS[group])
         
         self.proxys = sum(self.proxys, [])
