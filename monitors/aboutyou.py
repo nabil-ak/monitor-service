@@ -207,13 +207,15 @@ class aboutyou:
                 61263 = Jordan
 
                 Categorys:
-                20207,20215 = Men and Women 
+                20727 = Women Sneakers
+                21014 = Men Sneakers
+                20207,20215 = Men and Women Shoes
                 190025 = Boys GS
                 189974 = Boys PS
                 189879 = Girls GS
                 189823 = Girls PS
                 """
-                url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
+                url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20727,21014,20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
 
                 # Makes request to site and stores products 
                 items = self.scrape_site(url)
