@@ -1,10 +1,7 @@
 import requests as rq
 import os
 
-if __name__ == "__main__":
-    TLSCLIENT = "http://202.61.192.38:8082"
-else:
-    TLSCLIENT = f"http://{os.environ['GATEWAY']}:8082"
+TLSCLIENT = f"http://{os.environ['GATEWAY']}:8082"
 
 
 def addParamsToHeader(url, headers, proxies):
@@ -32,37 +29,38 @@ def parseCookies(res, url):
     del res.headers["session-cookies"]
     return res
 
-def get(url, headers={}, proxies={}, timeout=10):
+def get(url, headers={}, proxies={}, timeout=10, **kargs):
     """
     get request wrapper
     """
     headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
     
-    res = rq.get(TLSCLIENT, headers=headers, timeout=timeout)
+    res = rq.get(TLSCLIENT, headers=headers, timeout=timeout, **kargs)
     
     res = parseCookies(res, url)
 
     return res
 
-def post(url, headers={}, data={}, proxies={}, timeout=10):
+def post(url, headers={}, proxies={}, timeout=10, **kargs):
     """
     post request wrapper
     """
     headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
     
-    res = rq.post(TLSCLIENT, headers=headers, data=data, timeout=timeout)
+    res = rq.post(TLSCLIENT, headers=headers, timeout=timeout, **kargs)
     
     res = parseCookies(res, url)
 
     return res
 
-if __name__ == "__main__":
-    headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
-    }
-    getReq = get('https://api-sell.wethenew.com/products?skip=100&take=100&onlyWanted=true', headers=headers
-    )
-    print(getReq.text)
-    print(getReq.status_code)
-    print(getReq.cookies)
-    print(getReq.headers)
+def head(url, headers={}, proxies={}, timeout=10, **kargs):
+    """
+    head request wrapper
+    """
+    headers = addParamsToHeader(url=url, headers=headers, proxies=proxies)
+    
+    res = rq.head(TLSCLIENT, headers=headers, timeout=timeout, **kargs)
+    
+    res = parseCookies(res, url)
+
+    return res
