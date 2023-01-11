@@ -33,3 +33,5 @@ services:
     image: index.docker.io/xwe10/tls-api
     ports:
       - "8082:8082"
+  clearverify:
+    image: index.docker.io/xwe10/clear-verify
