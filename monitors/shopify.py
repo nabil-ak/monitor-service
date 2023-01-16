@@ -29,7 +29,7 @@ class shopify(Process):
         self.negativkeywords = settings["negativkeywords"]
         self.tags = settings["tags"]
         self.blacksku = settings["blacksku"]
-        self.firstScrape = False
+        self.firstScrape = True
 
         self.INSTOCK = []
         self.timeout = timeout()
