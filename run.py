@@ -65,8 +65,8 @@ def startMonitors():
         monitorPool.append(asos.asos(groups=filterGroups(["asos"]),settings=settings["asos"],region=region[0],currency=region[1]))
     
     #Create all About You Monitors
-    for region in settings["aboutyou"]["stores"]:
-        monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], regions=region[0], currency=region[1]))
+    for store in settings["aboutyou"]["stores"]:
+        monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], store=store[0], storeid=store[1]))
     
     #Create all Shopify Monitors
     shopifyGlobal = settings["shopify"]
