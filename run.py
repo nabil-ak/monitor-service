@@ -69,7 +69,7 @@ def startMonitors():
         monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], store=store[0], storeid=store[1]))
     
     #Create all Shopify Monitors
-    shopifyGlobal = settings["shopify"].copy()
+    shopifyGlobal = dict(settings["shopify"])
     for s in shopifyGlobal["sites"]:
         if "keywords" in s and s["keywords"]:
             s["keywords"] = s["keywords"]+shopifyGlobal["keywords"]
