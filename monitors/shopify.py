@@ -24,7 +24,7 @@ class shopify(Process):
         self.site = settings["name"]
         self.url = settings["url"]
         self.proxys = ProxyManager(settings["proxys"])
-        self.delay = settings["url"]
+        self.delay = settings["delay"]
         self.keywords= settings["keywords"]
         self.negativkeywords = settings["negativkeywords"]
         self.tags = settings["tags"]
