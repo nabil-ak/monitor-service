@@ -158,7 +158,7 @@ class asos(Process):
         """
 
         #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}-{self.region}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+        logging.basicConfig(filename=f'logs/{SITE}_{self.region}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
 
