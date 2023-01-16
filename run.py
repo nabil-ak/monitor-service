@@ -1,6 +1,7 @@
 import traceback
 import time
 import database
+import copy
 
 from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz
 from threading import Thread
@@ -69,7 +70,7 @@ def startMonitors():
         monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], store=store[0], storeid=store[1]))
     
     #Create all Shopify Monitors
-    shopifyGlobal = dict(settings["shopify"])
+    shopifyGlobal = copy.deepcopy(settings["shopify"])
     for s in shopifyGlobal["sites"]:
         if "keywords" in s and s["keywords"]:
             s["keywords"] = s["keywords"]+shopifyGlobal["keywords"]
