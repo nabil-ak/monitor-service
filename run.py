@@ -1,16 +1,11 @@
-import random
 import traceback
 import time
+import database
 
-from monitors import aboutyou,shopify,cultura,micromania,popinabox,popito,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,magento,asos,kickz
-from multiprocessing import Process
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz
 from threading import Thread
-from random_user_agent.params import SoftwareName, HardwareType
-from random_user_agent.user_agent import UserAgent
-from user_agent import getcurrentChromeUseragent
 from proxymanager import ProxyManager
 
-import database
 
 cookgroups = database.getGroups()
 settings = database.getSettings()
@@ -48,140 +43,82 @@ def updateData():
             
         time.sleep(20)
 
+
+def filterGroups(sites):
+    """
+    Return groups that have a webhook of a specific site
+    """
+    filteredGroups = []
+    for group in cookgroups:
+        if any(site in group for site in sites):
+            filteredGroups.append(group)
+    
+    return filteredGroups
+
 def startMonitors():
     """
     Start every Monitor in a Process
     """
-    #Get 200 random User Agents
-    software_names = [SoftwareName.CHROME.value]
-    hardware_type = [HardwareType.MOBILE__PHONE]
-    user_agents = random.choices(UserAgent(software_names=software_names, hardware_type=hardware_type).get_user_agents(), k=200)
-
-    #Get newest Chrome Useragent
-    chrome_user_agent = getcurrentChromeUseragent()
 
     #Create all Asos Monitors
-    ASOSREGIONS = [["de","eur"], ["fr","eur"], ["es","eur"] , ["it","eur"], ["com","gbp"], ["roe","eur"], ["us","usd"]]
-    for region in ASOSREGIONS:
-        a = asos.asos(groups=cookgroups,skus=settings["asos"]["skus"],delay=settings["asos"]["delay"],region=region[0],currency=region[1],user_agents=user_agents,proxymanager=ProxyManager(settings["asos"]["proxys"]))
-        monitorPool.append(Process(target=a.monitor))
+    for region in settings["asos"]["regions"]:
+        monitorPool.append(asos.asos(groups=filterGroups(["asos"]),settings=settings["asos"],region=region[0],currency=region[1]))
     
     #Create all About You Monitors
-    ABOUTYOUSTORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558],["AT",200],["SE",655],["IE",657],["GR",686],["EE",632],["FI",656],["LV",622],["CY",705]]
-    for store in ABOUTYOUSTORES:
-        a = aboutyou.aboutyou(cookgroups,store[0],store[1],chrome_user_agent,ProxyManager(settings["aboutyou"]["proxys"]),settings["aboutyou"]["delay"],settings["aboutyou"]["keywords"],settings["aboutyou"]["blacksku"],settings["aboutyou"]["whitesku"])
-        monitorPool.append(Process(target=a.monitor))
+    for region in settings["aboutyou"]["stores"]:
+        monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], regions=region[0], currency=region[1]))
     
     #Create all Shopify Monitors
     shopifyGlobal = settings["shopify"]
     for s in shopifyGlobal["sites"]:
-        """
-        Check if keywords are set if so combine them with global keywords otherwise just use the global keywords if "local" keywords dosent exist.
-        """
-        if "keywords" in s:
-            if not s["keywords"]:
-                keywords = s["keywords"]
-            else:
-                keywords = s["keywords"]+shopifyGlobal["keywords"]
+        if "keywords" in s and s["keywords"]:
+            s["keywords"] = s["keywords"]+shopifyGlobal["keywords"]
         else:
-            keywords = shopifyGlobal["keywords"]
+            s["keywords"] = shopifyGlobal["keywords"]
         
-        """
-        Check if tags are set if so combine them with global tags otherwise just use the global tags if "local" tags dosent exist.
-        """
-        if "tags" in s:
-            if not s["tags"]:
-                tags = s["tags"]
-            else:
-                tags = s["tags"]+shopifyGlobal["tags"]
+        if "tags" in s and s["tags"]:
+            s["tags"] = s["tags"]+shopifyGlobal["tags"]
         else:
-            tags = shopifyGlobal["tags"]
+            s["tags"] = shopifyGlobal["tags"]
 
-        """
-        Check if blackskus are set if so combine them with global blackskus otherwise just use the global blackskus if "local" blackskus dosent exist.
-        """
-        if "blacksku" in s:
-            if not s["blacksku"]:
-                blacksku = s["blacksku"]
-            else:
-                blacksku = s["blacksku"]+shopifyGlobal["blacksku"]
+       
+        if "blacksku" in s and s["blacksku"]:
+            s["blacksku"] = s["blacksku"]+shopifyGlobal["blacksku"]
         else:
-            blacksku = shopifyGlobal["blacksku"]
+            s["blacksku"] = shopifyGlobal["blacksku"]
 
-        """
-        Check if negativkeywords are set if so combine them with global negativkeywords otherwise just use the global negativkeywords if "local" negativkeywords dosent exist.
-        """
-        if "negativkeywords" in s:
-            if not s["negativkeywords"]:
-                negativkeywords = s["negativkeywords"]
-            else:
-                negativkeywords = s["negativkeywords"]+shopifyGlobal["negativkeywords"]
+        if "negativkeywords" in s and s["negativkeywords"]:
+            s["negativkeywords"] = s["negativkeywords"]+shopifyGlobal["negativkeywords"]
         else:
-            negativkeywords = shopifyGlobal["negativkeywords"]
+            s["negativkeywords"] = shopifyGlobal["negativkeywords"]
 
-        delay = shopifyGlobal["delay"] if "delay" not in s else s["delay"]
-        shopifyProcess = shopify.shopify(groups=cookgroups,site=s["name"],url=s["url"],user_agents=user_agents,delay=delay,keywords=keywords,negativkeywords=negativkeywords,tags=tags,blacksku=blacksku,proxymanager=ProxyManager(settings["shopify"]["proxys"]))
-        monitorPool.append(Process(target=shopifyProcess.monitor))
+        if "delay" not in s: 
+            s["delay"] = shopifyGlobal["delay"]
 
-    #Create all Magento Monitors
-    '''
-    magentoMonitores = ["topps"]
+        s["proxys"] = shopifyGlobal["proxys"]
+        monitorPool.append(shopify.shopify(groups=filterGroups([s["name"], "shopify"]),settings=s))
 
-    for s in magentoMonitores:
-        magentoProcess = magento.magento(groups=cookgroups,site=s,url=settings[s]["url"],store_id=settings[s]["store_id"],user_agent=chrome_user_agent,delay=settings[s]["delay"],keywords=settings[s]["keywords"],proxys=proxys,blacksku=settings[s]["blacksku"])
-        monitorPool.append(Process(target=magentoProcess.monitor))'''
-    
-    #Create Cultura Monitor
-    #culturaProcess = cultura.cultura(groups=cookgroups,user_agents=[{"user_agent":chrome_user_agent}],querys=settings["cultura"]["query"],delay=settings["cultura"]["delay"],blacksku=settings["cultura"]["blacksku"])
-    #monitorPool.append(Process(target=culturaProcess.monitor))
-    
-    #Create Micromania Monitor
-    micromaniaProcess = micromania.micromania(groups=cookgroups,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=settings["micromania"]["query"],delay=settings["micromania"]["delay"],blacksku=settings["micromania"]["blacksku"])
-    monitorPool.append(Process(target=micromaniaProcess.monitor))
-    
-    #Create Popinabox Monitor
-    popinaboxProcess = popinabox.popinabox(groups=cookgroups,user_agents=user_agents,querys=settings["popinabox"]["query"],delay=settings["popinabox"]["delay"],blacksku=settings["popinabox"]["blacksku"],proxymanager=ProxyManager(settings["popinabox"]["proxys"]))
-    monitorPool.append(Process(target=popinaboxProcess.monitor))
-    
-    #Create Popito Monitor
-    #popitoProcess = popito.popito(groups=cookgroups,user_agents=user_agents,querys=settings["popito"]["query"],delay=settings["popito"]["delay"],blacksku=settings["popito"]["blacksku"])
-    #monitorPool.append(Process(target=popitoProcess.monitor))
-    
     #Create all Wethenew Monitor
-    for endpoint in ["products", "sell-nows", "consignment-slots"]:
-        proxyManager = ProxyManager(settings["wethenew"]["proxys"])
-        wethenewProcess = wethenew.wethenew(groups=cookgroups,endpoint=endpoint,user_agent=chrome_user_agent,blacksku=settings["wethenew"]["blacksku"],delay=settings["wethenew"]["delay"],keywords=settings["wethenew"]["keywords"],proxymanager=proxyManager)
-        monitorPool.append(Process(target=wethenewProcess.monitor))
+    endpoints = ["products", "sell-nows", "consignment-slots"]
+    for ep in endpoints:
+        monitorPool.append(wethenew.wethenew(groups=filterGroups(["wethenew-"+ep]),endpoint=ep,settings=settings["wethenew"]))
 
     #Create SVD Monitor
-    svdProcess = svd.svd(groups=cookgroups,user_agents=user_agents,delay=settings["svd"]["delay"],keywords=settings["svd"]["keywords"],blacksku=settings["svd"]["blacksku"],proxymanager=ProxyManager(settings["svd"]["proxys"]))
-    monitorPool.append(Process(target=svdProcess.monitor))
+    monitorPool.append(svd.svd(groups=filterGroups(["svd"]),settings=settings["svd"]))
     
     #Create kickz Monitor
     for region in settings["kickz"]["regions"]:
-        kickzProcess = kickz.kickz(groups=cookgroups,region=region["region"],regionname=region["name"],user_agent=chrome_user_agent,delay=settings["kickz"]["delay"],keywords=settings["kickz"]["keywords"],blacksku=settings["kickz"]["blacksku"],proxymanager=ProxyManager(settings["kickz"]["proxys"]))
-        monitorPool.append(Process(target=kickzProcess.monitor))
+        monitorPool.append(kickz.kickz(groups=filterGroups(["kickz"]),region=region["region"],regionname=region["name"],settings=settings["kickz"]))
 
     #Create prodirectsoccer Monitor
-    prodirectsoccerProcess = prodirectsoccer.prodirectsoccer(groups=cookgroups,user_agent=chrome_user_agent,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(settings["prodirectsoccer"]["proxys"]))
-    monitorPool.append(Process(target=prodirectsoccerProcess.monitor))
+    monitorPool.append(prodirectsoccer.prodirectsoccer(groups=filterGroups(["prodirectsoccer"]),settings=settings["prodirectsoccer"]))
     
-    prodirect = [["prodirectsoccer", "soccerengb"], ["prodirectsport","sportengb"], ["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
     #Create prodirectsoccer_release Monitors
-    for p in prodirect:
-        prodirectsoccer_release_Process = prodirectsoccer_release.prodirectsoccer_release(site=p[0],releasecategory=p[1],groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer_release"]["query"],delay=settings["prodirectsoccer_release"]["delay"],blacksku=settings["prodirectsoccer_release"]["blacksku"],proxymanager=ProxyManager(settings["prodirectsoccer_release"]["proxys"]))
-        monitorPool.append(Process(target=prodirectsoccer_release_Process.monitor))
-
-    """
-    #Create all other prodirect Monitor
-    prodirect = [["prodirectselect", "selectengb"], ["prodirectbasketball", "basketballengb"], ["prodirectfit", "fitengb"]]
-    for p in prodirect:
-        prodirectProcess = prodirectsoccer_other.prodirectsoccer_other(name=p[0], releasecategory= p[1], groups=cookgroups,user_agents=user_agents,querys=settings["prodirectsoccer"]["query"],delay=settings["prodirectsoccer"]["delay"],blacksku=settings["prodirectsoccer"]["blacksku"],proxymanager=ProxyManager(["boiling"]))
-        monitorPool.append(Process(target=prodirectProcess.monitor))"""
+    for p in settings["prodirectsoccer_release"]["sites"]:
+        monitorPool.append(prodirectsoccer_release.prodirectsoccer_release(groups=filterGroups(["prodirectsoccer_release"]),site=p[0],releasecategory=p[1],settings=settings["prodirectsoccer_release"]))
 
     #Create eleventeamsports Monitor
-    eleventeamsportsProcess = eleventeamsports.eleventeamsports(groups=cookgroups,user_agent=chrome_user_agent,delay=settings["eleventeamsports"]["delay"],querys=settings["eleventeamsports"]["query"],blacksku=settings["eleventeamsports"]["blacksku"],proxymanager=ProxyManager(settings["eleventeamsports"]["proxys"]))
-    monitorPool.append(Process(target=eleventeamsportsProcess.monitor))
+    monitorPool.append(eleventeamsports.eleventeamsports(groups=filterGroups(["eleventeamsports"]),settings=settings["eleventeamsports"]))
     
     #Start all Monitors
     for mon in monitorPool:

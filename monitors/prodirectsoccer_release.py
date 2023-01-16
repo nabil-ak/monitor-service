@@ -1,5 +1,7 @@
-from threading import Thread
+from multiprocessing import Process
+from user_agent import CHROME_USERAGENT
 from datetime import datetime, timedelta
+from proxymanager import ProxyManager
 import random
 import requests as rq
 import time
@@ -7,80 +9,52 @@ import json
 import logging
 import traceback
 import urllib3
-import os
+import webhook
+import threadrunner
+
+SITE = __name__.split(".")[1]
 
 LAUNCHTIMEDELTA = 946684800 #01.01.2000 00.00H
 
-class prodirectsoccer_release:
-    def __init__(self,site,releasecategory,groups,user_agents,proxymanager,delay=2,querys=[],blacksku=[]):
-        self.user_agents = user_agents
-        
+class prodirectsoccer_release(Process):
+    def __init__(self, groups, site, releasecategory, settings):
+        Process.__init__(self)
         self.site = site
         self.releasecategory = releasecategory
         self.groups = groups
-        self.proxys = proxymanager
-        self.delay = delay
-        self.querys= querys
-        self.blacksku = blacksku
+        self.proxys = ProxyManager(settings["proxys"])
+        self.delay = settings["delay"]
+        self.querys= settings["query"]
+        self.blacksku = settings["blacksku"]
+        self.firstScrape = True
 
         self.INSTOCK = []
         
-    def discord_webhook(self, group, title, sku, url, thumbnail, prize, launch):
+    def discord_webhook(self, group, title, pid, url, thumbnail, price, launch):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if "prodirectsoccer_release" not in group:
-            return
-
         fields = []
-        fields.append({"name": "Prize", "value": f"```{prize}£```", "inline": True})
-        fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
-        fields.append({"name": "Type", "value": f"```🟡 RELEASE```", "inline": True})
+        fields.append({"name": "Price", "value": f"{price}£", "inline": True})
+        fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
+        fields.append({"name": "Status", "value": f"**Release**", "inline": True})
         fields.append({"name": "Launch-Time", "value": f"<t:{launch}>", "inline": True})
-        
 
-        data = {
-            "username": group["Name"],
-            "avatar_url": group["Avatar_Url"],
-            "embeds": [{
-            "title": title,
-            "url": url, 
-            "thumbnail": {"url": f"{os.environ['IMAGEPROXY']}?url={thumbnail.replace(' ','')}&proxy={','.join(self.proxys.proxygroups)}"},
-            "fields": fields,
-            "color": int(group['Colour']),
-            "footer": {
-                "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
-                "icon_url": group["Avatar_Url"]
-                },
-            "author": {
-                "name": "prodirectsoccer"
-            }
-            }]
-        }
-        print(data)
-        
-        
-        result = rq.post(group["prodirectsoccer_release"], data=json.dumps(data), headers={"Content-Type": "application/json"})
-        
-        try:
-            result.raise_for_status()
-        except rq.exceptions.HTTPError as err:
-            logging.error(err)
-            print(f"[prodirectsoccer_release] Exception found: {err}")
-        else:
-            logging.info(msg=f'[prodirectsoccer_release] Successfully sent Discord notification to {group["prodirectsoccer_release"]}')
-            print(f'[prodirectsoccer_release] Successfully sent Discord notification to {group["prodirectsoccer_release"]}')
+        webhook.send(group=group, webhook=group[SITE], site=f"{self.site}_release", title=title, url=url, thumbnail=thumbnail, fields=fields)
 
 
-
-    def scrape_release_site(self,query,headers):
+    def scrape_release_site(self,query):
         """
         Scrapes the specified prodirectsoccer release query site and adds items to array
         """
         items = []
 
+        url = f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7B{self.releasecategory}%7D&search={query}&callback=jsonpResponse"
+
         # Makes request to site
-        html = rq.get(f"https://query.published.live1.suggest.eu1.fredhopperservices.com/pro_direct/json?scope=//catalog01/en_GB/categories%3E%7B{self.releasecategory}%7D&search={query}&callback=jsonpResponse",  headers=headers, proxies=self.proxys.next(), verify=False, timeout=10)
+        html = rq.get(url,  headers={
+                'user-agent': CHROME_USERAGENT
+        }, proxies=self.proxys.next())
         html.raise_for_status()
 
         products = json.loads(html.text[14:-1])["suggestionGroups"][1]["suggestions"]
@@ -90,8 +64,8 @@ class prodirectsoccer_release:
         for product in products:
             product_item = {
                     "name":product["name"],
-                    "sku":product["quickref"],
-                    "prize":product["currentprice"].replace("000",""),
+                    "pid":product["quickref"],
+                    "price":product["currentprice"].replace("000",""),
                     "image":product["_thumburl"],
                     "url":product["producturl"],
                     "launch":LAUNCHTIMEDELTA+(int(product["launchtimedelta"])*60)
@@ -99,12 +73,11 @@ class prodirectsoccer_release:
             items.append(product_item)
 
          
-        
-        logging.info(msg=f'[prodirectsoccer_release] Successfully scraped releases for query {query}')
+        logging.info(msg=f'[{self.site}_release] Successfully scraped releases for query {query}')
         return items
         
 
-    def monitor(self):
+    def run(self):
         urllib3.disable_warnings()
         """
         Initiates the monitor
@@ -114,17 +87,8 @@ class prodirectsoccer_release:
         logging.basicConfig(filename=f'logs/{self.site}_release.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
-        print(f'STARTING prodirectsoccer_release MONITOR')
-        logging.info(msg=f'prodirectsoccer_release Successfully started monitor')
+        print(f'STARTING {self.site}_release MONITOR')
 
-        # Ensures that first scrape does not notify all products
-        start = 1
-
-        # Initialising headers
-        headers = {
-                'user-agent': random.choice(self.user_agents)["user_agent"]
-        }
-        
         while True:
             try:
                 startTime = time.time()
@@ -134,53 +98,38 @@ class prodirectsoccer_release:
                 for query in self.querys:
         
                     # Make request to release-site and stores products
-                    items = self.scrape_release_site(query, headers)
+                    items = self.scrape_release_site(query)
                     for product in items:
-                        if product["sku"] not in self.blacksku and datetime.fromtimestamp(product['launch'])>(datetime.now()-timedelta(days=1)):
+                        if product["pid"] not in self.blacksku and datetime.fromtimestamp(product['launch'])>(datetime.now()-timedelta(days=1)):
                             # Check if Product is INSTOCK
-                            if product not in self.INSTOCK and start != 1:
-                                print(f"[prodirectsoccer_release] {product}")
-                                logging.info(msg=f"[prodirectsoccer_release] {product}")
+                            if product not in self.INSTOCK and not self.firstScrape:
+                                print(f"[{self.site}_release] {product['name']} got restocked")
+                                logging.info(msg=f"[{self.site}_release] {product['name']} got restocked")
                                 for group in self.groups:
                                     #Send Ping to each Group
-                                    Thread(target=self.discord_webhook,args=(
-                                        group,
-                                        product['name'],
-                                        product['sku'],
-                                        product['url'],
-                                        product['image'],
-                                        product['prize'],
-                                        product['launch']
-                                        )).start()
+                                    threadrunner.run(
+                                        self.discord_webhook,
+                                        group=group,
+                                        title=product['name'],
+                                        pid=product['pid'],
+                                        url=product['url'],
+                                        thumbnail=product['image'],
+                                        price=product['price'],
+                                        launch=product['launch']
+                                    )
 
                             products.append(product)
 
                 self.INSTOCK = products
 
-                # Allows changes to be notified
-                start = 0
+                self.firstScrape = False
 
                 #Shuffle Query Order
                 random.shuffle(self.querys)
-                logging.info(msg=f'[prodirectsoccer_release] Checked all querys in {time.time()-startTime} seconds')
+                logging.info(msg=f'[{self.site}_release] Checked all querys in {time.time()-startTime} seconds')
                 time.sleep(self.delay)
 
             except Exception as e:
-                print(f"[prodirectsoccer_release] Exception found: {traceback.format_exc()}")
+                print(f"[{self.site}_release] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(5)
-                # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-
-if __name__ == '__main__':
-    devgroup = {
-        "Name":"Nabil DEV",
-        "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
-        "Colour":1382451,
-        "prodirectsoccer":"https://discord.com/api/webhooks/954818030834188368/v4kzvzQxIHl_Bm_F35E5wl4E6gF0ucM3rde4rQTOs9Ic__JjnIul-NxyUIPb1tUKmLtG"
-    }
-    logging.basicConfig(filename=f'logs/prodirectsoccer_release.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-    s = prodirectsoccer_release(groups=[devgroup],delay=5,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}],querys=["dunk"], proxymanager=ProxyManager)
-    s.monitor()

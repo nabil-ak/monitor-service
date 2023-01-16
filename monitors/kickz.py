@@ -1,85 +1,64 @@
-from threading import Thread
-from datetime import datetime
+from multiprocessing import Process
 from proxymanager import ProxyManager
 from bs4 import BeautifulSoup
 from multiprocessing.pool import ThreadPool 
+from user_agent import CHROME_USERAGENT
 import random
 import requests as rq
 import time
-import json
+import webhook
 import logging
 import traceback
 import urllib3
 import os
+import threadrunner
 
-class kickz:
-    def __init__(self,groups,region,regionname,user_agent,proxymanager,delay=1,keywords=[],blacksku=[]):
-        self.user_agent = user_agent
+SITE = __name__.split(".")[1]
+
+class kickz(Process):
+    def __init__(self, groups, region, regionname, settings):
+        Process.__init__(self)
         self.region = region
         self.regionname = regionname
         self.groups = groups
-        self.delay = delay
-        self.keywords= keywords
-        self.proxys = proxymanager
-        self.blacksku = blacksku
+        self.delay = settings["delay"]
+        self.keywords= settings["keywords"]
+        self.proxys = ProxyManager(settings["proxys"])
+        self.blacksku = settings["blacksku"]
+        self.firstScrape = True
 
         self.INSTOCK = []
         
-    def discord_webhook(self, group, title, sku, url, thumbnail, prize, status, raffle_date):
+    def discord_webhook(self, group, title, pid, url, thumbnail, price, status, raffle_date):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if "kickz" not in group:
-            return
 
         fields = []
-        fields.append({"name": "Prize", "value": f"```{prize}```", "inline": True})
-        fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
+        fields.append({"name": "Price", "value": f"{price}", "inline": True})
+        fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
 
         if status == "RESTOCK":
-            fields.append({"name": "Status", "value": f"```🟢 INSTOCK```", "inline": True})
+            fields.append({"name": "Status", "value": f"**New Add**", "inline": True})
         else:
-            fields.append({"name": "Status", "value": f"```🟡 RAFFLE```", "inline": True})
-            fields.append({"name": "Ending", "value": f"```{raffle_date.replace('Release: ','')}```", "inline": True})
-
-        data = {
-            "username": group["Name"],
-            "avatar_url": group["Avatar_Url"],
-            "embeds": [{
-            "title": title,
-            "url": url, 
-            "thumbnail": {"url": thumbnail},
-            "fields": fields,
-            "color": int(group['Colour']),
-            "footer": {
-                "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
-                "icon_url": group["Avatar_Url"]
-                },
-            "author": {
-                "name": "kickz "+self.regionname
-            }
-            }]
-        }
-        result = rq.post(group["kickz"], data=json.dumps(data), headers={"Content-Type": "application/json"})
+            fields.append({"name": "Status", "value": f"**Raffle**", "inline": True})
+            fields.append({"name": "Ending", "value": f"{raffle_date.replace('Release: ','')}", "inline": True})
         
-        try:
-            result.raise_for_status()
-        except rq.exceptions.HTTPError as err:
-            logging.error(err)
-            print(f"[kickz-{self.region}] Exception found: {err}")
-        else:
-            logging.info(msg=f'[kickz] Successfully sent Discord notification to {group["kickz"]}')
-            print(f'[kickz-{self.region}] Successfully sent Discord notification to {group["kickz"]}')
+        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.regionname}", title=title, url=url, thumbnail=thumbnail, fields=fields)
 
 
-    def scrape_site(self,headers, category):
+    def scrape_site(self, category):
         """
         Scrapes the specified kickz query site and adds items to array
         """
         items = []
 
+        url = f"https://www.kickz.com/on/demandware.store/{self.region}/en/Search-ShowAjax?cgid={category}&srule=new-arrivals&start=0&sz={random.randint(2000,100000)}&prefv1=Sneakers&prefn1=categoriesAssignment&prefv2=nike|jordan|new%20balance&prefn2=brand"
+
         # Makes request to site
-        html = rq.get(f"https://www.kickz.com/on/demandware.store/{self.region}/en/Search-ShowAjax?cgid={category}&srule=new-arrivals&start=0&sz={random.randint(2000,100000)}&prefv1=Sneakers&prefn1=categoriesAssignment&prefv2=nike|jordan|new%20balance&prefn2=brand",  headers=headers, proxies=self.proxys.next(), timeout=10)
+        html = rq.get(url, headers={
+                'user-agent': CHROME_USERAGENT
+        })
         html.raise_for_status()
         output = BeautifulSoup(html.text, "html.parser")
         
@@ -99,9 +78,9 @@ class kickz:
                 status = "RESTOCK"
 
             product_item = {
-                    "name":button.text,
-                    "sku":button["data-pid"],
-                    "prize":product.find("span", {"class": "b-price-item"}).text,
+                    "name":button.text.replace("\n",""),
+                    "pid":button["data-pid"],
+                    "price":product.find("span", {"class": "b-price-item"}).text,
                     "image": f"{os.environ['IMAGEPROXY']}?url={product.find('img')['src']}&proxy={','.join(self.proxys.proxygroups)}",
                     "url":"https://www.kickz.com"+button["href"],
                     "status": status,
@@ -110,29 +89,20 @@ class kickz:
             items.append(product_item)
 
         
-        logging.info(msg=f'[kickz-{self.region}] Successfully scraped category {category}')
+        logging.info(msg=f'[{SITE}_{self.regionname}] Successfully scraped category {category}')
         return items
         
-    def monitor(self):
+    def run(self):
         urllib3.disable_warnings()
         """
         Initiates the monitor
         """
 
         #Initiate the Logger
-        logging.basicConfig(filename=f'logs/kickz-{self.region}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+        logging.basicConfig(filename=f'logs/{SITE}_{self.regionname}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
-        print(f'STARTING kickz-{self.region} MONITOR')
-        logging.info(msg=f'kickz-{self.region} Successfully started monitor')
-
-        # Ensures that first scrape does not notify all products
-        start = 1
-
-        # Initialising headers
-        headers = {
-                'user-agent': self.user_agent
-        }
+        print(f'STARTING {SITE}_{self.regionname} MONITOR')
 
         #Initialise categorys and instock items for each category
         # new_M_shoes = New Men(https://www.kickz.com/de/l/neu/m%C3%A4nner/schuhe/)
@@ -149,9 +119,7 @@ class kickz:
                 startTime = time.time()
 
                 # Makes request to each category and stores products 
-                args = []
-                for c in categorys:
-                    args.append((headers, c))
+                args = [(c,) for c in categorys]
 
                 products = []
 
@@ -159,56 +127,46 @@ class kickz:
                     items = sum(threadpool.starmap(self.scrape_site, args), [])
 
                     for product in items:
-                        if product["sku"] not in self.blacksku:
+                        if product["pid"] not in self.blacksku:
                             #Check for Keywords
                             if self.keywords and not any(key.lower() in product["name"].lower() for key in self.keywords):
                                 continue
                             
                             save = {
-                                "sku":product["sku"],
+                                "pid":product["pid"],
                                 "status":product["status"]
                             }
 
                             # Check if Product is INSTOCK
                             if save not in products:
-                                if save not in self.INSTOCK and save["status"] != "RAFFLE_OVER" and start != 1:
-                                            print(f"[kickz-{self.region}] {product}")
-                                            logging.info(msg=f"[kickz-{self.region}] {product}")
+                                if save not in self.INSTOCK and save["status"] != "RAFFLE_OVER" and not self.firstScrape:
+                                            print(f"[{SITE}_{self.regionname}] {product['name']} got restocked")
+                                            logging.info(msg=f"[{SITE}_{self.regionname}] {product['name']} got restocked")
                                             for group in self.groups:
                                                 #Send Ping to each Group
-                                                Thread(target=self.discord_webhook,args=(
-                                                    group,
-                                                    product['name'],
-                                                    product['sku'],
-                                                    product['url'],
-                                                    product['image'],
-                                                    product['prize'],
-                                                    product['status'],
-                                                    product['raffle_date']
-                                                    )).start()
+                                                threadrunner.run(
+                                                    self.discord_webhook,
+                                                    group=group,
+                                                    title=product['name'],
+                                                    pid=product['pid'],
+                                                    url=product['url'],
+                                                    thumbnail=product['image'],
+                                                    price=product['price'],
+                                                    status=product['status'],
+                                                    raffle_date=product['raffle_date']
+                                                )
                                 products.append(save)
 
                     self.INSTOCK = products
 
                     # Allows changes to be notified
-                    start = 0
+                    self.firstScrape = False
 
-                    logging.info(msg=f'[kickz-{self.region}] Checked all querys in {time.time()-startTime} seconds')
+                    logging.info(msg=f'[{SITE}_{self.regionname}] Checked all querys in {time.time()-startTime} seconds')
 
                     time.sleep(self.delay)
 
             except Exception as e:
-                print(f"[kickz-{self.region}] Exception found: {traceback.format_exc()}")
+                print(f"[{SITE}_{self.regionname}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(2)
-
-
-if __name__ == '__main__':
-    devgroup = {
-        "Name":"Nabil DEV",
-        "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
-        "Colour":1382451,
-        "kickz":"https://discord.com/api/webhooks/954818030834188368/v4kzvzQxIHl_Bm_F35E5wl4E6gF0ucM3rde4rQTOs9Ic__JjnIul-NxyUIPb1tUKmLtG"
-    }
-    s = kickz(groups=[devgroup],keywords=["pegasus"],delay=3,user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}])
-    s.monitor()
+                time.sleep(4)

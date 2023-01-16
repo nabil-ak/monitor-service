@@ -1,6 +1,8 @@
-from threading import Thread
-from datetime import datetime
+from multiprocessing import Process
 from timeout import timeout
+from proxymanager import ProxyManager
+from user_agent import CHROME_USERAGENT
+import threadrunner
 import requests as rq
 import tls
 import time
@@ -8,19 +10,23 @@ import json
 import logging
 import traceback
 import urllib3
+import webhook
 
-class wethenew:
-    def __init__(self,groups,endpoint,user_agent,proxymanager,blacksku=[],delay=1,keywords=[]):
+SITE = __name__.split(".")[1]
 
+class wethenew(Process):
+    def __init__(self,groups,endpoint,settings):
+        Process.__init__(self)
         self.groups = groups
         self.endpoint = endpoint
-        self.blacksku = blacksku
-        self.delay = delay
-        self.keywords= keywords
-        self.proxys = proxymanager
-        self.user_agent = user_agent
+        self.blacksku = settings["blacksku"]
+        self.delay = settings["delay"]
+        self.keywords= settings["keywords"]
+        self.auth = settings["auth"]
+        self.proxys = ProxyManager(settings["proxys"])
         self.INSTOCK = []
         self.timeout = timeout()
+        self.firstScrape = True
 
         self.sizesKey = {
             "products":"wantedSizes",
@@ -29,12 +35,10 @@ class wethenew:
         }
 
         
-    def discord_webhook(self,group,sku,title, thumbnail, sizes):
+    def discord_webhook(self, group, pid, title, thumbnail, sizes):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        if not any([g in ["wethenew-products", "wethenew-sell-nows", "wethenew-consignment-slots"] for g in group]):    
-            return
 
         fields = []
         if self.endpoint == "sell-nows":
@@ -54,43 +58,10 @@ class wethenew:
             for size in sizes:
                 s+=size+"\n"
                 status+="🟡 WTB\n"
-            fields.append({"name": "SKU", "value": f"```{sku}```", "inline": False})
-            fields.append({"name": "Sizes", "value": f"```{s}```", "inline": True})
-            fields.append({"name": "Status", "value": f"```{status}```", "inline": True})
+            fields.append({"name": "Pid", "value": f"{pid}", "inline": False})
+            fields.append({"name": "Sizes", "value": f"{s}", "inline": True})
         
-        fields.append({"name": "Links", "value": f"[STOCKX](https://stockx.com/search?s={title.replace(' ', '+')}) | [WETHENEW](https://wethenew.com/search?type=product&q={title.replace(' ', '+')})", "inline": False})
-        
-        
-        data = {
-            "username": group["Name"],
-            "avatar_url": group["Avatar_Url"],
-            "embeds": [{
-            "title": title,
-            "url": f"https://sell.wethenew.com/{'consignment' if self.endpoint == 'consignment-slots' else 'listing'}/product/"+sku, 
-            "thumbnail": {"url": thumbnail},
-            "fields": fields,
-            "color": int(group['Colour']),
-            "footer": {
-                "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
-                "icon_url": group["Avatar_Url"]
-                },
-            "author": {
-                "name": f"wethenew-{self.endpoint}"
-            }
-            }]
-        }
-        
-        
-        result = rq.post(group[f"wethenew-{self.endpoint}"], data=json.dumps(data), headers={"Content-Type": "application/json"})
-        
-        try:
-            result.raise_for_status()
-        except rq.exceptions.HTTPError as err:
-            logging.error(err)
-            print(f"[wethenew-{self.endpoint}] Exception found: {err}")
-        else:
-            logging.info(msg=f'[wethenew-{self.endpoint}] Successfully sent Discord notification to {group["wethenew-{self.endpoint}"]}')
-            print(f'[wethenew-{self.endpoint}] Successfully sent Discord notification to {group["wethenew-{self.endpoint}"]}')
+        webhook.send(group=group, webhook=group["wethenew-"+self.endpoint], site=f"{SITE}_{self.endpoint}", title=title, url=f"https://sell.wethenew.com/{'consignment' if self.endpoint == 'consignment-slots' else 'listing'}/product/"+pid, thumbnail=thumbnail, fields=fields)
 
 
     def scrape_site(self):
@@ -102,14 +73,31 @@ class wethenew:
         output = []
         skip = 0
 
+        headers = {
+            'authority': 'api-sell.wethenew.com',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+            'authorization': f'Bearer {self.auth}',
+            'cache-control': 'no-cache',
+            'feature-policy': "microphone 'none'; geolocation 'none'; camera 'none'; payment 'none'; battery 'none'; gyroscope 'none'; accelerometer 'none';",
+            'origin': 'https://sell.wethenew.com',
+            'pragma': 'no-cache',
+            'referer': 'https://sell.wethenew.com/',
+            'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': CHROME_USERAGENT,
+            'x-xss-protection': '1;mode=block',
+        }
 
         #Get all Products from the Site
         while True:
             url = f"https://api-sell.wethenew.com/{self.endpoint}?skip={skip}&take=100&onlyWanted=true"
-            logging.info(msg=f'[wethenew-{self.endpoint}] Scrape {url}')
-            response = tls.get(url, proxies=self.proxys.next(), headers={
-                'user-agent': self.user_agent
-            })
+            logging.info(msg=f'[{SITE}_{self.endpoint}] Scrape {url}')
+            response = tls.get(url, proxies=self.proxys.next(), headers=headers)
             response.raise_for_status()
             r = response.json()
             for product in r["results"]:
@@ -118,29 +106,28 @@ class wethenew:
                 break
             skip+=100
 
-
         # Stores particular details in array
         for product in output:
             product_item = {
                 'title': product['brand'] + " " + product['name'], 
                 'image': product['image'], 
-                'sku': str(product['id']),
+                'pid': str(product['id']),
                 'variants': product[self.sizesKey[self.endpoint]]
             }
             items.append(product_item)
         
-        logging.info(msg=f'[wethenew-{self.endpoint}] Successfully scraped site')
+        logging.info(msg=f'[{SITE}_{self.endpoint}] Successfully scraped site')
         return items
 
-    def remove(self,sku):
+    def remove(self, pid):
         """
-        Remove all Products from INSTOCK with the same sku
+        Remove all Products from INSTOCK with the same pid
         """
         for elem in self.INSTOCK:
-            if sku == elem[2]:
+            if pid == elem[2]:
                 self.INSTOCK.remove(elem)
 
-    def updated(self,product):
+    def updated(self, product):
         """
         Check if the Variants got updated
         """
@@ -161,63 +148,57 @@ class wethenew:
         Remove duplicates
         """
         newItems = []
-        skus = []
+        pids = []
         for item in items:
-            if item["sku"] not in skus:
+            if item["pid"] not in pids:
                 newItems.append(item)
-                skus.append(item["sku"])
+                pids.append(item["pid"])
         
         return newItems
 
-    def comparitor(self,product, start):
-        product_item = [product['title'], product['image'], product['sku']]
-
-        product_item.append(product['variants']) # Appends in field
+    def comparitor(self, product):
+        product_item = [product['title'], product['image'], product['pid'], product['variants']]
         
         if product['variants']:
             ping, updated = self.updated(product_item)
-            if updated or start == 1:
+            if updated or self.firstScrape:
                 # If product is available but not stored or product is stored but available sizes are changed - sends notification and stores
 
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if start == 0:
-                    print(f"[wethenew-{self.endpoint}] {product_item}")
-                    logging.info(msg=f"[wethenew-{self.endpoint}] {product_item}")
+                if not self.firstScrape:
+                    print(f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
+                    logging.info(msg=f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
                     
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group
-                            Thread(target=self.discord_webhook,args=(
-                                group,
-                                product['sku'],
-                                product['title'],
-                                product['image'],
-                                product['variants'],
-                                )).start()
+                            threadrunner.run(
+                                self.discord_webhook,
+                                group=group,
+                                pid=product['pid'],
+                                title=product['title'],
+                                thumbnail=product['image'],
+                                sizes=product['variants'],
+                                )
         else:
             # Remove old version of the product
             self.remove(product_item[2])
 
-    def monitor(self):
+    def run(self):
         urllib3.disable_warnings()
         """
         Initiates the monitor
         """
 
         #Initiate the Logger
-        logging.basicConfig(filename=f'logs/wethenew-{self.endpoint}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+        logging.basicConfig(filename=f'logs/{SITE}_{self.endpoint}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
-        print(f'STARTING wethenew-{self.endpoint} MONITOR')
-        logging.info(msg=f'[wethenew-{self.endpoint}] Successfully started monitor')
-
-        # Ensures that first scrape does not notify all products
-        start = 1
-
-        
+        print(f'STARTING {SITE}_{self.endpoint} MONITOR')
+ 
         while True:
             try:
                 startTime = time.time()
@@ -229,39 +210,27 @@ class wethenew:
                 items = self.removeduplicate(items)
 
                 for product in items:
-                    if product["sku"] not in self.blacksku:
+                    if product["pid"] not in self.blacksku:
                         if len(self.keywords) == 0:
                             # If no keywords set, checks whether item status has changed
-                            self.comparitor(product, start)
+                            self.comparitor(product)
 
                         else:
                             # For each keyword, checks whether particular item status has changed
                             for key in self.keywords:
                                 if key.lower() in product['title'].lower():
-                                    self.comparitor(product, start)
+                                    self.comparitor(product)
                   
             
-
                 # Allows changes to be notified
-                start = 0
+                self.firstScrape = False
 
-                logging.info(msg=f'[wethenew-{self.endpoint}] Checked in {time.time()-startTime} seconds')
+                logging.info(msg=f'[{SITE}_{self.endpoint}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
                 time.sleep(float(self.delay))
 
             except Exception as e:
-                print(f"[wethenew-{self.endpoint}] Exception found: {traceback.format_exc()}")
+                print(f"[{SITE}_{self.endpoint}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
                 time.sleep(4)
-
-
-if __name__ == '__main__':
-    devgroup = {
-        "Name":"Nabil DEV",
-        "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
-        "Colour":1382451,
-        "wethenew":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
-    }
-    s = wethenew(groups=[devgroup],blacksku=[])
-    s.monitor()

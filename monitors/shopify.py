@@ -1,7 +1,10 @@
-from threading import Thread
+from multiprocessing import Process
 from datetime import datetime
 from timeout import timeout
 from multiprocessing.pool import ThreadPool 
+from proxymanager import ProxyManager
+from user_agent import CHROME_USERAGENT
+import quicktask as qt
 import random
 import requests as rq
 import time
@@ -9,25 +12,29 @@ import json
 import logging
 import traceback
 import urllib3
+import webhook
+import threadrunner
 
-class shopify:
-    def __init__(self,groups,site,url,user_agents,proxymanager,delay=1,keywords=[],negativkeywords=[],tags=[],blacksku=[]):
-        self.user_agents = user_agents
+SITE = __name__.split(".")[1]
 
+class shopify(Process):
+    def __init__(self, groups, settings):
+        Process.__init__(self)
         self.groups = groups
-        self.site = site
-        self.url = url
-        self.proxys = proxymanager
-        self.delay = delay
-        self.keywords= keywords
-        self.negativkeywords = negativkeywords
-        self.tags = tags
-        self.blacksku = blacksku
+        self.site = settings["name"]
+        self.url = settings["url"]
+        self.proxys = ProxyManager(settings["proxys"])
+        self.delay = settings["url"]
+        self.keywords= settings["keywords"]
+        self.negativkeywords = settings["negativkeywords"]
+        self.tags = settings["tags"]
+        self.blacksku = settings["blacksku"]
+        self.firstScrape = False
 
         self.INSTOCK = []
         self.timeout = timeout()
         
-    def discord_webhook(self, group, site, title, sku, url, thumbnail, prize, sizes):
+    def discord_webhook(self, group, title, pid, url, thumbnail, price, sizes):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -35,67 +42,42 @@ class shopify:
         if self.site in group:
             if len(group[self.site]) == 0:
                 return
-            webhook = group[self.site]
+            webhookurl = group[self.site]
         elif "shopify" in group:
-            webhook = group["shopify"]
-        else:
-            return
+            webhookurl = group["shopify"]
 
         fields = []
-        fields.append({"name": "Prize", "value": f"```{prize}```", "inline": True})
-        fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
-        fields.append({"name": "Stock", "value": f"```{str(len(sizes))}+```", "inline": True})
-        for size in sizes:
-            fields.append({"name": size['title'], "value": size['url'], "inline": True})
+        fields.append({"name": "Price", "value": f"{price}", "inline": True})
+        fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
+        fields.append({"name": "Stock", "value": f"{str(len(sizes))}+", "inline": True})
 
-        data = {
-            "username": group["Name"],
-            "avatar_url": group["Avatar_Url"],
-            "embeds": [{
-            "title": title,
-            "url": url, 
-            "thumbnail": {"url": thumbnail},
-            "fields": fields,
-            "color": int(group['Colour']),
-            "footer": {
-                "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
-                "icon_url": group["Avatar_Url"]
-                },
-            "author": {
-                "name": site
-            }
-            }]
-        }
-        
-        
-        result = rq.post(webhook, data=json.dumps(data), headers={"Content-Type": "application/json"})
-        
-        try:
-            result.raise_for_status()
-        except rq.exceptions.HTTPError as err:
-            logging.error(err)
-            print(f"[{self.site}] Exception found: {err}")
-        else:
-            logging.info(msg=f'[{self.site}] Successfully sent Discord notification to {webhook}')
-            print(f'[{self.site}] Successfully sent Discord notification to {webhook}')
+        i = 0
+        for _ in range((len(sizes)//7)+(1 if len(sizes)%7 != 0 else 0)):
+            sizesString = ""
+            for size in sizes[:i+7]:
+                sizesString+=f"{size['url']} | {size['title']}\n"
+                i+=1
+            fields.append({"name": f"ATC | Size", "value": sizesString, "inline": True})
+            sizes = sizes[i:]
+
+        fields.append({"name": "Quicktasks", "value": f"{qt.cybersole(link=url)} - {qt.adonis(site='shopify', link=url)} - {qt.thunder(site='shopify', link=url)} - {qt.panaio(site='Shopify', link=url)}", "inline": False})
+
+        webhook.send(group=group, webhook=webhookurl, site=f"{self.site}", title=title, url=url, thumbnail=thumbnail, fields=fields)
 
 
-    def scrape_site(self,url,page,headers):
+    def scrape_site(self, page):
         """
         Scrapes the specified Shopify site and adds items to array
         """
         items = []
 
         #Fetch the Shopify-Page
-        html = rq.get(url + f'?page={page}&limit={random.randint(251,1000000)}', headers=headers, proxies=self.proxys.next(), verify=False, timeout=20)
+        html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next())
         html.raise_for_status()
         output = json.loads(html.text)['products']
         
         # Stores particular details in array
         for product in output:
-            #Just scrape Sneakers and Sandals when the site is Kith or Slamjam
-            if self.site in ["kith","slamjam","asphaltgold"] and product["product_type"] not in ["Sneakers","Sandals","Footwear","Sandals and Slides"]:
-                continue
             product_item = {
                 'title': product['title'], 
                 'image': product['images'][0]['src'] if product['images'] else "", 
@@ -108,7 +90,7 @@ class shopify:
         logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
         return items
 
-    def remove(self,handle):
+    def remove(self, handle):
         """
         Remove all Products from INSTOCK with the same handle
         """
@@ -116,7 +98,7 @@ class shopify:
             if handle == elem[2]:
                 self.INSTOCK.remove(elem)
 
-    def updated(self,product):
+    def updated(self, product):
         """
         Check if the Variants got updated
         """
@@ -133,7 +115,7 @@ class shopify:
         return[True,True]
 
 
-    def comparitor(self,product, start):
+    def comparitor(self,product):
         product_item = [product['title'], product['image'], product['handle']]
 
         # Collect all available sizes
@@ -143,39 +125,39 @@ class shopify:
                 available_sizes.append({'title': size['title'], 'url': '[ATC](' + self.url[:self.url.find('/', 10)] + '/cart/' + str(size['id']) + ':1)'})
 
         
-        product_item.append(available_sizes) # Appends in field
+        product_item.append(available_sizes)
         
         if available_sizes:
             ping, updated = self.updated(product_item)
-            if updated or start == 1:
+            if updated or self.firstScrape:
                 # If product is available but not stored or product is stored but available sizes are changed - sends notification and stores
 
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if start == 0:
-                    print(f"[{self.site}] {product_item}")
-                    logging.info(msg=f"[{self.site}] {product_item}")
+                if not self.firstScrape:
+                    print(f"[{self.site}] {product_item[0]} got restocked")
+                    logging.info(msg=f"[{self.site}] {product_item[0]} got restocked")
 
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group
-                            Thread(target=self.discord_webhook,args=(
-                                group,
-                                self.site,
-                                product["title"],
-                                product['handle'],
-                                self.url.replace('.json', '/') + product['handle'],
-                                product['image'],
-                                product['variants'][0]['price']+" €",
-                                available_sizes,
-                                )).start()
+                            threadrunner.run(
+                                self.discord_webhook,
+                                group=group,
+                                title=product["title"],
+                                pid=product['handle'],
+                                url=self.url.replace('.json', '/') + product['handle'],
+                                thumbnail=product['image'],
+                                price=product['variants'][0]['price']+" €",
+                                sizes=available_sizes,
+                            )
         else:
             # Remove old version of the product
             self.remove(product_item[2])
 
-    def monitor(self):
+    def run(self):
         urllib3.disable_warnings()
         """
         Initiates the monitor
@@ -186,14 +168,6 @@ class shopify:
             level=logging.DEBUG)
 
         print(f'STARTING {self.site} MONITOR')
-        logging.info(msg=f'[{self.site}] Successfully started monitor')
-
-        # Ensures that first scrape does not notify all products
-        start = 1
-
-        # Initialising headers
-        headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-        
 
         maxpage = 20
         
@@ -203,7 +177,7 @@ class shopify:
 
                 args = []
                 for page in range(1,maxpage):
-                    args.append((self.url, page, headers))
+                    args.append((page,))
 
                 # Makes request to the pages and stores products 
                 with ThreadPool(maxpage) as threadpool:
@@ -215,25 +189,24 @@ class shopify:
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
-                                    self.comparitor(product, start)
+                                    self.comparitor(product)
 
                                 else:
                                     # For each keyword, checks whether particular item status has changed
                                     for key in self.keywords:
                                         if key.lower() in product['title'].lower():
-                                            self.comparitor(product, start)
+                                            self.comparitor(product)
 
                                     # For each tag, checks whether particular item status has changed
                                     for tag in self.tags:
                                         if tag in product['tags']:
-                                            self.comparitor(product, start)
+                                            self.comparitor(product)
 
 
                     logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
 
-                    # Allows changes to be notified
-                    start = 0
+                    self.firstScrape = False
 
                     #Check if maxpage is reached otherwise increase by 5
                     try:
@@ -248,18 +221,4 @@ class shopify:
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-                time.sleep(15)
-
-                # Rotates headers
-                headers = {'User-Agent': random.choice(self.user_agents)["user_agent"]}
-
-
-if __name__ == '__main__':
-    devgroup = {
-        "Name":"Nabil DEV",
-        "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
-        "Colour":1382451,
-        "kith":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
-    }
-    s = shopify(site="asphaltgold",groups=[devgroup],url="https://asphaltgold.com/products.json",user_agents=[{"user_agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/604.18 FABUILD-IOS/6.0.1 FABUILD-IOS-iOS/6.0.1 APP/6.0.1"}])
-    s.monitor()
+                time.sleep(3)

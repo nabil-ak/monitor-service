@@ -3,42 +3,16 @@ from datetime import datetime
 import json
 import requests as rq
 
-def start_webhook(group,delay,website):
-    """
-    Send initial Message
-    """
-    data = {
-        "username": group["Name"],
-        "avatar_url": group["Avatar_Url"],
-        "embeds": [{
-            "title": "Start Monitor",
-            "description": f"Start monitoring {website} with a delay of {delay} seconds. Thanks for using our monitors!",
-            "color": int(group['Colour']),
-            "footer": {
-                "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
-                "icon_url": group["Avatar_Url"]
-            },
-            "author": {
-                "name": website
-            }
-        }]
-    }
-    
-    result = rq.post(group["Webhook"], data=json.dumps(data), headers={"Content-Type": "application/json"})
 
-    try:
-        result.raise_for_status()
-    except rq.exceptions.HTTPError as err:
-        logging.error(err)
-
-def discord_webhook(group,site,title, url, thumbnail,prize, sizes):
+def send(group,webhook,site,title,url,thumbnail,fields):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
-        fields = []
-        fields.append({"name": "[ PRIZE ]", "value": prize, "inline": False})
-        for size in sizes:
-            fields.append({"name": size['title'], "value": size['url'], "inline": True})
+        fields.append({
+            "name": "Links", 
+            "value": f"[StockX](https://stockx.com/search?s={title.replace(' ','+')}) | [GOAT](https://www.goat.com/search?query={title.replace(' ','+')}) | [Wethenew](https://wethenew.com/search?type=product&q={title.replace(' ','+')})", 
+            "inline": False
+        })
 
         data = {
             "username": group["Name"],
@@ -48,7 +22,7 @@ def discord_webhook(group,site,title, url, thumbnail,prize, sizes):
             "url": url, 
             "thumbnail": {"url": thumbnail},
             "fields": fields,
-            "color": int(group['Colour']),
+            "color": group['Colour'],
             "footer": {
                 "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
                 "icon_url": group["Avatar_Url"]
@@ -60,14 +34,10 @@ def discord_webhook(group,site,title, url, thumbnail,prize, sizes):
             ]
         }
         
+        result = rq.post(webhook, data=json.dumps(data), headers={"Content-Type": "application/json"})
         
-        result = rq.post(group["Webhook"], data=json.dumps(data), headers={"Content-Type": "application/json"})
-        
-        try:
-            result.raise_for_status()
-        except rq.exceptions.HTTPError as err:
-            logging.error(err)
-        else:
-            logging.info(msg=f'Successfully sent Discord notification to {group["Webhook"]}')
-            print(f'Successfully sent Discord notification to {group["Webhook"]}')
+        result.raise_for_status()
+    
+        logging.info(msg=f'[{site}] Successfully sent Discord notification to {group["Name"]} with product {title}')
+        print(f'[{site}] Successfully sent Discord notification to {group["Name"]} with product {title}')
             

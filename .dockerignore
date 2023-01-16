@@ -1,7 +1,0 @@
-.vscode
-__pycache__
-dev
-env
-logs
-monitor.log
-debug.py

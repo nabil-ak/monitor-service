@@ -1,103 +1,92 @@
-from threading import Thread
-from datetime import datetime
+from multiprocessing import Process
 from timeout import timeout
 from proxymanager import ProxyManager
+from user_agent import CHROME_USERAGENT
+import quicktask as qt
 import random
-import requests as rq
 import time
 import json
 import logging
 import traceback
 import urllib3
-import cloudscraper
-from user_agent import getcurrentChromeUseragent
+import tls
+import webhook
+import threadrunner
 
+SITE = __name__.split(".")[1]
 
-
-class aboutyou:
-    def __init__(self,groups,store,storeid,user_agent,proxymanager,delay=1,keywords=[],blacksku=[],whitesku=[]):
-        self.scraper = cloudscraper.create_scraper(browser={'custom': user_agent})
+class aboutyou(Process):
+    def __init__(self, groups, settings, store, storeid):
+        Process.__init__(self)
         self.INSTOCK = []
         self.groups = groups
-        self.proxys = proxymanager
-        self.delay = delay
-        self.keywords = keywords
-        self.proxytime = 0
-        self.blacksku = blacksku
-        self.whitesku = whitesku
+        self.proxys = ProxyManager(settings["proxys"])
+        self.delay = settings["delay"]
+        self.keywords = settings["keywords"]
+        self.blacksku = settings["blacksku"]
+        self.whitesku = settings["whitesku"]
         self.store = store
         self.storeid = storeid
         self.timeout = timeout()
+        self.firstScrape = True
 
-    def discord_webhook(self,group,sku,store,title, url, thumbnail,prize, sizes, stock):
+    def discord_webhook(self, group, pid, title, url, thumbnail, price, sizes, stock):
             """
             Sends a Discord webhook notification to the specified webhook URL
             """
-            if "aboutyou" not in group:
-                return
 
             fields = []
-            fields.append({"name": "Prize", "value": f"```{prize} €```", "inline": True})
-            fields.append({"name": "SKU", "value": f"```{sku}```", "inline": True})
-            fields.append({"name": "Region", "value": f"```{store}```", "inline": True})
+            fields.append({"name": "Price", "value": f"{price} €", "inline": True})
+            fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
+            fields.append({"name": "Region", "value": f"{self.store}", "inline": True})
 
             sizesSTR = "\n"
             stockSTR = ""
             for size in sizes:
-                sizesSTR+=size+"\n"
-                stockSTR+=f"{'🟢' if stock[size] >2 else '🟡'} {stock[size]}\n"
-            fields.append({"name": "Sizes", "value": f"```{sizesSTR}```", "inline": True})
-            fields.append({"name": "Stock", "value": f"```{stockSTR}```", "inline": True})
-
-            links = {"name": "Links", 
-            "value": f"[CH](https://www.aboutyou.ch/p/nabil/nabil-{sku}) - [CZ](https://www.aboutyou.cz/p/nabil/nabil-{sku}) - [DE](https://www.aboutyou.de/p/nabil/nabil-{sku}) - [FR](https://www.aboutyou.fr/p/nabil/nabil-{sku}) - [IT](https://www.aboutyou.it/p/nabil/nabil-{sku}) - [PL](https://www.aboutyou.pl/p/nabil/nabil-{sku}) - [SK](https://www.aboutyou.sk/p/nabil/nabil-{sku}) - [ES](https://www.aboutyou.es/p/nabil/nabil-{sku}) - [NL](https://www.aboutyou.nl/p/nabil/nabil-{sku}) - [BE](https://www.aboutyou.nl/p/nabil/nabil-{sku})", "inline": False}
-            fields.append(links)
-
-            data = {
-                "username": group["Name"],
-                "avatar_url": group["Avatar_Url"],
-                "embeds": [{
-                "title": title,
-                "url": url, 
-                "thumbnail": {"url": thumbnail},
-                "fields": fields,
-                "color": int(group['Colour']),
-                "footer": {
-                    "text": f"{group['Name']} | {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}",
-                    "icon_url": group["Avatar_Url"]
-                    },
-                "author": {
-                    "name": "About You"
-                }
-                }
-                ]
-            }
-            
-            
-            result = rq.post(group["aboutyou"], data=json.dumps(data), headers={"Content-Type": "application/json"})
-            
-            try:
-                result.raise_for_status()
-            except rq.exceptions.HTTPError as err:
-                logging.error(err)
-                print(f"[ABOUT YOU {self.store}] Exception found: {err}")
-            else:
-                logging.info(msg=f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
-                print(f'[ABOUT YOU {self.store}] Successfully sent Discord notification to {group["aboutyou"]}')
+                sizesSTR+=f"{size}\n"
+                stockSTR+=f"{stock[size]}\n"
+            fields.append({"name": "Sizes", "value": f"{sizesSTR}", "inline": True})
+            fields.append({"name": "Stock", "value": f"{stockSTR}", "inline": True})
 
 
-    def scrape_site(self,url):
+            fields.append({
+                "name": "Links", 
+                "value": f"[CH](https://www.aboutyou.ch/p/nabil/nabil-{pid}) - [CZ](https://www.aboutyou.cz/p/nabil/nabil-{pid}) - [DE](https://www.aboutyou.de/p/nabil/nabil-{pid}) - [FR](https://www.aboutyou.fr/p/nabil/nabil-{pid}) - [IT](https://www.aboutyou.it/p/nabil/nabil-{pid}) - [PL](https://www.aboutyou.pl/p/nabil/nabil-{pid}) - [SK](https://www.aboutyou.sk/p/nabil/nabil-{pid}) - [ES](https://www.aboutyou.es/p/nabil/nabil-{pid}) - [NL](https://www.aboutyou.nl/p/nabil/nabil-{pid}) - [BE](https://www.aboutyou.nl/p/nabil/nabil-{pid})", 
+                "inline": False})
+
+            fields.append({"name": "Quicktasks", "value": f"{qt.adonis(site='AboutYou', link=pid)} - {qt.koi(site='AboutYou', link=pid)} - {qt.loscobot(site='AboutYou', link=pid)} - {qt.panaio(site='AboutYou', link=pid)}", "inline": True})
+
+            webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.store}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+
+
+    def scrape_site(self):
         """
         Scrapes the specified About You site and adds items to array
         """
+
+        """
+        Brands:
+        53709 = Nike Sportwear
+        61263 = Jordan
+
+        Categorys:
+        20727 = Women Sneakers
+        21014 = Men Sneakers
+        20207,20215 = Men and Women Shoes
+        190025 = Boys GS
+        189974 = Boys PS
+        189879 = Girls GS
+        189823 = Girls PS
+        """
+        url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20727,21014,20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
+
         items = []
     
-        html = self.scraper.get(url, proxies=self.proxys.next(), timeout=10)
+        html = tls.get(url, proxies=self.proxys.next(), headers={"user-agent":CHROME_USERAGENT})
         output = json.loads(html.text)['entities']
         
-        # Stores particular details in array
+    
         for product in output:
-            #Format each Product
             product_item = {
                 'title': product['attributes']['brand']['values']['label']+" "+product['attributes']['name']['values']['label'], 
                 'image': "https://cdn.aboutstatic.com/file/"+product['images'][0]['hash'] if "images" in product['images'][0]['hash'] else "https://cdn.aboutstatic.com/file/images/"+product['images'][0]['hash'], 
@@ -106,11 +95,10 @@ class aboutyou:
             items.append(product_item)
         
         
-        logging.info(msg=f'[ABOUT YOU {self.store}] Successfully scraped site')
-        self.scraper.close()
+        logging.info(msg=f'[{SITE}_{self.store}] Successfully scraped all categorys')
         return items
 
-    def remove(self,id):
+    def remove(self, id):
         """
         Remove all Products from INSTOCK with the same id
         """
@@ -118,12 +106,12 @@ class aboutyou:
             if id == elem[2]:
                 self.INSTOCK.remove(elem)
 
-    def checkUpdated(self,product):
+    def checkUpdated(self, product):
         """
         Check if the Variants got updated
         """
         for elem in self.INSTOCK:
-            #Check if Product was not changed
+            #Check if product is not changed
             if product[2] == elem[2] and product[3] == elem[3]:
                 return [False,False]
                 
@@ -135,7 +123,7 @@ class aboutyou:
         return[True,True]
 
 
-    def comparitor(self,product, start):
+    def comparitor(self, product):
         product_item = [product['title'], product['image'], product['id']]
 
         # Collect all available sizes
@@ -147,115 +135,80 @@ class aboutyou:
                 available_sizes.append(size['attributes']['vendorSize']['values']['label'])
                 stocks[size['attributes']['vendorSize']['values']['label']] = size['stock']['quantity']
         
-        product_item.append(available_sizes) # Appends in field
+        product_item.append(available_sizes)
         
         if available_sizes:
             ping, updated = self.checkUpdated(product_item)
-            if updated or start == 1:
+            if updated or self.firstScrape:
                 # If product is available but not stored or product is stored but available sizes are changed - sends notification and stores
 
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if start == 0:
-                    print(f"[ABOUT YOU {self.store}] {product_item}")
-                    logging.info(msg=f"[ABOUT YOU {self.store}] {product_item}")
+                if not self.firstScrape:
+                    print(f"[{SITE}_{self.store}] {product_item[0]} got restocked")
+                    logging.info(msg=f"[{SITE}_{self.store}] {product_item[0]} got restocked")
 
                     if ping and self.timeout.ping(product_item):
                         for group in self.groups:
                             #Send Ping to each Group
-                            Thread(target=self.discord_webhook,args=(
-                                group,
-                                product['id'],
-                                self.store,
-                                product['title'],
-                                f"https://www.aboutyou.{self.store}/p/nabil/nabil-{product['id']}",
-                                product['image'],
-                                str(product['variants'][0]['price']['withTax']/100),
-                                available_sizes,
-                                stocks,
-                                )).start()
+                            threadrunner.run(
+                                self.discord_webhook,
+                                group=group,
+                                pid=product['id'],
+                                title=product['title'],
+                                url=f"https://www.aboutyou.{self.store}/p/nabil/nabil-{product['id']}",
+                                thumbnail=product['image'],
+                                price=str(product['variants'][0]['price']['withTax']/100),
+                                sizes=available_sizes,
+                                stock=stocks,
+                            )
         else:
             # Remove old version of the product
             self.remove(product_item[2])
 
-    def monitor(self):
+    def run(self):
         urllib3.disable_warnings()
         """
         Initiates the monitor
         """
 
         #Initiate the Logger
-        logging.basicConfig(filename=f'logs/aboutyou-{self.store}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
+        logging.basicConfig(filename=f'logs/{SITE}-{self.store}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
             level=logging.DEBUG)
 
 
-        print(f'STARTING ABOUT YOU {self.store} MONITOR')
-        logging.info(msg=f'[ABOUT YOU {self.store}] Successfully started monitor')
+        print(f'STARTING {SITE} {self.store} MONITOR')
 
-        # Ensures that first scrape does not notify all products
-        start = 1
-
-    
         while True:
             try:
                 startTime = time.time()
-                """
-                Brands:
-                53709 = Nike Sportwear
-                61263 = Jordan
-
-                Categorys:
-                20727 = Women Sneakers
-                21014 = Men Sneakers
-                20207,20215 = Men and Women Shoes
-                190025 = Boys GS
-                189974 = Boys PS
-                189879 = Girls GS
-                189823 = Girls PS
-                """
-                url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20727,21014,20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
 
                 # Makes request to site and stores products 
-                items = self.scrape_site(url)
+                items = self.scrape_site()
                 for product in items:
                     if int(product['id']) not in self.blacksku:
                         if len(self.keywords) == 0 or int(product['id']) in self.whitesku:
                             # If no keywords set or sku is whitelisted, checks whether item status has changed
-                            self.comparitor(product, start)
+                            self.comparitor(product)
 
                         else:
                             # For each keyword, checks whether particular item status has changed
                             for key in self.keywords:
                                 if key.lower() in product['title'].lower():
-                                    self.comparitor(product, start)
+                                    self.comparitor(product)
 
                 # Allows changes to be notified
-                start = 0
+                self.firstScrape = False
                 
-                logging.info(msg=f'[ABOUT YOU {self.store}] Checked in {time.time()-startTime} seconds')
+                logging.info(msg=f'[{SITE}_{self.store}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
                 time.sleep(float(self.delay))
 
 
             except Exception as e:
-                print(f"[ABOUT YOU {self.store}] Exception found: {traceback.format_exc()}")
+                print(f"[{SITE}_{self.store}] Exception found: {traceback.format_exc()}")
                 logging.error(e)
-
-
-if __name__ == '__main__':
-    devgroup = {
-        "Name":"Nabil DEV",
-        "Avatar_Url":"https://i.imgur.com/H7rGtJ1.png",
-        "Colour":1382451,
-        "aboutyou":"https://discord.com/api/webhooks/954709947751473202/rREovDHUt60B8ws8ov4dPj0ZP_k5Tf0t-gUnpcEIVQTrmVKzJ1v0alkG5VKoqeZIS85g"
-    }
-    STORES = [["DE",139],["CH",431],["FR",658],["ES",670],["IT",671],["PL",550],["CZ",554],["SK",586],["NL",545],["BE",558]]
-    logging.basicConfig(filename=f'aboutyou.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-    for store in STORES:
-        a = aboutyou(groups=[devgroup],keywords=[],delay=0.1,store=store[0],storeid=store[1],
-        user_agent=getcurrentChromeUseragent())
-        Thread(target=a.monitor).start()
+                time.sleep(3)
