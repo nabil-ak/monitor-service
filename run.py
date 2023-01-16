@@ -69,7 +69,7 @@ def startMonitors():
         monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], store=store[0], storeid=store[1]))
     
     #Create all Shopify Monitors
-    shopifyGlobal = settings["shopify"]
+    shopifyGlobal = settings["shopify"].copy()
     for s in shopifyGlobal["sites"]:
         if "keywords" in s and s["keywords"]:
             s["keywords"] = s["keywords"]+shopifyGlobal["keywords"]
@@ -130,5 +130,4 @@ if __name__ == "__main__":
 
     #Check if new Group was added or updated and also check if settings was updated
     Thread(target=updateData).start()
-
 
