@@ -206,14 +206,14 @@ class shopify(Process):
                     logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
 
-                    self.firstScrape = False
+                    
 
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
+                        self.firstScrape = False
                     except:
                         maxpage+=5
-                        start = 1
 
                 # User set delay
                 time.sleep(float(self.delay))

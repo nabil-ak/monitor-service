@@ -1,6 +1,7 @@
 from multiprocessing import Process
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
+from multiprocessing.pool import ThreadPool 
 import requests as rq
 import time
 import json
@@ -66,8 +67,8 @@ class svd(Process):
             items.append(product_item)
 
         
-        logging.info(msg=f'[{SITE}] Successfully scraped site')
-        return items
+        logging.info(msg=f'[{SITE}] Successfully scraped category {category}')
+        return [category,items]
         
 
     def run(self):
@@ -100,45 +101,45 @@ class svd(Process):
             try:
                 startTime = time.time()
 
-                # Makes request to site and stores products 
+                # Makes request to each category
+                with ThreadPool(len(categorys)) as threadpool:
+                    args = [(c,) for c in categorys]
+                    itemsSplited = threadpool.starmap(self.scrape_site, args)
 
-                for c in categorys:
-                    items = self.scrape_site(c)
+                    for c, items in itemsSplited:
+                        products = []
 
-                    products = []
+                        for product in items:
+                            if product["sku"] not in self.blacksku and product["state"] not in ["Sold Out", "Raffle"] and len(product["sku"]) > 1:
+                                #Check for Keywords
+                                if self.keywords and not any(key.lower() in product["name"].lower() for key in self.keywords):
+                                    continue
 
-                    for product in items:
-                        if product["sku"] not in self.blacksku and product["state"] not in ["Sold Out", "Raffle"] and len(product["sku"]) > 1:
-                            #Check for Keywords
-                            if self.keywords and not any(key.lower() in product["name"].lower() for key in self.keywords):
-                                continue
+                                # Check if Product is INSTOCK
+                                if not any([product["sku"] in cat for cat in self.INSTOCK.values()]) and not self.firstScrape:
+                                        print(f"[{SITE}] {product['name']} got restocked")
+                                        logging.info(msg=f"[{SITE}] {product['name']} got restocked")
+                                        for group in self.groups:
+                                            #Send Ping to each Group
+                                            threadrunner.run(
+                                                self.discord_webhook,
+                                                group=group,
+                                                title=product['name'],
+                                                sku=product['sku'],
+                                                url=product['url'],
+                                                thumbnail=product['image'],
+                                                price=product['price']
+                                                )
+                                products.append(product["sku"])
 
-                            # Check if Product is INSTOCK
-                            if not any([product["sku"] in cat for cat in self.INSTOCK.values()]) and not self.firstScrape:
-                                    print(f"[{SITE}] {product['name']} got restocked")
-                                    logging.info(msg=f"[{SITE}] {product['name']} got restocked")
-                                    for group in self.groups:
-                                        #Send Ping to each Group
-                                        threadrunner.run(
-                                            self.discord_webhook,
-                                            group=group,
-                                            title=product['name'],
-                                            sku=product['sku'],
-                                            url=product['url'],
-                                            thumbnail=product['image'],
-                                            price=product['price']
-                                            )
-                            products.append(product["sku"])
-
-                    self.INSTOCK[c] = products
-
-                    time.sleep(self.delay/len(categorys))
-
+                        self.INSTOCK[c] = products
 
                 # Allows changes to be notified
                 self.firstScrape = False
 
                 logging.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
+
+                time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
