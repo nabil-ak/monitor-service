@@ -3,7 +3,7 @@ import time
 import database
 import copy
 
-from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz,shopify_priceerror
 from threading import Thread
 from proxymanager import ProxyManager
 
@@ -103,6 +103,9 @@ def startMonitors():
     endpoints = ["products", "sell-nows", "consignment-slots"]
     for ep in endpoints:
         monitorPool.append(wethenew.wethenew(groups=filterGroups(["wethenew-"+ep]),endpoint=ep,settings=settings["wethenew"]))
+
+    #Wethenew Price Error
+    monitorPool.append(shopify_priceerror.shopify_priceerror(groups=filterGroups(["wethenew_priceerror"]),settings=settings["wethenew_priceerror"]))
 
     #Create SVD Monitor
     monitorPool.append(svd.svd(groups=filterGroups(["svd"]),settings=settings["svd"]))
