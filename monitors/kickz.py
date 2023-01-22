@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from multiprocessing.pool import ThreadPool 
 from user_agent import CHROME_USERAGENT
 import random
-import requests as rq
+import tls
 import time
 import webhook
 import logging
@@ -56,7 +56,7 @@ class kickz(Process):
         url = f"https://www.kickz.com/on/demandware.store/{self.region}/en/Search-ShowAjax?cgid={category}&srule=new-arrivals&start=0&sz={random.randint(2000,100000)}&prefv1=Sneakers&prefn1=categoriesAssignment&prefv2=nike|jordan|new%20balance&prefn2=brand"
 
         # Makes request to site
-        html = rq.get(url, headers={
+        html = tls.get(url, headers={
                 'user-agent': CHROME_USERAGENT
         })
         html.raise_for_status()
