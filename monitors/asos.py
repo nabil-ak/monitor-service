@@ -129,24 +129,22 @@ class asos(Process):
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if not self.firstScrape:
+                if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.region}] {product_item[0]} got restocked")
                     logging.info(msg=f"[{SITE}_{self.region}] {product_item[0]} got restocked")
-
-                    if ping and self.timeout.ping(product_item):
-                        for group in self.groups:
-                            #Send Ping to each Group
-                            threadrunner.run(
-                                self.discord_webhook,
-                                group=group,
-                                pid=product['id'],
-                                region=self.region,
-                                title=product['title'],
-                                url=f"https://www.asos.com/{self.region}/nabil/prd/{product['id']}",
-                                thumbnail=product['image'],
-                                price=str(product['variants'][0]['price']['current']['text']),
-                                sizes=available_sizes
-                            )
+                    for group in self.groups:
+                        #Send Ping to each Group
+                        threadrunner.run(
+                            self.discord_webhook,
+                            group=group,
+                            pid=product['id'],
+                            region=self.region,
+                            title=product['title'],
+                            url=f"https://www.asos.com/{self.region}/nabil/prd/{product['id']}",
+                            thumbnail=product['image'],
+                            price=str(product['variants'][0]['price']['current']['text']),
+                            sizes=available_sizes
+                        )
         else:
             # Remove old version of the product
             self.remove(product_item[2])

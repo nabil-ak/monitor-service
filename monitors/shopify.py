@@ -136,23 +136,21 @@ class shopify(Process):
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if not self.firstScrape:
+                if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{self.site}] {product_item[0]} got restocked")
                     logging.info(msg=f"[{self.site}] {product_item[0]} got restocked")
-
-                    if ping and self.timeout.ping(product_item):
-                        for group in self.groups:
-                            #Send Ping to each Group
-                            threadrunner.run(
-                                self.discord_webhook,
-                                group=group,
-                                title=product["title"],
-                                pid=product['handle'],
-                                url=self.url.replace('.json', '/') + product['handle'],
-                                thumbnail=product['image'],
-                                price=product['variants'][0]['price']+" €",
-                                sizes=available_sizes,
-                            )
+                    for group in self.groups:
+                        #Send Ping to each Group
+                        threadrunner.run(
+                            self.discord_webhook,
+                            group=group,
+                            title=product["title"],
+                            pid=product['handle'],
+                            url=self.url.replace('.json', '/') + product['handle'],
+                            thumbnail=product['image'],
+                            price=product['variants'][0]['price']+" €",
+                            sizes=available_sizes,
+                        )
         else:
             # Remove old version of the product
             self.remove(product_item[2])

@@ -168,21 +168,19 @@ class wethenew(Process):
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if not self.firstScrape:
+                if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
                     logging.info(msg=f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
-                    
-                    if ping and self.timeout.ping(product_item):
-                        for group in self.groups:
-                            #Send Ping to each Group
-                            threadrunner.run(
-                                self.discord_webhook,
-                                group=group,
-                                pid=product['pid'],
-                                title=product['title'],
-                                thumbnail=product['image'],
-                                sizes=product['variants'],
-                                )
+                    for group in self.groups:
+                        #Send Ping to each Group
+                        threadrunner.run(
+                            self.discord_webhook,
+                            group=group,
+                            pid=product['pid'],
+                            title=product['title'],
+                            thumbnail=product['image'],
+                            sizes=product['variants'],
+                            )
         else:
             # Remove old version of the product
             self.remove(product_item[2])

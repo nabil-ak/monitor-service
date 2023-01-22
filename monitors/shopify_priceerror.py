@@ -94,7 +94,7 @@ class shopify_priceerror(Process):
         @return [schould ping, if updated]
         """
         for elem in self.INSTOCK:
-            #Check if the price was changed by more than 50%
+            #Check if the price was changed by more than self.percent
             if product[2] == elem[2]:
                 for size in product[3]:
                     for sizeOLD in elem[3]:
@@ -136,22 +136,21 @@ class shopify_priceerror(Process):
                 self.remove(product_item[2])
                 
                 self.INSTOCK.append(product_item)
-                if not self.firstScrape:
+                if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{self.site}] {product_item[0]} got a price error")
                     logging.info(msg=f"[{self.site}] {product_item[0]} got a price error")
 
-                    if ping and self.timeout.ping(product_item):
-                        for group in self.groups:
-                            #Send Ping to each Group
-                            threadrunner.run(
-                                self.discord_webhook,
-                                group=group,
-                                title=product["title"],
-                                pid=product['handle'],
-                                url=self.url.replace('.json', '/') + product['handle'],
-                                thumbnail=product['image'],
-                                sizes=available_sizes,
-                            )
+                    for group in self.groups:
+                        #Send Ping to each Group
+                        threadrunner.run(
+                            self.discord_webhook,
+                            group=group,
+                            title=product["title"],
+                            pid=product['handle'],
+                            url=self.url.replace('.json', '/') + product['handle'],
+                            thumbnail=product['image'],
+                            sizes=available_sizes,
+                        )
         else:
             # Remove old version of the product
             self.remove(product_item[2])
