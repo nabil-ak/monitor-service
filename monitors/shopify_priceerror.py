@@ -39,7 +39,7 @@ class shopify_priceerror(Process):
         fields = []
         fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
         fields.append({"name": "Stock", "value": f"{str(len(sizes))}+", "inline": True})
-        fields.append({"name": "Status", "value": f"**{(1-self.percent)*100}% price reduction**", "inline": True})
+        fields.append({"name": "Status", "value": f"**{round((1-self.percent)*100)}% price reduction**", "inline": True})
 
         i = 0
         for _ in range((len(sizes)//7)+(1 if len(sizes)%7 != 0 else 0)):
