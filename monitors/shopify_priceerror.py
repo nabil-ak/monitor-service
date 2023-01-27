@@ -1,5 +1,4 @@
 from multiprocessing import Process
-from datetime import datetime
 from timeout import timeout
 from multiprocessing.pool import ThreadPool 
 from proxymanager import ProxyManager
@@ -98,7 +97,7 @@ class shopify_priceerror(Process):
             if product[2] == elem[2]:
                 for size in product[3]:
                     for sizeOLD in elem[3]:
-                        if size['title'] == sizeOLD['title'] and size['price'] != sizeOLD['price']:
+                        if size['id'] == sizeOLD['id'] and size['price'] != sizeOLD['price']:
                             if (size['price']/sizeOLD['price'])<=self.percent:
                                 return[True,True]
                             else:
@@ -119,7 +118,9 @@ class shopify_priceerror(Process):
         available_sizes = []
         for size in product['variants']:
             if size['available']: # Makes an ATC link from the variant ID
-                available_sizes.append({'title': size['title'], 
+                available_sizes.append({
+                'id': size['id'],
+                'title': size['title'], 
                 'url': '[ATC](' + self.url[:self.url.find('/', 10)] + '/cart/' + str(size['id']) + ':1)',
                 'price': float(size['price'])
                 })
