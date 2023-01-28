@@ -3,10 +3,8 @@ from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 import threadrunner
-import requests as rq
 import tls
 import time
-import json
 import logging
 import traceback
 import urllib3
@@ -26,6 +24,7 @@ class wethenew(Process):
         self.proxys = ProxyManager(settings["proxys"])
         self.INSTOCK = []
         self.timeout = timeout()
+        self.authPointer = -1
         self.firstScrape = True
 
         self.sizesKey = {
@@ -34,6 +33,12 @@ class wethenew(Process):
             "consignment-slots":"sizes"
         }
 
+    def getAuth(self):
+        """
+        Get a new Auth token
+        """
+        self.authPointer = 0 if self.authPointer == len(self.auth)-1 else self.authPointer+1 
+        return self.auth[self.authPointer]
         
     def discord_webhook(self, group, pid, title, thumbnail, sizes):
         """
@@ -48,7 +53,7 @@ class wethenew(Process):
             for size in sizes:
                 s+=f"`{size['size']}`\n"
                 prices+=f"`{size['price']}€`\n"
-                links+=f"[ATC](https://sell.wethenew.com/instant-sales/{size['id']})\n"
+                links+=f"[Sell Now](https://sell.wethenew.com/instant-sales/{size['id']})\n"
             fields.append({"name": "Sizes", "value": s, "inline": True})
             fields.append({"name": "Prices", "value": prices, "inline": True})
             fields.append({"name": "Accept", "value": links, "inline": True})
@@ -73,32 +78,34 @@ class wethenew(Process):
         output = []
         skip = 0
 
-        headers = {
-            'authority': 'api-sell.wethenew.com',
-            'accept': 'application/json, text/plain, */*',
-            'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-            'authorization': f'Bearer {self.auth}',
-            'cache-control': 'no-cache',
-            'feature-policy': "microphone 'none'; geolocation 'none'; camera 'none'; payment 'none'; battery 'none'; gyroscope 'none'; accelerometer 'none';",
-            'origin': 'https://sell.wethenew.com',
-            'pragma': 'no-cache',
-            'referer': 'https://sell.wethenew.com/',
-            'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-site',
-            'user-agent': CHROME_USERAGENT,
-            'x-xss-protection': '1;mode=block',
-        }
 
         #Get all Products from the Site
         while True:
+            headers = {
+                'authority': 'api-sell.wethenew.com',
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+                'authorization': f'Bearer {self.getAuth()}',
+                'cache-control': 'no-cache',
+                'feature-policy': "microphone 'none'; geolocation 'none'; camera 'none'; payment 'none'; battery 'none'; gyroscope 'none'; accelerometer 'none';",
+                'origin': 'https://sell.wethenew.com',
+                'pragma': 'no-cache',
+                'referer': 'https://sell.wethenew.com/',
+                'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-site',
+                'user-agent': CHROME_USERAGENT,
+                'x-xss-protection': '1;mode=block',
+            }
+
             url = f"https://api-sell.wethenew.com/{self.endpoint}?skip={skip}&take=100&onlyWanted=true"
             logging.info(msg=f'[{SITE}_{self.endpoint}] Scrape {url}')
             response = tls.get(url, proxies=self.proxys.next(), headers=headers)
             response.raise_for_status()
+
             r = response.json()
             for product in r["results"]:
                 output.append(product)
