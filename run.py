@@ -72,17 +72,18 @@ def startMonitors():
     #Create all Shopify Monitors
     shopifyGlobal = copy.deepcopy(settings["shopify"])
     for s in shopifyGlobal["sites"]:
-        if "keywords" in s and s["keywords"]:
-            s["keywords"] = s["keywords"]+shopifyGlobal["keywords"]
+        if "keywords" in s:
+            if s["keywords"]:
+                s["keywords"] = s["keywords"]+shopifyGlobal["keywords"]
         else:
             s["keywords"] = shopifyGlobal["keywords"]
         
-        if "tags" in s and s["tags"]:
-            s["tags"] = s["tags"]+shopifyGlobal["tags"]
+        if "tags" in s:
+            if s["tags"]:
+                s["tags"] = s["tags"]+shopifyGlobal["tags"]
         else:
             s["tags"] = shopifyGlobal["tags"]
 
-       
         if "blacksku" in s and s["blacksku"]:
             s["blacksku"] = s["blacksku"]+shopifyGlobal["blacksku"]
         else:
