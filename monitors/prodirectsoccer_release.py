@@ -2,7 +2,6 @@ from threading import Thread, Event
 from user_agent import CHROME_USERAGENT
 from datetime import datetime, timedelta
 from proxymanager import ProxyManager
-import random
 import requests as rq
 import time
 import json
@@ -123,8 +122,6 @@ class prodirectsoccer_release(Thread):
 
                 self.firstScrape = False
 
-                #Shuffle Query Order
-                random.shuffle(self.querys)
                 self.logger.info(msg=f'[{self.site}_release] Checked all querys in {time.time()-startTime} seconds')
                 self.stop.wait(self.delay)
 

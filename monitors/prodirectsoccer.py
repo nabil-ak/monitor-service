@@ -2,7 +2,6 @@ from threading import Thread, Event
 from bs4 import BeautifulSoup
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
-import random
 import time
 import json
 import loggerfactory
@@ -138,8 +137,6 @@ class prodirectsoccer(Thread):
                 # Allows changes to be notified
                 self.firstScrape = False
 
-                #Shuffle Query Order
-                random.shuffle(self.querys)
                 self.logger.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
 
             except Exception as e:
