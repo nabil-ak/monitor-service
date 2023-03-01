@@ -1,11 +1,11 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 from multiprocessing.pool import ThreadPool 
 import requests as rq
 import time
 import json
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import os
@@ -14,15 +14,18 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class svd(Process):
+class svd(Thread):
     def __init__(self, groups, settings):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.groups = groups
         self.delay = settings["delay"]
         self.keywords= settings["keywords"]
         self.proxys = ProxyManager(settings["proxys"])
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(SITE)
 
         self.INSTOCK = {}
         
@@ -36,7 +39,7 @@ class svd(Process):
         fields.append({"name": "Sku", "value": f"{sku}", "inline": True})
         fields.append({"name": "Status", "value": f"**New Add**", "inline": True})
         
-        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_site(self, category):
@@ -67,7 +70,7 @@ class svd(Process):
             items.append(product_item)
 
         
-        logging.info(msg=f'[{SITE}] Successfully scraped category {category}')
+        self.logger.info(msg=f'[{SITE}] Successfully scraped category {category}')
         return [category,items]
         
 
@@ -76,10 +79,6 @@ class svd(Process):
         """
         Initiates the monitor
         """
-
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
 
         print(f'STARTING {SITE} MONITOR')
     
@@ -97,7 +96,7 @@ class svd(Process):
         for c in categorys:
             self.INSTOCK[c] = []
         
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
 
@@ -118,7 +117,7 @@ class svd(Process):
                                 # Check if Product is INSTOCK
                                 if not any([product["sku"] in cat for cat in self.INSTOCK.values()]) and not self.firstScrape:
                                         print(f"[{SITE}] {product['name']} got restocked")
-                                        logging.info(msg=f"[{SITE}] {product['name']} got restocked")
+                                        self.logger.info(msg=f"[{SITE}] {product['name']} got restocked")
                                         for group in self.groups:
                                             #Send Ping to each Group
                                             threadrunner.run(
@@ -137,11 +136,11 @@ class svd(Process):
                 # Allows changes to be notified
                 self.firstScrape = False
 
-                logging.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
+                self.logger.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
 
-                time.sleep(self.delay)
+                self.stop.wait(self.delay)
 
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(3)
+                self.logger.error(e)
+                self.stop.wait(3)

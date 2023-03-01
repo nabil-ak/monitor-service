@@ -1,20 +1,21 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 import threadrunner
 import tls
 import time
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import webhook
 
 SITE = __name__.split(".")[1]
 
-class wethenew(Process):
+class wethenew(Thread):
     def __init__(self,groups,endpoint,settings):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.groups = groups
         self.endpoint = endpoint
         self.blacksku = settings["blacksku"]
@@ -26,6 +27,8 @@ class wethenew(Process):
         self.timeout = timeout()
         self.authPointer = -1
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(f"{SITE}_{self.endpoint}")
 
         self.sizesKey = {
             "products":"wantedSizes",
@@ -66,7 +69,7 @@ class wethenew(Process):
             fields.append({"name": "Pid", "value": f"{pid}", "inline": False})
             fields.append({"name": "Sizes", "value": f"{s}", "inline": True})
         
-        webhook.send(group=group, webhook=group["wethenew-"+self.endpoint], site=f"{SITE}_{self.endpoint}", title=title, url=f"https://sell.wethenew.com/{'consignment' if self.endpoint == 'consignment-slots' else 'listing'}/product/"+pid, thumbnail=thumbnail, fields=fields)
+        webhook.send(group=group, webhook=group["wethenew-"+self.endpoint], site=f"{SITE}_{self.endpoint}", title=title, url=f"https://sell.wethenew.com/{'consignment' if self.endpoint == 'consignment-slots' else 'listing'}/product/"+pid, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_site(self):
@@ -102,7 +105,7 @@ class wethenew(Process):
             }
 
             url = f"https://api-sell.wethenew.com/{self.endpoint}?skip={skip}&take=100&onlyWanted=true"
-            logging.info(msg=f'[{SITE}_{self.endpoint}] Scrape {url}')
+            self.logger.info(msg=f'[{SITE}_{self.endpoint}] Scrape {url}')
             response = tls.get(url, proxies=self.proxys.next(), headers=headers)
             response.raise_for_status()
 
@@ -123,7 +126,7 @@ class wethenew(Process):
             }
             items.append(product_item)
         
-        logging.info(msg=f'[{SITE}_{self.endpoint}] Successfully scraped site')
+        self.logger.info(msg=f'[{SITE}_{self.endpoint}] Successfully scraped site')
         return items
 
     def remove(self, pid):
@@ -177,7 +180,7 @@ class wethenew(Process):
                 self.INSTOCK.append(product_item)
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
-                    logging.info(msg=f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
+                    self.logger.info(msg=f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
                     for group in self.groups:
                         #Send Ping to each Group
                         threadrunner.run(
@@ -198,13 +201,9 @@ class wethenew(Process):
         Initiates the monitor
         """
 
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}_{self.endpoint}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-
         print(f'STARTING {SITE}_{self.endpoint} MONITOR')
  
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
                 
@@ -230,12 +229,12 @@ class wethenew(Process):
                 # Allows changes to be notified
                 self.firstScrape = False
 
-                logging.info(msg=f'[{SITE}_{self.endpoint}] Checked in {time.time()-startTime} seconds')
+                self.logger.info(msg=f'[{SITE}_{self.endpoint}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
-                time.sleep(float(self.delay))
+                self.stop.wait(float(self.delay))
 
             except Exception as e:
                 print(f"[{SITE}_{self.endpoint}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(4)
+                self.logger.error(e)
+                self.stop.wait(4)

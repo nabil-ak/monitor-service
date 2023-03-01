@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from user_agent import CHROME_USERAGENT
 from datetime import datetime, timedelta
 from proxymanager import ProxyManager
@@ -6,7 +6,7 @@ import random
 import requests as rq
 import time
 import json
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import webhook
@@ -16,9 +16,10 @@ SITE = __name__.split(".")[1]
 
 LAUNCHTIMEDELTA = 946684800 #01.01.2000 00.00H
 
-class prodirectsoccer_release(Process):
+class prodirectsoccer_release(Thread):
     def __init__(self, groups, site, releasecategory, settings):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.site = site
         self.releasecategory = releasecategory
         self.groups = groups
@@ -27,6 +28,8 @@ class prodirectsoccer_release(Process):
         self.querys= settings["query"]
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(f"{self.site}_release")
 
         self.INSTOCK = []
         
@@ -40,7 +43,7 @@ class prodirectsoccer_release(Process):
         fields.append({"name": "Status", "value": f"**Release**", "inline": True})
         fields.append({"name": "Launch-Time", "value": f"<t:{launch}>", "inline": True})
 
-        webhook.send(group=group, webhook=group[SITE], site=f"{self.site}_release", title=title, url=url, thumbnail=thumbnail, fields=fields)
+        webhook.send(group=group, webhook=group[SITE], site=f"{self.site}_release", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_release_site(self,query):
@@ -73,7 +76,7 @@ class prodirectsoccer_release(Process):
             items.append(product_item)
 
          
-        logging.info(msg=f'[{self.site}_release] Successfully scraped releases for query {query}')
+        self.logger.info(msg=f'[{self.site}_release] Successfully scraped releases for query {query}')
         return items
         
 
@@ -83,13 +86,9 @@ class prodirectsoccer_release(Process):
         Initiates the monitor
         """
 
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{self.site}_release.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-
         print(f'STARTING {self.site}_release MONITOR')
 
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
 
@@ -104,7 +103,7 @@ class prodirectsoccer_release(Process):
                             # Check if Product is INSTOCK
                             if product not in self.INSTOCK and not self.firstScrape:
                                 print(f"[{self.site}_release] {product['name']} got restocked")
-                                logging.info(msg=f"[{self.site}_release] {product['name']} got restocked")
+                                self.logger.info(msg=f"[{self.site}_release] {product['name']} got restocked")
                                 for group in self.groups:
                                     #Send Ping to each Group
                                     threadrunner.run(
@@ -126,10 +125,10 @@ class prodirectsoccer_release(Process):
 
                 #Shuffle Query Order
                 random.shuffle(self.querys)
-                logging.info(msg=f'[{self.site}_release] Checked all querys in {time.time()-startTime} seconds')
-                time.sleep(self.delay)
+                self.logger.info(msg=f'[{self.site}_release] Checked all querys in {time.time()-startTime} seconds')
+                self.stop.wait(self.delay)
 
             except Exception as e:
                 print(f"[{self.site}_release] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(5)
+                self.logger.error(e)
+                self.stop.wait(5)

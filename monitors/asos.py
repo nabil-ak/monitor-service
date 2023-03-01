@@ -1,12 +1,12 @@
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
-from multiprocessing import Process
+from threading import Thread, Event
 import random
 import requests as rq
 import quicktask as qt
 import time
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import os
@@ -15,9 +15,10 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class asos(Process):
+class asos(Thread):
     def __init__(self, groups, settings, region, currency):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.INSTOCK = []
         self.groups = groups
         self.region = region
@@ -27,6 +28,8 @@ class asos(Process):
         self.delay = settings["delay"]
         self.timeout = timeout()
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(f"{SITE}_{self.region}")
 
     def discord_webhook(self, group, pid, region, title, url, thumbnail, price, sizes):
             """
@@ -52,7 +55,7 @@ class asos(Process):
 
             fields.append({"name": "Quicktasks", "value": f"{qt.adonis(site='asos', link=pid)} - {qt.koi(site='ASOS', link=pid)} - {qt.storm(site='asos', link=pid)} - {qt.panaio(site='Asos', link=pid)} - {qt.thunder(site='Asos', link=pid)}", "inline": True})
 
-            webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.region}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+            webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.region}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
             
 
     def getTitle(self, pid):
@@ -80,7 +83,7 @@ class asos(Process):
                 'variants': product['variants']}
             items.append(product_item)
         
-        logging.info(msg=f'[{SITE}_{self.region}] Successfully scraped all pids')
+        self.logger.info(msg=f'[{SITE}_{self.region}] Successfully scraped all pids')
         return items
 
     def remove(self, id):
@@ -131,7 +134,7 @@ class asos(Process):
                 self.INSTOCK.append(product_item)
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.region}] {product_item[0]} got restocked")
-                    logging.info(msg=f"[{SITE}_{self.region}] {product_item[0]} got restocked")
+                    self.logger.info(msg=f"[{SITE}_{self.region}] {product_item[0]} got restocked")
                     for group in self.groups:
                         #Send Ping to each Group
                         threadrunner.run(
@@ -155,15 +158,10 @@ class asos(Process):
         Initiates the monitor
         """
 
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}_{self.region}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-
-
         print(f'STARTING {SITE}_{self.region} MONITOR')
 
 
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
                 url = f"https://www.asos.com/api/product/catalogue/v3/stockprice?productIds={(''.join([pid['sku']+',' for pid in self.pids]))[:-1]}&store={self.region}&currency={self.currency}&keyStoreDataversion=dup0qtf-35&cache={random.randint(10000,999999999)}"
@@ -177,13 +175,13 @@ class asos(Process):
                 # Allows changes to be notified
                 self.firstScrape = False
                 
-                logging.info(msg=f'[{SITE}_{self.region}] Checked in {time.time()-startTime} seconds')
+                self.logger.info(msg=f'[{SITE}_{self.region}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
-                time.sleep(float(self.delay))
+                self.stop.wait(float(self.delay))
 
 
             except Exception as e:
                 print(f"[{SITE}_{self.region}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(3)
+                self.logger.error(e)
+                self.stop.wait(3)

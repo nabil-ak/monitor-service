@@ -1,9 +1,9 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 import time
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import tls
@@ -12,9 +12,10 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class eleventeamsports(Process):
+class eleventeamsports(Thread):
     def __init__(self, groups, settings):
-        Process.__init__(self)   
+        Thread.__init__(self)
+        self.daemon = True   
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])
         self.delay = settings["delay"]
@@ -23,6 +24,8 @@ class eleventeamsports(Process):
         self.proxytime = 0
         self.timeout = timeout(timeout=120, pingdelay=20)
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(SITE)
 
         self.INSTOCK = []
         
@@ -36,7 +39,7 @@ class eleventeamsports(Process):
         fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
         fields.append({"name": "Status", "value": f"**New Add**", "inline": True})
 
-        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_site(self, query):
@@ -68,7 +71,7 @@ class eleventeamsports(Process):
                 items.append(product_item)
 
         
-        logging.info(msg=f'[{SITE}] Successfully scraped query {query}')
+        self.logger.info(msg=f'[{SITE}] Successfully scraped query {query}')
         return items
         
 
@@ -78,13 +81,9 @@ class eleventeamsports(Process):
         Initiates the monitor
         """
 
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-
         print(f'STARTING {SITE} MONITOR')
         
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
                 
@@ -100,7 +99,7 @@ class eleventeamsports(Process):
                             # Check if Product is INSTOCK
                             if product["pid"] not in self.INSTOCK and not self.firstScrape and self.timeout.ping(product):
                                     print(f"[{SITE}] {product['name']} got restocked")
-                                    logging.info(msg=f"[{SITE}] {product['name']} got restocked")
+                                    self.logger.info(msg=f"[{SITE}] {product['name']} got restocked")
                                     for group in self.groups:
                                         #Send Ping to each Group
                                         threadrunner.run(
@@ -114,15 +113,15 @@ class eleventeamsports(Process):
                                         )
                             products.append(product["pid"])
 
-                    time.sleep(self.delay/len(self.querys))
+                    self.stop.wait(self.delay/len(self.querys))
 
                 self.INSTOCK = products
 
                 self.firstScrape = False
 
-                logging.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
+                self.logger.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
 
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(4)
+                self.logger.error(e)
+                self.stop.wait(4)

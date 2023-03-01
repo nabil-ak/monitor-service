@@ -1,10 +1,9 @@
-import logging
 from datetime import datetime
 import json
 import requests as rq
 
 
-def send(group,webhook,site,title,url,thumbnail,fields):
+def send(group,webhook,site,title,url,thumbnail,fields,logger):
         """
         Sends a Discord webhook notification to the specified webhook URL
         """
@@ -38,6 +37,6 @@ def send(group,webhook,site,title,url,thumbnail,fields):
         
         result.raise_for_status()
     
-        logging.info(msg=f'[{site}] Successfully sent Discord notification to {group["Name"]} with product {title}')
+        logger.info(msg=f'[{site}] Successfully sent Discord notification to {group["Name"]} with product {title}')
         print(f'[{site}] Successfully sent Discord notification to {group["Name"]} with product {title}')
             

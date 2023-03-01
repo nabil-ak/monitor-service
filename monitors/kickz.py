@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from proxymanager import ProxyManager
 from bs4 import BeautifulSoup
 from multiprocessing.pool import ThreadPool 
@@ -7,7 +7,7 @@ import random
 import tls
 import time
 import webhook
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import os
@@ -15,9 +15,10 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class kickz(Process):
+class kickz(Thread):
     def __init__(self, groups, region, regionname, settings):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.region = region
         self.regionname = regionname
         self.groups = groups
@@ -26,6 +27,8 @@ class kickz(Process):
         self.proxys = ProxyManager(settings["proxys"])
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(f"{SITE}_{self.regionname}")
 
         self.INSTOCK = []
         
@@ -44,7 +47,7 @@ class kickz(Process):
             fields.append({"name": "Status", "value": f"**Raffle**", "inline": True})
             fields.append({"name": "Ending", "value": f"{raffle_date.replace('Release: ','')}", "inline": True})
         
-        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.regionname}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.regionname}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_site(self, category):
@@ -106,7 +109,7 @@ class kickz(Process):
             items.append(product_item)
 
         
-        logging.info(msg=f'[{SITE}_{self.regionname}] Successfully scraped category {category}')
+        self.logger.info(msg=f'[{SITE}_{self.regionname}] Successfully scraped category {category}')
         return items
         
     def run(self):
@@ -114,10 +117,6 @@ class kickz(Process):
         """
         Initiates the monitor
         """
-
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}_{self.regionname}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
 
         print(f'STARTING {SITE}_{self.regionname} MONITOR')
 
@@ -131,7 +130,7 @@ class kickz(Process):
         # Air_Jordan_1 = Jordan1(https://www.kickz.com/de/l/jordan/retros/air-jordan-1-retro/)
         # Air_Jordan_3 = Jordan3(https://www.kickz.com/de/l/jordan/retros/air-jordan-3-retro/)
         categorys = ["new_M_shoes","new_F_shoes","new_U_shoes","3_M_46","3_F_46","3_K_42","Air_Jordan_1","Air_Jordan_3"]
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
 
@@ -158,7 +157,7 @@ class kickz(Process):
                             if save not in products:
                                 if save not in self.INSTOCK and save["status"] != "RAFFLE_OVER" and not self.firstScrape:
                                             print(f"[{SITE}_{self.regionname}] {product['name']} got restocked")
-                                            logging.info(msg=f"[{SITE}_{self.regionname}] {product['name']} got restocked")
+                                            self.logger.info(msg=f"[{SITE}_{self.regionname}] {product['name']} got restocked")
                                             for group in self.groups:
                                                 #Send Ping to each Group
                                                 threadrunner.run(
@@ -179,11 +178,11 @@ class kickz(Process):
                     # Allows changes to be notified
                     self.firstScrape = False
 
-                    logging.info(msg=f'[{SITE}_{self.regionname}] Checked all querys in {time.time()-startTime} seconds')
+                    self.logger.info(msg=f'[{SITE}_{self.regionname}] Checked all querys in {time.time()-startTime} seconds')
 
-                    time.sleep(self.delay)
+                    self.stop.wait(self.delay)
 
             except Exception as e:
                 print(f"[{SITE}_{self.regionname}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(4)
+                self.logger.error(e)
+                self.stop.wait(4)

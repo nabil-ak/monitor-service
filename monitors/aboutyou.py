@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
@@ -6,7 +6,7 @@ import quicktask as qt
 import random
 import time
 import json
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import tls
@@ -15,9 +15,10 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class aboutyou(Process):
+class aboutyou(Thread):
     def __init__(self, groups, settings, store, storeid):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.INSTOCK = []
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])
@@ -29,6 +30,8 @@ class aboutyou(Process):
         self.storeid = storeid
         self.timeout = timeout()
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(f"{SITE}_{self.store}")
 
     def discord_webhook(self, group, pid, title, url, thumbnail, price, sizes, stock):
             """
@@ -56,7 +59,7 @@ class aboutyou(Process):
 
             fields.append({"name": "Quicktasks", "value": f"{qt.adonis(site='AboutYou', link=pid)} - {qt.koi(site='AboutYou', link=pid)} - {qt.loscobot(site='AboutYou', link=pid)} - {qt.panaio(site='AboutYou', link=pid)}", "inline": True})
 
-            webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.store}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+            webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.store}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_site(self):
@@ -95,7 +98,7 @@ class aboutyou(Process):
             items.append(product_item)
         
         
-        logging.info(msg=f'[{SITE}_{self.store}] Successfully scraped all categorys')
+        self.logger.info(msg=f'[{SITE}_{self.store}] Successfully scraped all categorys')
         return items
 
     def remove(self, id):
@@ -148,7 +151,7 @@ class aboutyou(Process):
                 self.INSTOCK.append(product_item)
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.store}] {product_item[0]} got restocked")
-                    logging.info(msg=f"[{SITE}_{self.store}] {product_item[0]} got restocked")
+                    self.logger.info(msg=f"[{SITE}_{self.store}] {product_item[0]} got restocked")
                     for group in self.groups:
                         #Send Ping to each Group
                         threadrunner.run(
@@ -172,14 +175,9 @@ class aboutyou(Process):
         Initiates the monitor
         """
 
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{SITE}_{self.store}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-
-
         print(f'STARTING {SITE} {self.store} MONITOR')
 
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
 
@@ -200,13 +198,13 @@ class aboutyou(Process):
                 # Allows changes to be notified
                 self.firstScrape = False
                 
-                logging.info(msg=f'[{SITE}_{self.store}] Checked in {time.time()-startTime} seconds')
+                self.logger.info(msg=f'[{SITE}_{self.store}] Checked in {time.time()-startTime} seconds')
 
                 # User set delay
-                time.sleep(float(self.delay))
+                self.stop.wait(float(self.delay))
 
 
             except Exception as e:
                 print(f"[{SITE}_{self.store}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(3)
+                self.logger.error(e)
+                self.stop.wait(3)

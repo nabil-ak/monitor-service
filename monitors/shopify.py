@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from threading import Thread, Event
 from datetime import datetime
 from timeout import timeout
 from multiprocessing.pool import ThreadPool 
@@ -9,7 +9,7 @@ import random
 import requests as rq
 import time
 import json
-import logging
+import loggerfactory
 import traceback
 import urllib3
 import webhook
@@ -17,9 +17,10 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class shopify(Process):
+class shopify(Thread):
     def __init__(self, groups, settings):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.groups = groups
         self.site = settings["name"]
         self.url = settings["url"]
@@ -30,6 +31,8 @@ class shopify(Process):
         self.tags = settings["tags"]
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
+        self.stop = Event()
+        self.logger = loggerfactory.create(self.site)
 
         self.INSTOCK = []
         self.timeout = timeout()
@@ -62,7 +65,7 @@ class shopify(Process):
 
         fields.append({"name": "Quicktasks", "value": f"{qt.cybersole(link=url)} - {qt.adonis(site='shopify', link=url)} - {qt.thunder(site='shopify', link=url)} - {qt.panaio(site='Shopify', link=url)}", "inline": False})
 
-        webhook.send(group=group, webhook=webhookurl, site=f"{self.site}", title=title, url=url, thumbnail=thumbnail, fields=fields)
+        webhook.send(group=group, webhook=webhookurl, site=f"{self.site}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
     def scrape_site(self, page):
@@ -87,7 +90,7 @@ class shopify(Process):
                 }
             items.append(product_item)
         
-        logging.info(msg=f'[{self.site}] Successfully scraped Page {page}')
+        self.logger.info(msg=f'[{self.site}] Successfully scraped Page {page}')
         return items
 
     def remove(self, handle):
@@ -138,7 +141,7 @@ class shopify(Process):
                 self.INSTOCK.append(product_item)
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{self.site}] {product_item[0]} got restocked")
-                    logging.info(msg=f"[{self.site}] {product_item[0]} got restocked")
+                    self.logger.info(msg=f"[{self.site}] {product_item[0]} got restocked")
                     for group in self.groups:
                         #Send Ping to each Group
                         threadrunner.run(
@@ -161,15 +164,11 @@ class shopify(Process):
         Initiates the monitor
         """
 
-        #Initiate the Logger
-        logging.basicConfig(filename=f'logs/{self.site}.log', filemode='w', format='%(asctime)s - %(name)s - %(message)s',
-            level=logging.DEBUG)
-
         print(f'STARTING {self.site} MONITOR')
 
         maxpage = 20
         
-        while True:
+        while not self.stop.is_set():
             try:
                 startTime = time.time()
 
@@ -201,7 +200,7 @@ class shopify(Process):
                                             self.comparitor(product)
 
 
-                    logging.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+                    self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
 
                     
@@ -214,9 +213,9 @@ class shopify(Process):
                         maxpage+=5
 
                 # User set delay
-                time.sleep(float(self.delay))
+                self.stop.wait(float(self.delay))
 
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
-                logging.error(e)
-                time.sleep(3)
+                self.logger.error(e)
+                self.stop.wait(3)

@@ -9,7 +9,7 @@ from proxymanager import ProxyManager
 
 
 cookgroups = database.getGroups()
-settings = database.getSettings()
+originalSettings = database.getSettings()
 ProxyManager.updateProxys()
 
 monitorPool = []
@@ -18,7 +18,7 @@ def updateData():
     """
     Check settings, groups and proxys every 20 seconds for update
     """
-    global settings,cookgroups,proxys
+    global originalSettings,cookgroups,proxys
     while True:
         try:
             newCookgroups = database.getGroups()
@@ -28,17 +28,19 @@ def updateData():
             time.sleep(10)
             database.Connect()
 
-        if settings != newSettings or newCookgroups != cookgroups or ProxyManager.updateProxys():
+        if originalSettings != newSettings or newCookgroups != cookgroups or ProxyManager.updateProxys():
             cookgroups = newCookgroups
-            settings = newSettings
+            originalSettings = newSettings
             print("[UPDATER] Restart Monitors")
 
             #Restart every Monitor
             for mon in monitorPool:
-                #Stop them
-                mon.terminate()
-            monitorPool.clear()
+                mon.stop.set()
 
+            while any(mon.is_alive() for mon in monitorPool):
+                time.sleep(1)
+
+            monitorPool.clear()
             #Start them with new Settings
             startMonitors()
             
@@ -61,6 +63,8 @@ def startMonitors():
     Start every Monitor in a Process
     """
 
+    settings = copy.deepcopy(originalSettings)
+
     #Create all Asos Monitors
     for region in settings["asos"]["regions"]:
         monitorPool.append(asos.asos(groups=filterGroups(["asos"]),settings=settings["asos"],region=region[0],currency=region[1]))
@@ -70,7 +74,7 @@ def startMonitors():
         monitorPool.append(aboutyou.aboutyou(groups=filterGroups(["aboutyou"]), settings=settings["aboutyou"], store=store[0], storeid=store[1]))
     
     #Create all Shopify Monitors
-    shopifyGlobal = copy.deepcopy(settings["shopify"])
+    shopifyGlobal = settings["shopify"]
     for s in shopifyGlobal["sites"]:
         if "keywords" in s:
             if s["keywords"]:
