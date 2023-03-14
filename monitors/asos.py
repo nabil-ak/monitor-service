@@ -35,6 +35,12 @@ class asos(Thread):
             """
             Sends a Discord webhook notification to the specified webhook URL
             """
+
+            if f"{SITE}_{self.region}" in group:
+                webhookurl = group[f"{SITE}_{self.region}"]
+            elif "asos" in group:
+                webhookurl = group["asos"]
+
             fields = []
             fields.append({"name": "Price", "value": f"{price}", "inline": True})
             fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
@@ -55,7 +61,7 @@ class asos(Thread):
 
             fields.append({"name": "Quicktasks", "value": f"{qt.adonis(site='asos', link=pid)} - {qt.koi(site='ASOS', link=pid)} - {qt.storm(site='asos', link=pid)} - {qt.panaio(site='Asos', link=pid)} - {qt.thunder(site='Asos', link=pid)}", "inline": True})
 
-            webhook.send(group=group, webhook=group[SITE], site=f"{SITE}_{self.region}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
+            webhook.send(group=group, webhook=webhookurl, site=f"{SITE}_{self.region}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
             
 
     def getTitle(self, pid):

@@ -67,7 +67,7 @@ def startMonitors():
 
     #Create all Asos Monitors
     for region in settings["asos"]["regions"]:
-        monitorPool.append(asos.asos(groups=filterGroups(["asos"]),settings=settings["asos"],region=region[0],currency=region[1]))
+        monitorPool.append(asos.asos(groups=filterGroups(["asos","asos_"+region[0]]),settings=settings["asos"],region=region[0],currency=region[1]))
     
     #Create all About You Monitors
     for store in settings["aboutyou"]["stores"]:
