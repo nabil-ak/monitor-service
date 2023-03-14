@@ -101,7 +101,7 @@ class kickz(Thread):
                     "name":button.text.replace("\n",""),
                     "pid":button["data-pid"],
                     "price":product.find("span", {"class": "b-price-item"}).text,
-                    "image": f"{os.environ['IMAGEPROXY']}?url={product.find('img')['src']}&proxy={','.join(self.proxys.proxygroups)}",
+                    "image": f"https://imageresize.24i.com/?w=300&url={product.find('img')['src']}&proxy={','.join(self.proxys.proxygroups)}",
                     "url":"https://www.kickz.com"+button["href"],
                     "status": status,
                     "raffle_date":raffle_date

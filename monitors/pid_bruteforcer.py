@@ -12,16 +12,15 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class eleventeamsports(Thread):
+class pid_bruteforcer(Thread):
     def __init__(self, groups, settings):
         Thread.__init__(self)
         self.daemon = True   
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])
         self.delay = settings["delay"]
-        self.querys= settings["query"]
-        self.blacksku = settings["blacksku"]
-        self.timeout = timeout(timeout=120, pingdelay=20)
+        self.site= settings["site"]
+        self.startPid = settings["startPid"]
         self.firstScrape = True
         self.stop = Event()
         self.logger = loggerfactory.create(SITE)
