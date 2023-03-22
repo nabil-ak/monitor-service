@@ -138,5 +138,5 @@ if __name__ == "__main__":
     startMonitors()
 
     #Check if new Group was added or updated and also check if settings was updated
-    Thread(target=updateData).start()
+    #Thread(target=updateData).start()
 
