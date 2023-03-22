@@ -102,7 +102,7 @@ def startMonitors():
             s["delay"] = shopifyGlobal["delay"]
 
         s["proxys"] = shopifyGlobal["proxys"]
-        monitorPool.append(shopify.shopify(groups=filterGroups([s["name"], "shopify"]),settings=s))
+        #monitorPool.append(shopify.shopify(groups=filterGroups([s["name"], "shopify"]),settings=s))
 
     #Create all Wethenew Monitor
     endpoints = ["products", "sell-nows", "consignment-slots"]
@@ -132,7 +132,6 @@ def startMonitors():
     #Start all Monitors
     for mon in monitorPool:
         mon.start()
-        time.sleep(0.2)
 
 if __name__ == "__main__":
     #Start Monitors
