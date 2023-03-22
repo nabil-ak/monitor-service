@@ -139,4 +139,5 @@ if __name__ == "__main__":
 
     #Check if new Group was added or updated and also check if settings was updated
     #Thread(target=updateData).start()
-
+    while True:
+        time.sleep(2)
