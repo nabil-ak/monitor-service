@@ -167,55 +167,55 @@ class shopify(Thread):
         print(f'STARTING {self.site} MONITOR')
 
         maxpage = 20
-        
-        while not self.stop.is_set():
-            try:
-                startTime = time.time()
+        with ThreadPool(50) as threadpool:
+            while not self.stop.is_set():
+                try:
+                    startTime = time.time()
 
-                args = []
-                for page in range(1,maxpage):
-                    args.append((page,))
+                    args = []
+                    for page in range(1,maxpage):
+                        args.append((page,))
 
-                # Makes request to the pages and stores products 
-                with ThreadPool(maxpage) as threadpool:
-                    itemsSplited = threadpool.starmap(self.scrape_site, args)
-
-                    items = sum(itemsSplited, [])
-
-                    for product in items:
-                            if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
-                                if len(self.keywords) == 0 and len(self.tags) == 0:
-                                    # If no keywords and tags set, checks whether item status has changed
-                                    self.comparitor(product)
-
-                                else:
-                                    # For each keyword, checks whether particular item status has changed
-                                    for key in self.keywords:
-                                        if key.lower() in product['title'].lower():
-                                            self.comparitor(product)
-
-                                    # For each tag, checks whether particular item status has changed
-                                    for tag in self.tags:
-                                        if tag in product['tags']:
-                                            self.comparitor(product)
-
-
-                    self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+                    # Makes request to the pages and stores products 
                     
+                        itemsSplited = threadpool.starmap(self.scrape_site, args)
 
-                    
+                        items = sum(itemsSplited, [])
 
-                    #Check if maxpage is reached otherwise increase by 5
-                    try:
-                        maxpage = itemsSplited.index([])+2
-                        self.firstScrape = False
-                    except:
-                        maxpage+=5
+                        for product in items:
+                                if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
+                                    if len(self.keywords) == 0 and len(self.tags) == 0:
+                                        # If no keywords and tags set, checks whether item status has changed
+                                        self.comparitor(product)
 
-                # User set delay
-                self.stop.wait(float(self.delay))
+                                    else:
+                                        # For each keyword, checks whether particular item status has changed
+                                        for key in self.keywords:
+                                            if key.lower() in product['title'].lower():
+                                                self.comparitor(product)
 
-            except Exception as e:
-                print(f"[{self.site}] Exception found: {traceback.format_exc()}")
-                self.logger.error(e)
-                self.stop.wait(3)
+                                        # For each tag, checks whether particular item status has changed
+                                        for tag in self.tags:
+                                            if tag in product['tags']:
+                                                self.comparitor(product)
+
+
+                        self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+                        
+
+                        
+
+                        #Check if maxpage is reached otherwise increase by 5
+                        try:
+                            maxpage = itemsSplited.index([])+2
+                            self.firstScrape = False
+                        except:
+                            maxpage+=5
+
+                    # User set delay
+                    self.stop.wait(float(self.delay))
+
+                except Exception as e:
+                    print(f"[{self.site}] Exception found: {traceback.format_exc()}")
+                    self.logger.error(e)
+                    self.stop.wait(3)
