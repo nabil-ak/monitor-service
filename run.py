@@ -132,6 +132,7 @@ def startMonitors():
     #Start all Monitors
     for mon in monitorPool:
         mon.start()
+        time.sleep(0.2)
 
 if __name__ == "__main__":
     #Start Monitors
