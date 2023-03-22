@@ -1,5 +1,4 @@
 from threading import Thread, Event
-from multiprocessing import Process
 from datetime import datetime
 from timeout import timeout
 from multiprocessing.pool import ThreadPool 
@@ -18,9 +17,10 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class shopify(Process):
+class shopify(Thread):
     def __init__(self, groups, settings):
-        Process.__init__(self)
+        Thread.__init__(self)
+        self.daemon = True
         self.groups = groups
         self.site = settings["name"]
         self.url = settings["url"]
