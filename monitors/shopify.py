@@ -179,7 +179,8 @@ class shopify(Thread):
                     # Makes request to the pages and stores products 
                     
                         itemsSplited = threadpool.starmap(self.scrape_site, args)
-
+                        time.sleep(1)
+                        continue
                         items = sum(itemsSplited, [])
 
                         for product in items:
