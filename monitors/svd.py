@@ -2,7 +2,7 @@ from threading import Thread, Event
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 from multiprocessing.pool import ThreadPool 
-import requests as rq
+import tls
 import time
 import json
 import loggerfactory
@@ -67,7 +67,7 @@ class svd(Thread):
         }
 
         # Makes request to site
-        html = rq.get(url, headers=headers, proxies=self.proxys.next())
+        html = tls.get(url, headers=headers, proxies=self.proxys.next())
         html.raise_for_status()
         products = json.loads(html.text)['data']['products']['items']
 
