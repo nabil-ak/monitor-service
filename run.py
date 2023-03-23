@@ -37,9 +37,9 @@ def updateData():
             for mon in monitorPool:
                 mon.stop.set()
 
-            while any(mon.is_alive() for mon in monitorPool):
-                time.sleep(1)
-
+            for mon in monitorPool:
+                mon.join()
+            
             monitorPool.clear()
             #Start them with new Settings
             startMonitors()
