@@ -47,8 +47,8 @@ class ProxyManager():
         """
         Get the next Proxy
         """
-        
-        self.currentProxy = 0 if self.currentProxy >= (len(self.proxys) - 1) or not self.proxys else self.currentProxy + 1
+        with self.lock:
+            self.currentProxy = 0 if self.currentProxy >= (len(self.proxys) - 1) or not self.proxys else self.currentProxy + 1
 
         return {
         "http":f"http://{self.proxys[self.currentProxy]}",
