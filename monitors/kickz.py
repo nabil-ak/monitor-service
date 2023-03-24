@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from proxymanager import ProxyManager
 from bs4 import BeautifulSoup
-from multiprocessing.pool import ThreadPool 
+from concurrent.futures import ThreadPoolExecutor
 from user_agent import CHROME_USERAGENT
 import random
 import tls
@@ -138,8 +138,10 @@ class kickz(Thread):
 
                 products = []
 
-                with ThreadPool(len(categorys)) as threadpool:
-                    items = sum(threadpool.map(self.scrape_site, categorys), [])
+                with ThreadPoolExecutor(5) as executor:
+                    itemsSplited = [item for item in executor.map(self.scrape_site, categorys)]
+                    items = sum(itemsSplited, [])
+                    
 
                     for product in items:
                         if product["pid"] not in self.blacksku:

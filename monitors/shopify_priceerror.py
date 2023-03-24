@@ -1,6 +1,6 @@
 from threading import Thread, Event
 from timeout import timeout
-from multiprocessing.pool import ThreadPool 
+from concurrent.futures import ThreadPoolExecutor
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 import quicktask as qt
@@ -174,8 +174,8 @@ class shopify_priceerror(Thread):
                 startTime = time.time()
 
                 # Makes request to the pages and stores products 
-                with ThreadPool(5) as threadpool:
-                    itemsSplited = threadpool.map(self.scrape_site, range(1,maxpage))
+                with ThreadPoolExecutor(5) as executor:
+                    itemsSplited = [item for item in executor.map(self.scrape_site, range(1,maxpage))]
 
                     items = sum(itemsSplited, [])
 

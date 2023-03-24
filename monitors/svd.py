@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
-from multiprocessing.pool import ThreadPool 
+from concurrent.futures import ThreadPoolExecutor
 import tls
 import time
 import json
@@ -115,8 +115,8 @@ class svd(Thread):
                 startTime = time.time()
 
                 # Makes request to each category
-                with ThreadPool(len(categorys)) as threadpool:
-                    itemsSplited = threadpool.map(self.scrape_site, categorys)
+                with ThreadPoolExecutor(5) as executor:
+                    itemsSplited = [item for item in executor.map(self.scrape_site, categorys)]
 
                     for c, items in itemsSplited:
                         products = []
