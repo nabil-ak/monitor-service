@@ -173,7 +173,7 @@ class shopify(Thread):
 
                 # Makes request to the pages and stores products 
                 with ThreadPool(5) as threadpool:
-                    itemsSplited = threadpool.starmap(self.scrape_site, tuple(range(1,maxpage)))
+                    itemsSplited = threadpool.map(self.scrape_site, range(1,maxpage))
                     
                     items = sum(itemsSplited, [])
 
