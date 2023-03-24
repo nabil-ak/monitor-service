@@ -115,7 +115,7 @@ class svd(Thread):
                 startTime = time.time()
 
                 # Makes request to each category
-                with ThreadPoolExecutor(5) as executor:
+                with ThreadPoolExecutor(len(categorys)) as executor:
                     itemsSplited = [item for item in executor.map(self.scrape_site, categorys)]
 
                     for c, items in itemsSplited:

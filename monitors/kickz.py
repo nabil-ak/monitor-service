@@ -138,7 +138,7 @@ class kickz(Thread):
 
                 products = []
 
-                with ThreadPoolExecutor(5) as executor:
+                with ThreadPoolExecutor(len(categorys)) as executor:
                     itemsSplited = [item for item in executor.map(self.scrape_site, categorys)]
                     items = sum(itemsSplited, [])
                     
