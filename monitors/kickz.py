@@ -139,7 +139,7 @@ class kickz(Thread):
                 products = []
 
                 with ThreadPool(len(categorys)) as threadpool:
-                    items = sum(threadpool.starmap(self.scrape_site, set(categorys)), [])
+                    items = sum(threadpool.starmap(self.scrape_site, tuple(categorys)), [])
 
                     for product in items:
                         if product["pid"] not in self.blacksku:

@@ -116,7 +116,7 @@ class svd(Thread):
 
                 # Makes request to each category
                 with ThreadPool(len(categorys)) as threadpool:
-                    itemsSplited = threadpool.starmap(self.scrape_site, set(categorys))
+                    itemsSplited = threadpool.starmap(self.scrape_site, tuple(categorys))
 
                     for c, items in itemsSplited:
                         products = []
