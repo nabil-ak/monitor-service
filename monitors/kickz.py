@@ -19,7 +19,6 @@ SITE = __name__.split(".")[1]
 class kickz(Process):
     def __init__(self, groups, region, regionname, settings):
         Process.__init__(self)
-        self.daemon = True
         self.region = region
         self.regionname = regionname
         self.groups = groups

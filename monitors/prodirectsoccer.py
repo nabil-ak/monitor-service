@@ -17,7 +17,6 @@ SITE = __name__.split(".")[1]
 class prodirectsoccer(Process):
     def __init__(self, groups, settings):
         Process.__init__(self)
-        self.daemon = True
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])
         self.delay = settings["delay"]

@@ -19,7 +19,6 @@ SITE = __name__.split(".")[1]
 class aboutyou(Process):
     def __init__(self, groups, settings, store, storeid):
         Process.__init__(self)
-        self.daemon = True
         self.INSTOCK = []
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])

@@ -16,7 +16,6 @@ SITE = __name__.split(".")[1]
 class wethenew(Process):
     def __init__(self,groups,endpoint,settings):
         Process.__init__(self)
-        self.daemon = True
         self.groups = groups
         self.endpoint = endpoint
         self.blacksku = settings["blacksku"]

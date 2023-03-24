@@ -19,7 +19,6 @@ LAUNCHTIMEDELTA = 946684800 #01.01.2000 00.00H
 class prodirectsoccer_release(Process):
     def __init__(self, groups, site, releasecategory, settings):
         Process.__init__(self)
-        self.daemon = True
         self.site = site
         self.releasecategory = releasecategory
         self.groups = groups

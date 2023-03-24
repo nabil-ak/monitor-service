@@ -18,7 +18,6 @@ SITE = __name__.split(".")[1]
 class svd(Process):
     def __init__(self, groups, settings):
         Process.__init__(self)
-        self.daemon = True
         self.groups = groups
         self.delay = settings["delay"]
         self.keywords= settings["keywords"]

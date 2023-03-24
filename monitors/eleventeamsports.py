@@ -15,8 +15,7 @@ SITE = __name__.split(".")[1]
 
 class eleventeamsports(Process):
     def __init__(self, groups, settings):
-        Thread.__init__(self)
-        self.daemon = True   
+        Process.__init__(self)
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])
         self.delay = settings["delay"]

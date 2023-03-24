@@ -18,8 +18,7 @@ SITE = __name__.split(".")[1]
 
 class asos(Process):
     def __init__(self, groups, settings, region, currency):
-        Thread.__init__(self)
-        self.daemon = True
+        Process.__init__(self)
         self.INSTOCK = []
         self.groups = groups
         self.region = region
