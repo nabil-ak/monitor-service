@@ -177,7 +177,7 @@ class shopify(Thread):
                     args.append((page,))
 
                 # Makes request to the pages and stores products 
-                with ThreadPoolExecutor(maxpage) as executor:
+                with ThreadPoolExecutor(5) as executor:
                     #itemsSplited = threadpool.starmap(self.scrape_site, args)
                     itemsSplited = []
 
