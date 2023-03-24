@@ -37,8 +37,10 @@ def updateData():
             for mon in monitorPool:
                 mon.stop.set()
 
+            #Wait for each Monitor to stop
             for mon in monitorPool:
-                mon.join()
+                if mon.is_alive():
+                    mon.join()
             
             monitorPool.clear()
             #Start them with new Settings
