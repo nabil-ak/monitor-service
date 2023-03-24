@@ -78,8 +78,6 @@ class shopify(Thread):
         html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next())
         html.raise_for_status()
         output = json.loads(html.text)['products']
-
-        return []
         
         # Stores particular details in array
         for product in output:
@@ -93,7 +91,7 @@ class shopify(Thread):
             items.append(product_item)
         
         self.logger.info(msg=f'[{self.site}] Successfully scraped Page {page}')
-        return items
+        return []
 
     def remove(self, handle):
         """
