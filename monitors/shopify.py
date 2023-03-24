@@ -182,7 +182,7 @@ class shopify(Thread):
                     #itemsSplited = threadpool.starmap(self.scrape_site, args)
                     itemsSplited = []
 
-                    for item in executor.map(self.scrape_site, range(1,maxpage)):
+                    for item in executor.map(self.scrape_site, range(1,maxpage), timeout=20):
                         itemsSplited.append(item)
                         
                     items = sum(itemsSplited, [])
