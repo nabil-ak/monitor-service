@@ -185,7 +185,6 @@ class shopify(Thread):
                     for item in executor.map(self.scrape_site, range(1,maxpage)):
                         itemsSplited.append(item)
                         
-                    """
                     items = sum(itemsSplited, [])
 
                     for product in items:
@@ -205,8 +204,7 @@ class shopify(Thread):
                                     for tag in self.tags:
                                         if tag in product['tags']:
                                             self.comparitor(product)
-                                            break
-                    """                           
+                                            break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
