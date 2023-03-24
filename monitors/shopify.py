@@ -91,7 +91,7 @@ class shopify(Thread):
             items.append(product_item)
         
         self.logger.info(msg=f'[{self.site}] Successfully scraped Page {page}')
-        return []
+        return items
 
     def remove(self, handle):
         """
