@@ -179,10 +179,10 @@ class shopify(Thread):
                 # Makes request to the pages and stores products 
                 with ThreadPool(maxpage) as threadpool:
                     itemsSplited = threadpool.starmap(self.scrape_site, args)
-
+                    """
                     items = sum(itemsSplited, [])
 
-                    """for product in items:
+                    for product in items:
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
@@ -199,8 +199,8 @@ class shopify(Thread):
                                     for tag in self.tags:
                                         if tag in product['tags']:
                                             self.comparitor(product)
-                                            break"""
-
+                                            break
+                    """                           
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
