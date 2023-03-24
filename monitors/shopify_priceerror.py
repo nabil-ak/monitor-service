@@ -173,13 +173,9 @@ class shopify_priceerror(Thread):
             try:
                 startTime = time.time()
 
-                args = []
-                for page in range(1,maxpage):
-                    args.append((page,))
-
                 # Makes request to the pages and stores products 
-                with ThreadPool(maxpage) as threadpool:
-                    itemsSplited = threadpool.starmap(self.scrape_site, args)
+                with ThreadPool(5) as threadpool:
+                    itemsSplited = threadpool.starmap(self.scrape_site, range(1,maxpage))
 
                     items = sum(itemsSplited, [])
 

@@ -1,5 +1,4 @@
 from threading import Thread, Event
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from timeout import timeout
 from multiprocessing.pool import ThreadPool 
@@ -172,18 +171,10 @@ class shopify(Thread):
             try:
                 startTime = time.time()
 
-                args = []
-                for page in range(1,maxpage):
-                    args.append((page,))
-
                 # Makes request to the pages and stores products 
-                with ThreadPoolExecutor(5) as executor:
-                    #itemsSplited = threadpool.starmap(self.scrape_site, args)
-                    itemsSplited = []
-
-                    for item in executor.map(self.scrape_site, range(1,maxpage)):
-                        itemsSplited.append(item)
-                        
+                with ThreadPool(5) as threadpool:
+                    itemsSplited = threadpool.starmap(self.scrape_site, range(1,maxpage))
+                    
                     items = sum(itemsSplited, [])
 
                     for product in items:
