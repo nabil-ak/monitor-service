@@ -76,7 +76,6 @@ class shopify(Thread):
 
         #Fetch the Shopify-Page
         html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next())
-        return []
         html.raise_for_status()
         output = json.loads(html.text)['products']
         
@@ -183,7 +182,7 @@ class shopify(Thread):
 
                     items = sum(itemsSplited, [])
 
-                    for product in items:
+                    """for product in items:
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
@@ -200,7 +199,7 @@ class shopify(Thread):
                                     for tag in self.tags:
                                         if tag in product['tags']:
                                             self.comparitor(product)
-                                            break
+                                            break"""
 
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
