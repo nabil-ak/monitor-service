@@ -76,7 +76,7 @@ class shopify(Thread):
         items = []
 
         #Fetch the Shopify-Page
-        html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next())
+        html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next(), timeout=10)
         html.raise_for_status()
         output = json.loads(html.text)['products']
         
@@ -182,7 +182,7 @@ class shopify(Thread):
                     #itemsSplited = threadpool.starmap(self.scrape_site, args)
                     itemsSplited = []
 
-                    for item in executor.map(self.scrape_site, range(1,maxpage), timeout=20):
+                    for item in executor.map(self.scrape_site, range(1,maxpage)):
                         itemsSplited.append(item)
                         
                     items = sum(itemsSplited, [])
