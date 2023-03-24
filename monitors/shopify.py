@@ -73,6 +73,7 @@ class shopify(Thread):
         Scrapes the specified Shopify site and adds items to array
         """
         items = []
+        time.sleep(2)
         return []
         #Fetch the Shopify-Page
         html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next())
