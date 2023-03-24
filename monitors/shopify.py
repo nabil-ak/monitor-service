@@ -211,7 +211,7 @@ class shopify(Thread):
                     
                     #Check if maxpage is reached otherwise increase by 5
                     try:
-                        maxpage = itemsSplited.index([])+2
+                        #maxpage = itemsSplited.index([])+2
                         self.firstScrape = False
                     except:
                         maxpage+=5
