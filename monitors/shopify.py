@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from timeout import timeout
 from multiprocessing.pool import ThreadPool 
@@ -177,8 +178,13 @@ class shopify(Thread):
                     args.append((page,))
 
                 # Makes request to the pages and stores products 
-                with ThreadPool(maxpage) as threadpool:
-                    itemsSplited = threadpool.starmap(self.scrape_site, args)
+                with ThreadPoolExecutor(maxpage) as executor:
+                    #itemsSplited = threadpool.starmap(self.scrape_site, args)
+                    itemsSplited = []
+
+                    for item in executor.map(self.scrape_site, range(1,maxpage)):
+                        itemsSplited.append(item)
+                        
                     """
                     items = sum(itemsSplited, [])
 
@@ -204,9 +210,6 @@ class shopify(Thread):
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
-
-                    
-
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
