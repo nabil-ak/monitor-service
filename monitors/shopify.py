@@ -76,9 +76,10 @@ class shopify(Thread):
 
         #Fetch the Shopify-Page
         html = rq.get(self.url + f'?page={page}&limit={random.randint(251,1000000)}', headers={"user-agent":CHROME_USERAGENT}, proxies=self.proxys.next())
-        return []
         html.raise_for_status()
         output = json.loads(html.text)['products']
+
+        return []
         
         # Stores particular details in array
         for product in output:
