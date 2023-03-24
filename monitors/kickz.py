@@ -3,6 +3,7 @@ from proxymanager import ProxyManager
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from user_agent import CHROME_USERAGENT
+from multiprocessing import Process
 import random
 import tls
 import time
@@ -15,9 +16,9 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class kickz(Thread):
+class kickz(Process):
     def __init__(self, groups, region, regionname, settings):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.region = region
         self.regionname = regionname

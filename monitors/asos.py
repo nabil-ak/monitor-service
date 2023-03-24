@@ -2,6 +2,7 @@ from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 from threading import Thread, Event
+from multiprocessing import Process
 import random
 import requests as rq
 import quicktask as qt
@@ -15,7 +16,7 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class asos(Thread):
+class asos(Process):
     def __init__(self, groups, settings, region, currency):
         Thread.__init__(self)
         self.daemon = True

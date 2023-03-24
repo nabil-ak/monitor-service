@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from multiprocessing import Process
 from bs4 import BeautifulSoup
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
@@ -13,9 +14,9 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class prodirectsoccer(Thread):
+class prodirectsoccer(Process):
     def __init__(self, groups, settings):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.groups = groups
         self.proxys = ProxyManager(settings["proxys"])

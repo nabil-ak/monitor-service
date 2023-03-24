@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from multiprocessing import Process
 from user_agent import CHROME_USERAGENT
 from datetime import datetime, timedelta
 from proxymanager import ProxyManager
@@ -15,9 +16,9 @@ SITE = __name__.split(".")[1]
 
 LAUNCHTIMEDELTA = 946684800 #01.01.2000 00.00H
 
-class prodirectsoccer_release(Thread):
+class prodirectsoccer_release(Process):
     def __init__(self, groups, site, releasecategory, settings):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.site = site
         self.releasecategory = releasecategory

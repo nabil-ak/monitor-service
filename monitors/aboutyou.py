@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from multiprocessing import Process
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
@@ -15,9 +16,9 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class aboutyou(Thread):
+class aboutyou(Process):
     def __init__(self, groups, settings, store, storeid):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.INSTOCK = []
         self.groups = groups

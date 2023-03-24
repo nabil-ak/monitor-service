@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from multiprocessing import Process
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 from concurrent.futures import ThreadPoolExecutor
@@ -14,9 +15,9 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class svd(Thread):
+class svd(Process):
     def __init__(self, groups, settings):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.groups = groups
         self.delay = settings["delay"]

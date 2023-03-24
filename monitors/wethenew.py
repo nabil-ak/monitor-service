@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from multiprocessing import Process
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
@@ -12,9 +13,9 @@ import webhook
 
 SITE = __name__.split(".")[1]
 
-class wethenew(Thread):
+class wethenew(Process):
     def __init__(self,groups,endpoint,settings):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.groups = groups
         self.endpoint = endpoint

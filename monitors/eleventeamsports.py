@@ -2,6 +2,7 @@ from threading import Thread, Event
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
+from multiprocessing import Process
 import time
 import loggerfactory
 import traceback
@@ -12,7 +13,7 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class eleventeamsports(Thread):
+class eleventeamsports(Process):
     def __init__(self, groups, settings):
         Thread.__init__(self)
         self.daemon = True   
