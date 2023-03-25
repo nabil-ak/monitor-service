@@ -35,14 +35,14 @@ def updateData():
 
             #Restart every Monitor
             for mon in monitorPool:
-                if type(mon) is Thread:
+                if isinstance(mon, Thread):
                     mon.stop.set()
                 else:
                     mon.terminate()
 
             #Wait for each Monitor to stop
             for mon in monitorPool:
-                if type(mon) is Thread and mon.is_alive():
+                if isinstance(mon, Thread) and mon.is_alive():
                     mon.join()
             
             monitorPool.clear()
