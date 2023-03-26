@@ -26,7 +26,7 @@ class kickz(Process):
         self.keywords= settings["keywords"]
         self.proxys = ProxyManager(settings["proxys"])
         self.blacksku = settings["blacksku"]
-        self.firstScrape = True
+        self.firstScrape = False
         self.stop = Event()
         self.logger = loggerfactory.create(f"{SITE}_{self.regionname}")
 
@@ -101,7 +101,7 @@ class kickz(Process):
                     "name":button.text.replace("\n",""),
                     "pid":button["data-pid"],
                     "price":product.find("span", {"class": "b-price-item"}).text,
-                    "image": f"https://imageresize.24i.com/?w=300&url={product.find('img')['src']}&proxy={','.join(self.proxys.proxygroups)}",
+                    "image": f"https://imageresize.24i.com/?w=300&url={product.find('img')['src']}",
                     "url":"https://www.kickz.com"+button["href"],
                     "status": status,
                     "raffle_date":raffle_date

@@ -3,7 +3,7 @@ import time
 import database
 import copy
 
-from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz,shopify_priceerror
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz,shopify_priceerror,demandware_wishlist_morelist
 from threading import Thread
 from proxymanager import ProxyManager
 
@@ -119,10 +119,10 @@ def startMonitors():
 
     #Create SVD Monitor
     monitorPool.append(svd.svd(groups=filterGroups(["svd"]),settings=settings["svd"]))
-    
-    #Create kickz Monitor
-    for region in settings["kickz"]["regions"]:
-        monitorPool.append(kickz.kickz(groups=filterGroups(["kickz"]),region=region["region"],regionname=region["name"],settings=settings["kickz"]))
+
+    #Start all Demandware Wishlist MoreList Monitors
+    for site in settings["demandware_wishlist_morelist"]:
+        monitorPool.append(demandware_wishlist_morelist.demandware_wishlist_morelist(groups=filterGroups([site["name"]]), settings=site))
 
     #Create prodirectsoccer Monitor
     monitorPool.append(prodirectsoccer.prodirectsoccer(groups=filterGroups(["prodirectsoccer"]),settings=settings["prodirectsoccer"]))
