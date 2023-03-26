@@ -35,14 +35,12 @@ class demandware_wishlist_morelist(Process):
         fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
         fields.append({"name": "Stock", "value": f"{str(len(sizes))}+", "inline": True})
 
-        i = 0
         for _ in range((len(sizes)//7)+(1 if len(sizes)%7 != 0 else 0)):
             sizesString = ""
-            for size in sizes[:i+7]:
+            for size in sizes[:7]:
                 sizesString+=f"{size}\n"
-                i+=1
             fields.append({"name": f"Size", "value": sizesString, "inline": True})
-            sizes = sizes[i:]
+            sizes = sizes[7:]
 
         webhook.send(group=group, webhook=group[self.site], site=f"{self.site}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 

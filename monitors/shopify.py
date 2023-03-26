@@ -54,14 +54,12 @@ class shopify(Thread):
         fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
         fields.append({"name": "Stock", "value": f"{str(len(sizes))}+", "inline": True})
 
-        i = 0
         for _ in range((len(sizes)//7)+(1 if len(sizes)%7 != 0 else 0)):
             sizesString = ""
-            for size in sizes[:i+7]:
+            for size in sizes[:7]:
                 sizesString+=f"{size['url']} | {size['title']}\n"
-                i+=1
             fields.append({"name": f"ATC | Size", "value": sizesString, "inline": True})
-            sizes = sizes[i:]
+            sizes = sizes[7:]
 
         fields.append({"name": "Quicktasks", "value": f"{qt.cybersole(link=url)} - {qt.adonis(site='shopify', link=url)} - {qt.thunder(site='shopify', link=url)} - {qt.panaio(site='Shopify', link=url)}", "inline": False})
 

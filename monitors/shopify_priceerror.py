@@ -43,14 +43,12 @@ class shopify_priceerror(Thread):
         fields.append({"name": "Stock", "value": f"{str(len(sizes))}+", "inline": True})
         fields.append({"name": "Status", "value": f"**{round((1-self.percent)*100)}% price reduction**", "inline": True})
 
-        i = 0
         for _ in range((len(sizes)//7)+(1 if len(sizes)%7 != 0 else 0)):
             sizesString = ""
-            for size in sizes[:i+7]:
+            for size in sizes[:7]:
                 sizesString+=f"{size['url']} | {size['title']} | {size['price']}€\n"
-                i+=1
             fields.append({"name": f"ATC | Size | Price", "value": sizesString, "inline": True})
-            sizes = sizes[i:]
+            sizes = sizes[7:]
 
         fields.append({"name": "Quicktasks", "value": f"{qt.cybersole(link=url)} - {qt.adonis(site='shopify', link=url)} - {qt.thunder(site='shopify', link=url)} - {qt.panaio(site='Shopify', link=url)}", "inline": False})
 
