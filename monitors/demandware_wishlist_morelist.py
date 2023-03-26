@@ -178,6 +178,8 @@ class demandware_wishlist_morelist(Process):
                     self.comparitor(product)                         
 
                 self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+
+                self.firstScrape = False
                 
                 # User set delay
                 time.sleep(float(self.delay))
