@@ -91,7 +91,7 @@ class demandware_wishlist_morelist(Process):
                 break
             page+=1
         
-        self.logger.info(msg=f'[{self.site}] Successfully scraped Page {page}')
+        self.logger.info(msg=f'[{self.site}] Successfully scraped {page} pages')
         return items
 
     def remove(self, pid):
