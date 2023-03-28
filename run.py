@@ -3,7 +3,7 @@ import time
 import database
 import copy
 
-from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,kickz,shopify_priceerror,demandware_wishlist_morelist
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist
 from threading import Thread
 from proxymanager import ProxyManager
 
@@ -123,6 +123,9 @@ def startMonitors():
     #Start all Demandware Wishlist MoreList Monitors
     for site in settings["demandware_wishlist_morelist"]:
         monitorPool.append(demandware_wishlist_morelist.demandware_wishlist_morelist(groups=filterGroups([site["name"]]), settings=site))
+
+    #Create newbalance Monitor
+    monitorPool.append(newbalance.newbalance(groups=filterGroups([site["newbalance"]]), settings=settings["newbalance"]))
 
     #Create prodirectsoccer Monitor
     monitorPool.append(prodirectsoccer.prodirectsoccer(groups=filterGroups(["prodirectsoccer"]),settings=settings["prodirectsoccer"]))

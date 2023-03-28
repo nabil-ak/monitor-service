@@ -1,5 +1,6 @@
 from multiprocessing import Process
 from proxymanager import ProxyManager
+from concurrent.futures import ThreadPoolExecutor
 import requests as rq
 import time
 import loggerfactory
@@ -10,18 +11,15 @@ import threadrunner
 
 SITE = __name__.split(".")[1]
 
-class demandware_wishlist_morelist(Process):
+class newbalance(Process):
     def __init__(self, groups, settings):
         Process.__init__(self)
         self.groups = groups
-        self.site = settings["name"]
-        self.domain = settings["domain"]
-        self.url = settings["url"]
+        self.pids = settings["pids"]
         self.proxys = ProxyManager(settings["proxys"])
         self.delay = settings["delay"]
-        self.imageproxy = settings["imageproxy"]
         self.firstScrape = True
-        self.logger = loggerfactory.create(self.site)
+        self.logger = loggerfactory.create(SITE)
 
         self.INSTOCK = []
         
@@ -42,18 +40,16 @@ class demandware_wishlist_morelist(Process):
             fields.append({"name": f"Size", "value": sizesString, "inline": True})
             sizes = sizes[7:]
 
-        webhook.send(group=group, webhook=group[self.site], site=f"{self.site}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
+        webhook.send(group=group, webhook=group[SITE], site=f"{SITE}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
-    def scrape_site(self):
+    def scrape_site(self, pid):
         """
-        Scrapes the specified Wishlist items to array
+        Scrape the specific new balance product
         """
-        items = []
-        page = 1
 
         headers = {
-            'authority': f'www.{self.domain}',
+            'authority': 'www.newbalance.de',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
             'cache-control': 'max-age=0',
@@ -68,29 +64,30 @@ class demandware_wishlist_morelist(Process):
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
         }
 
-        while True:
-            #Fetch the Site
-            html = rq.get(self.url + f'&pageNumber={page}', headers=headers, proxies=self.proxys.next())
-            html.raise_for_status()
-            output = html.json()
-            
-            # Stores particular details in array
-            for product in output["wishlist"]["items"]:
-                product_item = {
-                    'title': product['name'], 
-                    'image': product['imageObj']['wishlistSecondImage'][0]['url'], 
-                    'pid': product['pid'],
-                    'variants': product['variationAttributes'][1]["values"],
-                    "price":product["price"]["sales"]["formatted"],
-                    "url":f"https://{self.domain}{product['productUrl']}"
-                    }
-                items.append(product_item)
-            if not output["wishlist"]["showMore"]:
-                break
-            page+=1
         
-        self.logger.info(msg=f'[{self.site}] Successfully scraped {page} pages')
-        return items
+        #Fetch the Site
+        html = rq.get(f"https://www.newbalance.de/on/demandware.store/Sites-BANG-Site/fr_FR/Product-Variation?pid={pid}", headers=headers, proxies=self.proxys.next())
+        html.raise_for_status()
+        output = html.json()["product"]
+        
+        product = {
+            'title': output['brand']+" "+output['id'].split("-")[0], 
+            'image': output['images']['productDetail'][0]['url'], 
+            'pid': output['id'],
+            'variants': output['variationAttributes'][1]["values"],
+            "price":output["price"]["sales"]["formatted"],
+            "url":f"https://www.newbalance.fr/{output['id']}.html"
+        } if output["online"] else {
+            'title': output['brand']+" "+output['id'].split("-")[0], 
+            'image': None, 
+            'pid': output['id'],
+            'variants': [],
+            "price":None,
+            "url":f"https://www.newbalance.fr/{output['id']}.html"
+        }
+        
+        self.logger.info(msg=f'[{SITE}] Successfully scraped {pid}')
+        return product
 
     def remove(self, pid):
         """
@@ -123,8 +120,8 @@ class demandware_wishlist_morelist(Process):
         # Collect all available sizes
         available_sizes = []
         for size in product['variants']:
-            if size['selectable'] and size['fitFinderSelectable'] and size['graySoldOutSizes']:
-                available_sizes.append(size['title'])
+            if size['selectable']:
+                available_sizes.append(size['displayValue'])
 
         
         product_item.append(available_sizes)
@@ -139,8 +136,8 @@ class demandware_wishlist_morelist(Process):
                 
                 self.INSTOCK.append(product_item)
                 if ping and not self.firstScrape:
-                    print(f"[{self.site}] {product_item[0]} got restocked")
-                    self.logger.info(msg=f"[{self.site}] {product_item[0]} got restocked")
+                    print(f"[{SITE}] {product_item[0]} got restocked")
+                    self.logger.info(msg=f"[{SITE}] {product_item[0]} got restocked")
                     for group in self.groups:
                         #Send Ping to each Group
                         threadrunner.run(
@@ -149,7 +146,7 @@ class demandware_wishlist_morelist(Process):
                             title=product["title"],
                             pid=product['pid'],
                             url=product['url'],
-                            thumbnail="https://imageresize.24i.com/?w=300&url="+product['image'] if self.imageproxy else product['image'],
+                            thumbnail=product['image'],
                             price=product['price'],
                             sizes=available_sizes,
                         )
@@ -163,26 +160,25 @@ class demandware_wishlist_morelist(Process):
         Initiates the monitor
         """
 
-        print(f'STARTING {self.site} MONITOR')
+        print(f'STARTING {SITE} MONITOR')
         
         while True:
             try:
                 startTime = time.time()
+                with ThreadPoolExecutor(len(self.pids)) as executor:
+                    items = [item for item in executor.map(self.scrape_site, self.pids)]
+                    # Makes request to the wishlist and stores products 
 
-                # Makes request to the wishlist and stores products 
-                items = self.scrape_site()
+                    for product in items:
+                        self.comparitor(product)                         
 
-                for product in items:
-                    self.comparitor(product)                         
+                    self.logger.info(msg=f'[{SITE}] Checked in {time.time()-startTime} seconds')
 
-                self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-
-                self.firstScrape = False
-                
+                    self.firstScrape = False
+                    
                 # User set delay
                 time.sleep(float(self.delay))
-
             except Exception as e:
-                print(f"[{self.site}] Exception found: {traceback.format_exc()}")
+                print(f"[{SITE}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
                 time.sleep(3)
