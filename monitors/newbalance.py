@@ -73,14 +73,15 @@ class newbalance(Process):
         product = {
             'title': output['brand']+" "+output['id'].split("-")[0], 
             'image': output['images']['productDetail'][0]['url'], 
-            'pid': output['id'],
+            'pid': pid,
+            'pidforwebhook': output['id'],
             'variants': output['variationAttributes'][1]["values"],
             "price":output["price"]["sales"]["formatted"],
             "url":f"https://www.newbalance.fr/{output['id']}.html"
         } if output["online"] else {
             'title': output['brand']+" "+output['id'].split("-")[0], 
             'image': None, 
-            'pid': output['id'],
+            'pid': pid,
             'variants': [],
             "price":None,
             "url":f"https://www.newbalance.fr/{output['id']}.html"
@@ -144,7 +145,7 @@ class newbalance(Process):
                             self.discord_webhook,
                             group=group,
                             title=product["title"],
-                            pid=product['pid'],
+                            pid=product['pidforwebhook'],
                             url=product['url'],
                             thumbnail=product['image'],
                             price=product['price'],
