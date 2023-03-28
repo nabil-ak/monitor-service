@@ -125,7 +125,7 @@ def startMonitors():
         monitorPool.append(demandware_wishlist_morelist.demandware_wishlist_morelist(groups=filterGroups([site["name"]]), settings=site))
 
     #Create newbalance Monitor
-    monitorPool.append(newbalance.newbalance(groups=filterGroups([site["newbalance"]]), settings=settings["newbalance"]))
+    monitorPool.append(newbalance.newbalance(groups=filterGroups(["newbalance"]), settings=settings["newbalance"]))
 
     #Create prodirectsoccer Monitor
     monitorPool.append(prodirectsoccer.prodirectsoccer(groups=filterGroups(["prodirectsoccer"]),settings=settings["prodirectsoccer"]))
