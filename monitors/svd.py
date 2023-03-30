@@ -3,7 +3,6 @@ from multiprocessing import Process
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 from concurrent.futures import ThreadPoolExecutor
-from mem_top import mem_top
 import tls
 import time
 import json
@@ -152,7 +151,6 @@ class svd(Process):
                 self.firstScrape = False
 
                 self.logger.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
-                self.logger.debug(mem_top())
                 self.stop.wait(self.delay)
 
             except Exception as e:

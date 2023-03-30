@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
+from mem_top import mem_top
 import quicktask as qt
 import random
 import requests as rq
@@ -193,7 +194,7 @@ class shopify(Thread):
                                         if tag in product['tags']:
                                             self.comparitor(product)
                                             break                          
-
+                    self.logger.debug(mem_top())                                
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     
                     #Check if maxpage is reached otherwise increase by 5
