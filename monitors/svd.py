@@ -106,7 +106,8 @@ class svd(Process):
         # 3473 = Nike Sneakers(https://www.sivasdescalzo.com/en/brands/nike/sneakers)
         # 2572 = Nike (https://www.sivasdescalzo.com/en/brands/nike)
         # 33 = Footwear (https://www.sivasdescalzo.com/en/footwear)
-        categorys = [4089,2900,2479,3558,2552,3473,2572,33]
+        # 2569 = New Balance (https://www.sivasdescalzo.com/en/brands/new-balance)
+        categorys = [4089,2900,2479,3558,2552,3473,2572,33,2569]
         for c in categorys:
             self.INSTOCK[c] = []
         
