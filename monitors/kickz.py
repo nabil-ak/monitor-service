@@ -81,7 +81,7 @@ class kickz(Process):
         )
         html.raise_for_status()
         output = BeautifulSoup(html.text, "html.parser")
-        
+        html.close()
         products = output.find_all("section", {"class": "b-product_tile"})
 
         # Stores particular details in array

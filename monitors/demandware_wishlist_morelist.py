@@ -73,7 +73,7 @@ class demandware_wishlist_morelist(Process):
             html = rq.get(self.url + f'&pageNumber={page}', headers=headers, proxies=self.proxys.next())
             html.raise_for_status()
             output = html.json()
-            
+            html.close()
             # Stores particular details in array
             for product in output["wishlist"]["items"]:
                 product_item = {

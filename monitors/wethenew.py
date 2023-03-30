@@ -110,6 +110,7 @@ class wethenew(Process):
             response.raise_for_status()
 
             r = response.json()
+            response.close()
             for product in r["results"]:
                 output.append(product)
             if r["pagination"]["totalPages"] <= r["pagination"]["page"]:

@@ -70,7 +70,7 @@ class svd(Process):
         html = tls.get(url, headers=headers, proxies=self.proxys.next())
         html.raise_for_status()
         products = json.loads(html.text)['data']['products']['items']
-
+        html.close()
         # Stores particular details in array
         for product in products:
             product_item = {

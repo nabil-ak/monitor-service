@@ -87,7 +87,7 @@ class aboutyou(Process):
     
         html = tls.get(url, proxies=self.proxys.next(), headers={"user-agent":CHROME_USERAGENT})
         output = json.loads(html.text)['entities']
-        
+        html.close()
     
         for product in output:
             product_item = {

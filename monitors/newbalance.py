@@ -69,7 +69,7 @@ class newbalance(Process):
         html = rq.get(f"https://www.newbalance.de/on/demandware.store/Sites-BANG-Site/fr_FR/Product-Variation?pid={pid}", headers=headers, proxies=self.proxys.next())
         html.raise_for_status()
         output = html.json()["product"]
-        
+        html.close()
         product = {
             'title': output['brand']+" "+output['id'].split("-")[0], 
             'image': output['images']['productDetail'][0]['url'], 

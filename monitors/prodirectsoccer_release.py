@@ -60,7 +60,7 @@ class prodirectsoccer_release(Process):
         html.raise_for_status()
 
         products = json.loads(html.text[14:-1])["suggestionGroups"][1]["suggestions"]
-       
+        html.close()
 
         # Stores particular details in array
         for product in products:

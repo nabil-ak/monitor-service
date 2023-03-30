@@ -80,7 +80,7 @@ class asos(Process):
     
         html = rq.get(url, proxies=self.proxys.next(), headers={"user-agent":CHROME_USERAGENT})
         products = html.json()
-        
+        html.close()
         for product in products:
             product_item = {
                 'title': self.getTitle(str(product['productId'])), 

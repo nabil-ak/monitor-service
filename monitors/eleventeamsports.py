@@ -53,7 +53,7 @@ class eleventeamsports(Process):
         }, proxies=self.proxys.next())
         html.raise_for_status()
         products = html.json()["hits"]["hit"]
-
+        html.close()
         # Stores particular details in array
         for product in products:
             product = product["fields"]
