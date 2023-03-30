@@ -195,7 +195,7 @@ class shopify(Thread):
                                             break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-                    
+                    self.logger.info(msg=f'[{self.site}] {len(self.INSTOCK)} Products in INSTOCK List')
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
@@ -209,4 +209,5 @@ class shopify(Thread):
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
+                self.logger.info(msg=f'[{self.site}] {len(self.INSTOCK)} Products in INSTOCK List')
                 self.stop.wait(3)
