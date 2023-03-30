@@ -170,7 +170,7 @@ class shopify(Thread):
                 startTime = time.time()
 
                 # Makes request to the pages and stores products 
-                with ThreadPoolExecutor(5) as executor:
+                with ThreadPoolExecutor(maxpage) as executor:
                     itemsSplited = [item for item in executor.map(self.scrape_site, range(1,maxpage))]
 
                     items = sum(itemsSplited, [])
