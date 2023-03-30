@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from multiprocessing import Process
 from timeout import timeout
 from concurrent.futures import ThreadPoolExecutor
 from proxymanager import ProxyManager
@@ -16,7 +17,7 @@ import tls
 
 SITE = __name__.split(".")[1]
 
-class shopify_priceerror(Thread):
+class shopify_priceerror(Process):
     def __init__(self, groups, settings):
         Thread.__init__(self)
         self.daemon = True
