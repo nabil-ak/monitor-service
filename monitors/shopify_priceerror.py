@@ -20,7 +20,6 @@ SITE = __name__.split(".")[1]
 class shopify_priceerror(Process):
     def __init__(self, groups, settings):
         Thread.__init__(self)
-        self.daemon = True
         self.groups = groups
         self.site = settings["name"]
         self.url = settings["url"]
