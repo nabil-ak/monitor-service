@@ -167,7 +167,7 @@ class shopify_priceerror(Process):
 
         maxpage = 20
         
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -190,9 +190,9 @@ class shopify_priceerror(Process):
                         maxpage+=5
 
                 # User set delay
-                self.stop.wait(float(self.delay))
+                time.sleep(float(self.delay))
 
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(3)
+                time.sleep(3)
