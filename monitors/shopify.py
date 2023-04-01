@@ -179,24 +179,22 @@ class shopify(Thread):
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
-                                    self.comparitor(product)
+                                    self.comparitor(product.copy())
 
                                 else:
                                     # For each keyword, checks whether particular item status has changed
                                     for key in self.keywords:
                                         if key.lower() in product['title'].lower():
-                                            self.comparitor(product)
+                                            self.comparitor(product.copy())
                                             break
 
                                     # For each tag, checks whether particular item status has changed
                                     for tag in self.tags:
                                         if tag in product['tags']:
-                                            self.comparitor(product)
+                                            self.comparitor(product.copy())
                                             break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-                    self.logger.info(msg=f'[{self.site}] {len(self.INSTOCK)} Products in INSTOCK List')
-                    self.logger.info(msg=f'[{self.site}] {gc.get_referents(self.INSTOCK)}')
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
@@ -210,5 +208,4 @@ class shopify(Thread):
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.logger.info(msg=f'[{self.site}] {len(self.INSTOCK)} Products in INSTOCK List')
                 self.stop.wait(3)
