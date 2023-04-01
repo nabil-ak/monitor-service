@@ -1,5 +1,4 @@
 from threading import Thread, Event
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from timeout import timeout
 from proxymanager import ProxyManager
@@ -14,6 +13,7 @@ import traceback
 import urllib3
 import webhook
 import threadrunner
+import gc
 
 SITE = __name__.split(".")[1]
 
@@ -196,6 +196,7 @@ class shopify(Thread):
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
                     self.logger.info(msg=f'[{self.site}] {len(self.INSTOCK)} Products in INSTOCK List')
+                    self.logger.info(msg=f'[{self.site}] {gc.get_referents(self.INSTOCK)}')
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
