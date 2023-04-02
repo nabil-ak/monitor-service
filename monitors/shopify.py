@@ -173,7 +173,7 @@ class shopify(Thread):
                 with ThreadPoolExecutor(maxpage) as executor:
                     itemsSplited = [item for item in executor.map(self.scrape_site, range(1,maxpage))]
 
-                    items = sum(itemsSplited, [])
+                    items = list(sum(itemsSplited, []))
 
                     for product in items:
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
