@@ -179,19 +179,19 @@ class shopify(Thread):
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
-                                    self.comparitor(product.copy())
+                                    self.comparitor(dict(product))
 
                                 else:
                                     # For each keyword, checks whether particular item status has changed
                                     for key in self.keywords:
                                         if key.lower() in product['title'].lower():
-                                            self.comparitor(product.copy())
+                                            self.comparitor(dict(product))
                                             break
 
                                     # For each tag, checks whether particular item status has changed
                                     for tag in self.tags:
                                         if tag in product['tags']:
-                                            self.comparitor(product.copy())
+                                            self.comparitor(dict(product))
                                             break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
