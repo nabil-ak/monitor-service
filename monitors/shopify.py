@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
+from copy import deepcopy
 import quicktask as qt
 import random
 import requests as rq
@@ -135,7 +136,7 @@ class shopify(Thread):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{self.site}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{self.site}] {product_item[0]} got restocked")
@@ -173,25 +174,25 @@ class shopify(Thread):
                 with ThreadPoolExecutor(maxpage) as executor:
                     itemsSplited = [item for item in executor.map(self.scrape_site, range(1,maxpage))]
 
-                    items = list(sum(itemsSplited, []))
+                    items = sum(itemsSplited, [])
 
                     for product in items:
                             if product["handle"] not in self.blacksku and not any([key in product["handle"] for key in self.negativkeywords]):
                                 if len(self.keywords) == 0 and len(self.tags) == 0:
                                     # If no keywords and tags set, checks whether item status has changed
-                                    self.comparitor(dict(product))
+                                    self.comparitor(product)
 
                                 else:
                                     # For each keyword, checks whether particular item status has changed
                                     for key in self.keywords:
                                         if key.lower() in product['title'].lower():
-                                            self.comparitor(dict(product))
+                                            self.comparitor(product)
                                             break
 
                                     # For each tag, checks whether particular item status has changed
                                     for tag in self.tags:
                                         if tag in product['tags']:
-                                            self.comparitor(dict(product))
+                                            self.comparitor(product)
                                             break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
