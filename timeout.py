@@ -1,4 +1,5 @@
 import time
+from copy import deepcopy
 
 TIMEOUT = 30
 PINGDELAY = 10
@@ -24,7 +25,7 @@ class timeout:
                 return True
 
         self.pings.append({
-            "product":product,
+            "product":deepcopy(product),
             "lastpingtimeout":time.time()+self.pingdelay,
             "timeout":-1
         })
