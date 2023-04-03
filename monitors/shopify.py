@@ -196,6 +196,7 @@ class shopify(Thread):
                                             break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
+                    self.logger.info(msg=gc.get_referents(items))
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
