@@ -196,14 +196,14 @@ class shopify(Thread):
                                             break                          
 
                     self.logger.info(msg=f'[{self.site}] Checked in {time.time()-startTime} seconds')
-                    self.logger.info(msg=len(gc.get_referents(items)))
+                    
                     #Check if maxpage is reached otherwise increase by 5
                     try:
                         maxpage = itemsSplited.index([])+2
                         self.firstScrape = False
                     except:
                         maxpage+=5
-
+                self.logger.info(msg=len(gc.get_referents(items)))
                 # User set delay
                 self.stop.wait(float(self.delay))
 
