@@ -40,6 +40,10 @@ class newbalance(Process):
             fields.append({"name": f"Size", "value": sizesString, "inline": True})
             sizes = sizes[7:]
 
+        fields.append({"name": "Links", 
+            "value": f"[FR](https://www.newbalance.fr/{pid}.html) - [DE](https://www.newbalance.de/{pid}.html) "+
+            f"- [NL](https://www.newbalance.nl/{pid}.html) - [AT](https://www.newbalance.at/{pid}.html) - [BE](https://www.newbalance.be/{pid}.html)", "inline": False})
+
         webhook.send(group=group, webhook=group[SITE], site=f"{SITE}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
 
