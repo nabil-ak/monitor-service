@@ -11,7 +11,6 @@ import webhook
 import loggerfactory
 import traceback
 import urllib3
-import os
 import threadrunner
 
 SITE = __name__.split(".")[1]

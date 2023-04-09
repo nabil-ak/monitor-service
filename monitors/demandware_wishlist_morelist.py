@@ -7,6 +7,7 @@ import traceback
 import urllib3
 import webhook
 import threadrunner
+import quicktask as qt
 
 SITE = __name__.split(".")[1]
 
@@ -41,6 +42,12 @@ class demandware_wishlist_morelist(Process):
                 sizesString+=f"{size}\n"
             fields.append({"name": f"Size", "value": sizesString, "inline": True})
             sizes = sizes[7:]
+
+        fields.append({"name": "Links", 
+            "value": f"[FR](https://{self.site}.com/fr/p/{pid}.html) - [DE](https://{self.site}.com/de/p/{pid}.html) "+
+            f"- [NL](https://{self.site}.com/nl/p/{pid}.html) - [BE](https://{self.site}.com/be/p/{pid}.html)", "inline": False})
+
+        fields.append({"name": "Quicktasks", "value": f"{qt.adonis(site=self.site, link=pid)}", "inline": True})
 
         webhook.send(group=group, webhook=group[self.site], site=f"{self.site}", title=title, url=url, thumbnail=thumbnail, fields=fields, logger=self.logger)
 
