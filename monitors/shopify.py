@@ -203,7 +203,10 @@ class shopify(Thread):
                         self.firstScrape = False
                     except:
                         maxpage+=5
-                self.logger.info(msg=len(gc.get_referents(items)))
+
+                    items.clear()
+                    itemsSplited.clear()
+                self.logger.info(msg=len(gc.get_referrers(items)))
                 # User set delay
                 self.stop.wait(float(self.delay))
 
