@@ -163,20 +163,20 @@ class asos(Process):
                     self.logger.info(msg=f"[{SITE}_{self.region}] {product_item[0]} got restocked")
 
                     variants = self.scrapeSizes(product['id'])
-                    
-                    for group in self.groups:
-                        #Send Ping to each Group
-                        threadrunner.run(
-                            self.discord_webhook,
-                            group=group,
-                            pid=product['id'],
-                            region=self.region,
-                            title=product['title'],
-                            url=f"https://www.asos.com/{self.region}/nabil/prd/{product['id']}",
-                            thumbnail=product['image'],
-                            price=str(product['variants'][0]['price']['current']['text']),
-                            variants=variants
-                        )
+                    if variants:
+                        for group in self.groups:
+                            #Send Ping to each Group
+                            threadrunner.run(
+                                self.discord_webhook,
+                                group=group,
+                                pid=product['id'],
+                                region=self.region,
+                                title=product['title'],
+                                url=f"https://www.asos.com/{self.region}/nabil/prd/{product['id']}",
+                                thumbnail=product['image'],
+                                price=str(product['variants'][0]['price']['current']['text']),
+                                variants=variants
+                            )
         else:
             # Remove old version of the product
             self.remove(product_item[2])

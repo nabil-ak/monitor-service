@@ -2,19 +2,17 @@ import traceback
 import time
 import database
 import copy
-import loggerfactory
 
-from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist,bstn
 from threading import Thread
 from proxymanager import ProxyManager
-from mem_top import mem_top
 
 cookgroups = database.getGroups()
 originalSettings = database.getSettings()
 ProxyManager.updateProxys()
 
 monitorPool = []
-logger = loggerfactory.create("main")
+
 def updateData():
     """
     Check settings, groups and proxys every 20 seconds for update
@@ -49,7 +47,7 @@ def updateData():
             monitorPool.clear()
             #Start them with new Settings
             startMonitors()
-        logger.debug(mem_top())    
+         
         time.sleep(20)
 
 
@@ -120,6 +118,9 @@ def startMonitors():
 
     #Create SVD Monitor
     monitorPool.append(svd.svd(groups=filterGroups(["svd"]),settings=settings["svd"]))
+
+    #Create bstn Monitor
+    monitorPool.append(bstn.bstn(groups=filterGroups(["bstn"]),settings=settings["bstn"]))
 
     #Start all Demandware Wishlist MoreList Monitors
     for site in settings["demandware_wishlist_morelist"]:
