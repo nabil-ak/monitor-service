@@ -1,4 +1,4 @@
-from threading import Thread, Event
+from multiprocessing import Process
 from concurrent.futures import ThreadPoolExecutor
 from timeout import timeout
 from proxymanager import ProxyManager
@@ -18,10 +18,9 @@ import gc
 
 SITE = __name__.split(".")[1]
 
-class shopify(Thread):
+class shopify(Process):
     def __init__(self, groups, settings):
-        Thread.__init__(self)
-        self.daemon = True
+        Process.__init__(self)
         self.groups = groups
         self.site = settings["name"]
         self.url = settings["url"]
@@ -32,7 +31,6 @@ class shopify(Thread):
         self.tags = settings["tags"]
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(self.site)
 
         self.INSTOCK = []
@@ -166,7 +164,7 @@ class shopify(Thread):
 
         maxpage = 20
         
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -206,11 +204,10 @@ class shopify(Thread):
 
                     items.clear()
                     itemsSplited.clear()
-                self.logger.info(msg=len(gc.get_referrers(items)))
                 # User set delay
-                self.stop.wait(float(self.delay))
+                time.sleep(float(self.delay))
 
             except Exception as e:
                 print(f"[{self.site}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(3)
+                time.sleep(3)
