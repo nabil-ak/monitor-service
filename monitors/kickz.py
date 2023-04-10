@@ -26,7 +26,6 @@ class kickz(Process):
         self.proxys = ProxyManager(settings["proxys"])
         self.blacksku = settings["blacksku"]
         self.firstScrape = False
-        self.stop = Event()
         self.logger = loggerfactory.create(f"{SITE}_{self.regionname}")
 
         self.INSTOCK = []
@@ -129,7 +128,7 @@ class kickz(Process):
         # Air_Jordan_1 = Jordan1(https://www.kickz.com/de/l/jordan/retros/air-jordan-1-retro/)
         # Air_Jordan_3 = Jordan3(https://www.kickz.com/de/l/jordan/retros/air-jordan-3-retro/)
         categorys = ["new_M_shoes","new_F_shoes","new_U_shoes","3_M_46","3_F_46","3_K_42","Air_Jordan_1","Air_Jordan_3"]
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -180,9 +179,9 @@ class kickz(Process):
 
                     self.logger.info(msg=f'[{SITE}_{self.regionname}] Checked all querys in {time.time()-startTime} seconds')
 
-                    self.stop.wait(self.delay)
+                    time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[{SITE}_{self.regionname}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(4)
+                time.sleep(4)

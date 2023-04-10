@@ -14,7 +14,6 @@ import traceback
 import urllib3
 import webhook
 import threadrunner
-import gc
 
 SITE = __name__.split(".")[1]
 

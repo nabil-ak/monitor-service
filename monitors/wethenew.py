@@ -1,4 +1,4 @@
-from threading import Thread, Event
+from copy import deepcopy
 from multiprocessing import Process
 from timeout import timeout
 from proxymanager import ProxyManager
@@ -27,7 +27,6 @@ class wethenew(Process):
         self.timeout = timeout()
         self.authPointer = -1
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(f"{SITE}_{self.endpoint}")
 
         self.sizesKey = {
@@ -178,7 +177,7 @@ class wethenew(Process):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{SITE}_{self.endpoint}] {product_item[0]} got restocked")
@@ -204,7 +203,7 @@ class wethenew(Process):
 
         print(f'STARTING {SITE}_{self.endpoint} MONITOR')
  
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
                 
@@ -232,10 +231,12 @@ class wethenew(Process):
 
                 self.logger.info(msg=f'[{SITE}_{self.endpoint}] Checked in {time.time()-startTime} seconds')
 
+                items.clear()
+
                 # User set delay
-                self.stop.wait(float(self.delay))
+                time.sleep(float(self.delay))
 
             except Exception as e:
                 print(f"[{SITE}_{self.endpoint}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(4)
+                time.sleep(4)

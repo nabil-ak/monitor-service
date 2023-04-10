@@ -24,7 +24,6 @@ class svd(Process):
         self.proxys = ProxyManager(settings["proxys"])
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(SITE)
 
         self.INSTOCK = {}
@@ -111,7 +110,7 @@ class svd(Process):
         for c in categorys:
             self.INSTOCK[c] = []
         
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -151,9 +150,9 @@ class svd(Process):
                 self.firstScrape = False
 
                 self.logger.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
-                self.stop.wait(self.delay)
+                time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(3)
+                time.sleep(3)

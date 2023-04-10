@@ -1,4 +1,5 @@
 from multiprocessing import Process
+from copy import deepcopy
 from proxymanager import ProxyManager
 import requests as rq
 import time
@@ -144,7 +145,7 @@ class demandware_wishlist_morelist(Process):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and not self.firstScrape:
                     print(f"[{self.site}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{self.site}] {product_item[0]} got restocked")
@@ -186,6 +187,8 @@ class demandware_wishlist_morelist(Process):
 
                 self.firstScrape = False
                 
+                items.clear()
+
                 # User set delay
                 time.sleep(float(self.delay))
 

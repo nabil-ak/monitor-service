@@ -1,4 +1,4 @@
-from threading import Thread, Event
+from copy import deepcopy
 from multiprocessing import Process
 from timeout import timeout
 from proxymanager import ProxyManager
@@ -30,7 +30,6 @@ class aboutyou(Process):
         self.storeid = storeid
         self.timeout = timeout()
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(f"{SITE}_{self.store}")
 
     def discord_webhook(self, group, pid, title, url, thumbnail, price, sizes, stock):
@@ -148,7 +147,7 @@ class aboutyou(Process):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.store}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{SITE}_{self.store}] {product_item[0]} got restocked")
@@ -177,7 +176,7 @@ class aboutyou(Process):
 
         print(f'STARTING {SITE} {self.store} MONITOR')
 
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -200,11 +199,13 @@ class aboutyou(Process):
                 
                 self.logger.info(msg=f'[{SITE}_{self.store}] Checked in {time.time()-startTime} seconds')
 
+                items.clear()
+
                 # User set delay
-                self.stop.wait(float(self.delay))
+                time.sleep(float(self.delay))
 
 
             except Exception as e:
                 print(f"[{SITE}_{self.store}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(3)
+                time.sleep(3)

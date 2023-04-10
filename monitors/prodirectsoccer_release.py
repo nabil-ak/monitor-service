@@ -27,7 +27,6 @@ class prodirectsoccer_release(Process):
         self.querys= settings["query"]
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(f"{self.site}_release")
 
         self.INSTOCK = []
@@ -87,7 +86,7 @@ class prodirectsoccer_release(Process):
 
         print(f'STARTING {self.site}_release MONITOR')
 
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -123,9 +122,9 @@ class prodirectsoccer_release(Process):
                 self.firstScrape = False
 
                 self.logger.info(msg=f'[{self.site}_release] Checked all querys in {time.time()-startTime} seconds')
-                self.stop.wait(self.delay)
+                time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[{self.site}_release] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(5)
+                time.sleep(5)

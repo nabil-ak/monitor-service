@@ -1,7 +1,7 @@
 from timeout import timeout
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
-from threading import Thread, Event
+from copy import deepcopy
 from multiprocessing import Process
 import random
 import requests as rq
@@ -28,7 +28,6 @@ class asos(Process):
         self.delay = settings["delay"]
         self.timeout = timeout()
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(f"{SITE}_{self.region}")
 
     def discord_webhook(self, group, pid, region, title, url, thumbnail, price, sizes):
@@ -137,7 +136,7 @@ class asos(Process):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.region}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{SITE}_{self.region}] {product_item[0]} got restocked")
@@ -167,7 +166,7 @@ class asos(Process):
         print(f'STARTING {SITE}_{self.region} MONITOR')
 
 
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
                 url = f"https://www.asos.com/api/product/catalogue/v3/stockprice?productIds={(''.join([pid['sku']+',' for pid in self.pids]))[:-1]}&store={self.region}&currency={self.currency}&keyStoreDataversion=dup0qtf-35&cache={random.randint(10000,999999999)}"
@@ -183,11 +182,12 @@ class asos(Process):
                 
                 self.logger.info(msg=f'[{SITE}_{self.region}] Checked in {time.time()-startTime} seconds')
 
+                items.clear()
                 # User set delay
-                self.stop.wait(float(self.delay))
+                time.sleep(float(self.delay))
 
 
             except Exception as e:
                 print(f"[{SITE}_{self.region}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(3)
+                time.sleep.wait(3)

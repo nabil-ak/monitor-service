@@ -1,4 +1,4 @@
-from threading import Thread, Event
+from copy import deepcopy
 from multiprocessing import Process
 from timeout import timeout
 from concurrent.futures import ThreadPoolExecutor
@@ -27,7 +27,6 @@ class shopify_priceerror(Process):
         self.delay = settings["delay"]
         self.percent = settings["percent"]
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(self.site)
 
         self.INSTOCK = []
@@ -137,7 +136,7 @@ class shopify_priceerror(Process):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{self.site}] {product_item[0]} got a price error")
                     self.logger.info(msg=f"[{self.site}] {product_item[0]} got a price error")
@@ -188,6 +187,9 @@ class shopify_priceerror(Process):
                         self.firstScrape = False
                     except:
                         maxpage+=5
+                    
+                    items.clear()
+                    itemsSplited.clear()
 
                 # User set delay
                 time.sleep(float(self.delay))

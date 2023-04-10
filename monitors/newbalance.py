@@ -1,5 +1,6 @@
 from multiprocessing import Process
 from proxymanager import ProxyManager
+from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor
 import requests as rq
 import time
@@ -139,7 +140,7 @@ class newbalance(Process):
                 # Remove old version of the product
                 self.remove(product_item[2])
                 
-                self.INSTOCK.append(product_item)
+                self.INSTOCK.append(deepcopy(product_item))
                 if ping and not self.firstScrape:
                     print(f"[{SITE}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{SITE}] {product_item[0]} got restocked")
@@ -180,6 +181,8 @@ class newbalance(Process):
                     self.logger.info(msg=f'[{SITE}] Checked in {time.time()-startTime} seconds')
 
                     self.firstScrape = False
+
+                    items.clear()
                     
                 # User set delay
                 time.sleep(float(self.delay))

@@ -23,7 +23,6 @@ class eleventeamsports(Process):
         self.blacksku = settings["blacksku"]
         self.timeout = timeout(timeout=120, pingdelay=20)
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(SITE)
 
         self.INSTOCK = []
@@ -82,7 +81,7 @@ class eleventeamsports(Process):
 
         print(f'STARTING {SITE} MONITOR')
         
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
                 
@@ -112,7 +111,7 @@ class eleventeamsports(Process):
                                         )
                             products.append(product["pid"])
 
-                    self.stop.wait(self.delay/len(self.querys))
+                    time.sleep(self.delay/len(self.querys))
 
                 self.INSTOCK = products
 
@@ -123,4 +122,4 @@ class eleventeamsports(Process):
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(4)
+                time.sleep(4)

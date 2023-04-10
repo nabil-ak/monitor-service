@@ -23,7 +23,6 @@ class prodirectsoccer(Process):
         self.querys= settings["query"]
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
-        self.stop = Event()
         self.logger = loggerfactory.create(SITE)
 
         self.INSTOCK = []
@@ -102,7 +101,7 @@ class prodirectsoccer(Process):
 
         print(f'STARTING {SITE} MONITOR')
         
-        while not self.stop.is_set():
+        while True:
             try:
                 startTime = time.time()
 
@@ -130,7 +129,7 @@ class prodirectsoccer(Process):
                                     )
 
                             products.append(product["pid"])
-                            self.stop.wait(self.delay/len(self.querys))
+                            time.sleep(self.delay/len(self.querys))
                     
                 self.INSTOCK = products
 
@@ -143,4 +142,4 @@ class prodirectsoccer(Process):
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
                 self.logger.error(e)
-                self.stop.wait(5)
+                time.sleep(5)
