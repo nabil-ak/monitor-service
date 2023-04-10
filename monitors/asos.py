@@ -30,7 +30,7 @@ class asos(Process):
         self.firstScrape = True
         self.logger = loggerfactory.create(f"{SITE}_{self.region}")
 
-    def discord_webhook(self, group, pid, region, title, url, thumbnail, price, sizes):
+    def discord_webhook(self, group, pid, region, title, url, thumbnail, price, variants):
             """
             Sends a Discord webhook notification to the specified webhook URL
             """
@@ -45,12 +45,15 @@ class asos(Process):
             fields.append({"name": "Pid", "value": f"{pid}", "inline": True})
             fields.append({"name": "Region", "value": f"{region}", "inline": True})
 
-            variantsSTR = "\n"
+            sizesSTR = "\n"
+            sizesPIDs = ""
             statusSTR = ""
-            for size in sizes:
-                variantsSTR+=str(size['id'])+"\n"
-                statusSTR+=f"{'**HIGH**' if not size['isLowInStock'] else 'LOW'}\n"
-            fields.append({"name": "Variants", "value": f"{variantsSTR}", "inline": True})
+            for variant in variants:
+                sizesSTR+=str(variant["brandSize"])+"\n"
+                sizesPIDs+=str(variant["id"])+"\n"
+                statusSTR+=f"{'**HIGH**' if not variant['isLowInStock'] else 'LOW'}\n"
+            fields.append({"name": "Sizes", "value": f"{sizesSTR}", "inline": True})
+            fields.append({"name": "Pids", "value": f"{sizesPIDs}", "inline": True})
             fields.append({"name": "Status", "value": f"{statusSTR}", "inline": True})
 
             fields.append({"name": "Links", 
@@ -70,6 +73,23 @@ class asos(Process):
         for product in self.pids:
             if pid == product["sku"]:
                 return product["title"]
+        
+    def scrapeSizes(self, pid):
+        """
+        Scrapes the specified Asos site and scrapes the sizes
+        """
+        variants = []
+
+        html = rq.get(f"https://api.asos.com/product/catalogue/v3/products/{pid}?store={self.region}&cache={random.randint(10000,999999999)}", proxies=self.proxys.next(), headers={"user-agent":CHROME_USERAGENT})
+        html.raise_for_status()
+        product = html.json()
+        html.close()
+
+        for variant in product["variants"]:
+            if variant["isInStock"]:
+                variants.append(variant)
+        
+        return variants
 
     def scrape_site(self, url):
         """
@@ -78,6 +98,7 @@ class asos(Process):
         items = []
     
         html = rq.get(url, proxies=self.proxys.next(), headers={"user-agent":CHROME_USERAGENT})
+        html.raise_for_status()
         products = html.json()
         html.close()
         for product in products:
@@ -140,6 +161,9 @@ class asos(Process):
                 if ping and self.timeout.ping(product_item) and not self.firstScrape:
                     print(f"[{SITE}_{self.region}] {product_item[0]} got restocked")
                     self.logger.info(msg=f"[{SITE}_{self.region}] {product_item[0]} got restocked")
+
+                    variants = self.scrapeSizes(product['id'])
+                    
                     for group in self.groups:
                         #Send Ping to each Group
                         threadrunner.run(
@@ -151,7 +175,7 @@ class asos(Process):
                             url=f"https://www.asos.com/{self.region}/nabil/prd/{product['id']}",
                             thumbnail=product['image'],
                             price=str(product['variants'][0]['price']['current']['text']),
-                            sizes=available_sizes
+                            variants=variants
                         )
         else:
             # Remove old version of the product
