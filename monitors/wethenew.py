@@ -78,6 +78,7 @@ class wethenew(Process):
 
         items = []
         output = []
+        firstProduct = 0
         skip = 0
 
 
@@ -112,8 +113,16 @@ class wethenew(Process):
             response.close()
             for product in r["results"]:
                 output.append(product)
-            if r["pagination"]["totalPages"] <= r["pagination"]["page"]:
-                break
+
+            if self.endpoint == "products":
+                if skip == 0:
+                    firstProduct = output[0]["id"]
+                else:
+                    if any([product["id"] == firstProduct for product in output]):
+                        break       
+            else:
+                if r["pagination"]["totalPages"] <= r["pagination"]["page"]:
+                    break
             skip+=100
 
         # Stores particular details in array
