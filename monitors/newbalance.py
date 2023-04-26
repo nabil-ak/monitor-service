@@ -71,7 +71,7 @@ class newbalance(Process):
 
         
         #Fetch the Site
-        html = rq.get(f"https://www.newbalance.de/on/demandware.store/Sites-BANG-Site/fr_FR/Product-Variation?pid={pid}", headers=headers, proxies=self.proxys.next())
+        html = rq.get(f"https://www.newbalance.de/on/demandware.store/Sites-BANG-Site/de_DE/Wishlist-GetProduct?pid={pid}", headers=headers, proxies=self.proxys.next())
         html.raise_for_status()
         output = html.json()["product"]
         html.close()
