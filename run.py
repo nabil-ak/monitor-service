@@ -3,7 +3,7 @@ import time
 import database
 import copy
 
-from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist,bstn
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist,bstn,zulassungsstelle
 from threading import Thread
 from proxymanager import ProxyManager
 
@@ -138,7 +138,10 @@ def startMonitors():
 
     #Create eleventeamsports Monitor
     monitorPool.append(eleventeamsports.eleventeamsports(groups=filterGroups(["eleventeamsports"]),settings=settings["eleventeamsports"]))
-    
+
+    #Create zulassungsstelle Monitor
+    monitorPool.append(zulassungsstelle.zulassungsstelle(groups=filterGroups(["zulassungsstelle"]), settings=settings["zulassungsstelle"]))
+
     #Start all Monitors
     for mon in monitorPool:
         mon.start()
