@@ -1,7 +1,7 @@
 from multiprocessing import Process
 from copy import deepcopy
 from proxymanager import ProxyManager
-import requests as rq
+import tls
 import time
 import loggerfactory
 import traceback
@@ -61,7 +61,6 @@ class demandware_wishlist_morelist(Process):
         page = 1
 
         headers = {
-            'authority': f'www.{self.domain}',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
             'cache-control': 'max-age=0',
@@ -78,7 +77,7 @@ class demandware_wishlist_morelist(Process):
 
         while True:
             #Fetch the Site
-            html = rq.get(self.url + f'&pageNumber={page}', headers=headers, proxies=self.proxys.next())
+            html = tls.get(self.url + f'&pageNumber={page}', headers=headers, proxies=self.proxys.next())
             html.raise_for_status()
             output = html.json()
             html.close()
