@@ -142,9 +142,6 @@ def startMonitors():
     #Create courir Monitor
     monitorPool.append(courir.courir(groups=filterGroups(["courir"]), settings=settings["courir"]))
 
-    #Create zulassungsstelle Monitor
-    monitorPool.append(zulassungsstelle.zulassungsstelle(groups=filterGroups(["zulassungsstelle"]), settings=settings["zulassungsstelle"]))
-
     #Start all Monitors
     for mon in monitorPool:
         mon.start()
