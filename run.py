@@ -3,7 +3,7 @@ import time
 import database
 import copy
 
-from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist,bstn,courir,zulassungsstelle
+from monitors import aboutyou,shopify,wethenew,svd,prodirectsoccer,prodirectsoccer_release,eleventeamsports,asos,newbalance,shopify_priceerror,demandware_wishlist_morelist,bstn,courir,salomen
 from threading import Thread
 from proxymanager import ProxyManager
 
@@ -141,6 +141,9 @@ def startMonitors():
 
     #Create courir Monitor
     monitorPool.append(courir.courir(groups=filterGroups(["courir"]), settings=settings["courir"]))
+
+    #Create prodirectsoccer Monitor
+    monitorPool.append(salomen.salomen(groups=filterGroups(["salomen"]),settings=settings["salomen"]))
 
     #Start all Monitors
     for mon in monitorPool:
