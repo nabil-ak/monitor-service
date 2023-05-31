@@ -129,7 +129,6 @@ class prodirectsoccer(Process):
                                     )
 
                             products.append(product["pid"])
-                            time.sleep(self.delay/len(self.querys))
                     
                 self.INSTOCK = products
 
@@ -138,6 +137,8 @@ class prodirectsoccer(Process):
                 self.firstScrape = False
 
                 self.logger.info(msg=f'[{SITE}] Checked all querys in {time.time()-startTime} seconds')
+
+                time.sleep(self.delay)
 
             except Exception as e:
                 print(f"[{SITE}] Exception found: {traceback.format_exc()}")
