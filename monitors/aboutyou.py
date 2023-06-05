@@ -82,7 +82,7 @@ class aboutyou(Process):
         189879 = Girls GS
         189823 = Girls PS
         """
-        url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20727,21014,20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709,290,170334&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
+        url = f"https://api-cloud.aboutyou.de/v1/products?with=attributes:key(brand|name),variants,variants.attributes:key(vendorSize)&filters[category]=20727,21014,20207,20215,190025,189974,189879,189823&filters[brand]=61263,53709,290,170334,165,55136&filters[excludedFromBrandPage]=false&sortDir=desc&sortScore=brand_scores&sortChannel=web_default&page=1&perPage={random.randint(2000, 50000)}&forceNonLegacySuffix=true&shopId={self.storeid}"
 
         items = []
     
