@@ -76,7 +76,7 @@ class newbalance(Process):
         output = html.json()["product"]
         html.close()
         product = {
-            'title': output['brand']+" "+output['id'].split("-")[0], 
+            'title': output['brand']+" "+output['productName'], 
             'image': output['images']['productDetail'][0]['url'], 
             'pid': pid,
             'pidforwebhook': output['id'],
@@ -84,7 +84,7 @@ class newbalance(Process):
             "price":output["price"]["sales"]["formatted"],
             "url":f"https://www.newbalance.fr/{output['id']}.html"
         } if output["online"] else {
-            'title': output['brand']+" "+output['id'].split("-")[0], 
+            'title': output['brand']+" "+output['productName'], 
             'image': None, 
             'pid': pid,
             'variants': [],
