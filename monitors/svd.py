@@ -3,13 +3,13 @@ from multiprocessing import Process
 from proxymanager import ProxyManager
 from user_agent import CHROME_USERAGENT
 from concurrent.futures import ThreadPoolExecutor
+from timeout import timeout
 import tls
 import time
 import json
 import loggerfactory
 import traceback
 import urllib3
-import os
 import webhook
 import threadrunner
 
@@ -25,6 +25,7 @@ class svd(Process):
         self.blacksku = settings["blacksku"]
         self.firstScrape = True
         self.logger = loggerfactory.create(SITE)
+        self.timeout = timeout(pingdelay=20,timeout=60)
 
         self.INSTOCK = {}
         
@@ -128,7 +129,7 @@ class svd(Process):
                                     continue
 
                                 # Check if Product is INSTOCK
-                                if not any([product["sku"] in cat for cat in self.INSTOCK.values()]) and not self.firstScrape:
+                                if not any([product["sku"] in cat for cat in self.INSTOCK.values()]) and not self.firstScrape and self.timeout.ping(product["sku"]):
                                         print(f"[{SITE}] {product['name']} got restocked")
                                         self.logger.info(msg=f"[{SITE}] {product['name']} got restocked")
                                         for group in self.groups:
