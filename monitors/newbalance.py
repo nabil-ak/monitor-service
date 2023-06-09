@@ -83,7 +83,7 @@ class newbalance(Process):
             'variants': output['variationAttributes'][1]["values"],
             "price":output["price"]["sales"]["formatted"],
             "url":f"https://www.newbalance.fr/{output['id']}.html"
-        } if output["online"] else {
+        } if output["online"] and output['images']['productDetail'] else {
             'title': output['brand']+" "+output['productName'], 
             'image': None, 
             'pid': pid,
