@@ -5,7 +5,7 @@ import random
 from multiprocessing import Lock
 
 PROXYS = {}
-EXCLUDE = []
+EXCLUDE = ["packet"]
 
 class ProxyManager():
     @staticmethod
