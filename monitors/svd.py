@@ -78,7 +78,7 @@ class svd(Process):
                     "name":product["brand_name"]+" "+product["name"],
                     "sku":product["sku"],
                     "price":str(product["final_price"])+" €",
-                    'image': f"{os.environ['IMAGEPROXY']}?url=https://media.sivasdescalzo.com/media/catalog/product/{product['small_image']['url']}?width=300&proxy={','.join(self.proxys.proxygroups)}",
+                    'image': f"{os.environ['IMAGEPROXY']}?url=https://media.sivasdescalzo.com/media/catalog/product/{product['small_image']['url']}?width=300&proxy=packet",
                     "url":"https://www.sivasdescalzo.com"+product["url"] if "sivasdescalzo" not in product["url"] else product["url"],
                     "state":product["state"]
                     }
