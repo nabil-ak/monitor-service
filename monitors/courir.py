@@ -2,7 +2,7 @@ from multiprocessing import Process
 from proxymanager import ProxyManager
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor
-import requests as rq
+import docs
 from bs4 import BeautifulSoup
 import time
 import json
@@ -68,10 +68,9 @@ class courir(Process):
     
         
         #Fetch the Site
-        html = rq.get(f"https://www.courir.com/on/demandware.store/Sites-Courir-FR-Site/fr_FR/Product-Variation?pid={pid}&Quantity=1&format=ajax&productlistid=undefined", headers=headers)
-        html.raise_for_status()
-        output = BeautifulSoup(html.text, 'html.parser')
-        html.close()
+        text = docs.get(f"https://www.courir.com/on/demandware.store/Sites-Courir-FR-Site/fr_FR/Product-Variation?pid={pid}&Quantity=1&format=ajax&productlistid=undefined", headers=headers, proxies=self.proxys.next())
+        output = BeautifulSoup(text, 'html.parser')
+
         product = {
             'title': output.find('span', {'class': 'product-brand js-product-brand'})["data-gtm"]+" "+
             output.find('span', {'class': 'product-name'}).text, 
