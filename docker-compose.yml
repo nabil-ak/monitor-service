@@ -35,3 +35,7 @@ services:
       - "8082:8082"
   clearverify:
     image: index.docker.io/xwe10/clear-verify
+  safefetchapi:
+    image: index.docker.io/xwe10/safefetchapi
+    ports:
+      - "4501:4501"
