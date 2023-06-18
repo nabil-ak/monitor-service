@@ -68,7 +68,7 @@ class courir(Process):
     
         
         #Fetch the Site
-        text = docs.get(f"https://www.courir.com/on/demandware.store/Sites-Courir-FR-Site/fr_FR/Product-Variation?pid={pid}&Quantity=1&format=ajax&productlistid=undefined", headers=headers, proxies=self.proxys.next())
+        text = docs.get(f"https://www.courir.com/on/demandware.store/Sites-Courir-FR-Site/fr_FR/Product-Variation?pid={pid}&Quantity=1&format=ajax&productlistid=undefined", headers=headers)
         output = BeautifulSoup(text, 'html.parser')
 
         product = {
