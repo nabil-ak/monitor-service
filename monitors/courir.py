@@ -69,7 +69,8 @@ class courir(Process):
         
         #Fetch the Site
         text = docs.get(f"https://www.courir.com/on/demandware.store/Sites-Courir-FR-Site/fr_FR/Product-Variation?pid={pid}&Quantity=1&format=ajax&productlistid=undefined", headers=headers)
-        output = BeautifulSoup(text, 'html.parser')
+        if text:
+            output = BeautifulSoup(text, 'html.parser')
 
         product = {
             'title': output.find('span', {'class': 'product-brand js-product-brand'})["data-gtm"]+" "+
@@ -79,7 +80,7 @@ class courir(Process):
             'variants': [element.find('a').text.replace("\n","") for element in output.find_all('li', {'class': 'selectable'})],
             "price": output.find('meta', {'itemprop': 'price'})["content"]+"€",
             "url": output.find('span', {'itemprop': 'url'}).text
-        } if output.find('li', {'class': 'selectable'}) and text else {
+        } if text and output.find('li', {'class': 'selectable'}) else {
             'title': None, 
             'image': None, 
             'pid': pid,
