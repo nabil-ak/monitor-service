@@ -18,4 +18,4 @@ def get(url, timeout=10, **kargs):
     if res["Success"]:
         return res["Content"]
     
-    raise Exception(res["Message"])
+    return None

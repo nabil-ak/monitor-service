@@ -79,7 +79,7 @@ class courir(Process):
             'variants': [element.find('a').text.replace("\n","") for element in output.find_all('li', {'class': 'selectable'})],
             "price": output.find('meta', {'itemprop': 'price'})["content"]+"€",
             "url": output.find('span', {'itemprop': 'url'}).text
-        } if output.find('li', {'class': 'selectable'}) else {
+        } if output.find('li', {'class': 'selectable'}) and text else {
             'title': None, 
             'image': None, 
             'pid': pid,
