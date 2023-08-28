@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  watchtower:
+    image: index.docker.io/containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.json:/config.json
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: --interval 30
+  keyword:
+    image: index.docker.io/xwe10/monitor-service-keyword-pinger
+    env_file:
+      - .env
