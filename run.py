@@ -69,6 +69,7 @@ def startMonitors():
 
     settings = copy.deepcopy(originalSettings)
 
+    """
     #Create all Asos Monitors
     for region in settings["asos"]["regions"]:
         monitorPool.append(asos.asos(groups=filterGroups(["asos","asos_"+region[0]]),settings=settings["asos"],region=region[0],currency=region[1]))
@@ -144,6 +145,12 @@ def startMonitors():
 
     #Create prodirectsoccer Monitor
     monitorPool.append(salomen.salomen(groups=filterGroups(["salomen"]),settings=settings["salomen"]))
+
+    """
+
+    endpoints = ["products", "sell-nows", "consignment-slots"]
+    for ep in endpoints:
+        monitorPool.append(wethenew.wethenew(groups=filterGroups(["wethenew-"+ep]),endpoint=ep,settings=settings["wethenew"]))
 
     #Start all Monitors
     for mon in monitorPool:

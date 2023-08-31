@@ -15,3 +15,11 @@ services:
     image: index.docker.io/xwe10/monitor-service-keyword-pinger
     env_file:
       - .env
+  monitor:
+    image: index.docker.io/xwe10/monitor-service
+    env_file:
+      - .env
+  tls:
+    image: index.docker.io/xwe10/tls-api
+    ports:
+      - "8082:8082"
